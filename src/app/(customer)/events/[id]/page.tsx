@@ -82,13 +82,12 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
               {doneCount} / {event.checklist_items.length} done
             </span>
           </h2>
-          <AddChecklistItemDialog eventId={id} onAdded={() => {}} />
+          <AddChecklistItemDialog eventId={id} />
         </div>
         <EventChecklistTable
           eventId={id}
           items={event.checklist_items as any}
           currency={event.currency}
-          onUpdated={() => {}}
         />
       </div>
     </div>

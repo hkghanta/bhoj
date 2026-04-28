@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChecklistStatus } from '@prisma/client'
@@ -16,7 +17,6 @@ type Props = {
   eventId: string
   items: ChecklistItem[]
   currency: string
-  onUpdated: () => void
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -29,7 +29,8 @@ const STATUS_COLORS: Record<string, string> = {
 
 const ALL_STATUSES = Object.keys(STATUS_COLORS)
 
-export function EventChecklistTable({ eventId, items, currency, onUpdated }: Props) {
+export function EventChecklistTable({ eventId, items, currency }: Props) {
+  const router = useRouter()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Record<string, unknown>>({})
   const [saving, setSaving] = useState(false)
@@ -59,7 +60,7 @@ export function EventChecklistTable({ eventId, items, currency, onUpdated }: Pro
     })
     setSaving(false)
     setEditingId(null)
-    onUpdated()
+    router.refresh()
   }
 
   const grouped = items.reduce<Record<string, ChecklistItem[]>>((acc, item) => {

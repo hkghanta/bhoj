@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,7 +10,6 @@ import { Plus } from 'lucide-react'
 
 type Props = {
   eventId: string
-  onAdded: () => void
 }
 
 const CATEGORIES = [
@@ -17,7 +17,8 @@ const CATEGORIES = [
   'Beauty & Wellness', 'Ceremony', 'Admin', 'Other'
 ]
 
-export function AddChecklistItemDialog({ eventId, onAdded }: Props) {
+export function AddChecklistItemDialog({ eventId }: Props) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<'external' | 'custom'>('external')
   const [form, setForm] = useState({
@@ -37,7 +38,7 @@ export function AddChecklistItemDialog({ eventId, onAdded }: Props) {
     setSaving(false)
     setOpen(false)
     setForm({ item_name: '', category: '', external_vendor_name: '', external_vendor_phone: '', external_vendor_email: '' })
-    onAdded()
+    router.refresh()
   }
 
   return (
