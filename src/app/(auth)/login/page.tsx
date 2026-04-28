@@ -30,6 +30,24 @@ export default function LoginPage() {
     }
   }
 
+  async function signInAsDemo(demoRole: 'customer' | 'vendor') {
+    setLoading(true)
+    setError('')
+    const demoEmail = demoRole === 'customer' ? 'priya@demo.bhoj' : 'spice@demo.bhoj'
+    const result = await signIn('credentials', {
+      email: demoEmail,
+      password: 'demo1234',
+      role: demoRole,
+      redirect: false,
+    })
+    if (result?.error) {
+      setError('Demo login failed')
+      setLoading(false)
+    } else {
+      window.location.href = demoRole === 'vendor' ? '/vendor/dashboard' : '/dashboard'
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -39,6 +57,28 @@ export default function LoginPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Demo accounts */}
+          <div className="rounded-lg border border-orange-200 bg-orange-50 p-3">
+            <p className="text-xs font-medium text-orange-700 mb-2">Try a demo account</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => signInAsDemo('customer')}
+                disabled={loading}
+                className="flex-1 text-xs bg-white border border-orange-200 hover:bg-orange-100 text-orange-700 font-medium py-2 rounded-md transition-colors disabled:opacity-50"
+              >
+                Customer — Priya
+              </button>
+              <button
+                type="button"
+                onClick={() => signInAsDemo('vendor')}
+                disabled={loading}
+                className="flex-1 text-xs bg-white border border-orange-200 hover:bg-orange-100 text-orange-700 font-medium py-2 rounded-md transition-colors disabled:opacity-50"
+              >
+                Vendor — Spice Route
+              </button>
+            </div>
+          </div>
           <div className="flex rounded-lg border overflow-hidden">
             <button
               type="button"
@@ -79,6 +119,9 @@ export default function LoginPage() {
             <Link href="/register/customer" className="text-orange-600 hover:underline">Sign up as customer</Link>
             {' · '}
             <Link href="/register/vendor" className="text-orange-600 hover:underline">List your business</Link>
+          </p>
+          <p className="text-center text-xs text-gray-400">
+            <Link href="/admin/login" className="hover:text-orange-600">Admin panel</Link>
           </p>
         </CardContent>
       </Card>

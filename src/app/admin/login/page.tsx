@@ -28,7 +28,8 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="bg-white rounded-xl border p-8 w-full max-w-sm">
-        <h1 className="text-xl font-bold text-gray-900 mb-6">Bhoj Admin</h1>
+        <h1 className="text-xl font-bold text-gray-900 mb-1">Bhoj Admin</h1>
+        <p className="text-xs text-gray-400 mb-6">Password: <code className="bg-gray-100 px-1 rounded">change-me-in-production</code></p>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -47,6 +48,14 @@ export default function AdminLoginPage() {
             {loading ? 'Signing in…' : 'Sign In'}
           </button>
         </form>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => setSecret('change-me-in-production')}
+          className="w-full mt-3 border border-orange-200 hover:bg-orange-50 text-orange-700 text-xs font-medium py-2 rounded-lg disabled:opacity-50"
+        >
+          Use demo secret
+        </button>
       </div>
     </div>
   )
