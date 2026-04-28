@@ -1,16 +1,18 @@
 import { startMatchWorker } from './lib/jobs/match'
 import { startRetuneWorker } from './lib/jobs/retune'
-import { scheduleRetuneJob } from './lib/jobs/queues'
+import { scheduleRetuneJob, scheduleMonthlyReset } from './lib/jobs/queues'
 
 async function main() {
   const matchWorker = startMatchWorker()
   const retuneWorker = startRetuneWorker()
 
   await scheduleRetuneJob()
+  await scheduleMonthlyReset()
 
   console.log('[worker] Match worker started')
   console.log('[worker] Retune worker started')
   console.log('[worker] Weekly re-tune scheduled (Mon 03:00 UTC)')
+  console.log('[worker] Monthly lead reset scheduled (1st of each month 00:00 UTC)')
 
   process.on('SIGTERM', async () => {
     await matchWorker.close()

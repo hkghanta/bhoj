@@ -3,6 +3,7 @@ import { redis } from '@/lib/redis'
 import { prisma } from '@/lib/prisma'
 import { scoreVendor } from '@/lib/matching/scorer'
 import { getWeights } from '@/lib/matching/weights'
+import { checkLeadLimit, incrementLeadCount } from '@/lib/lead-limit'
 import type { VendorForScoring, EventRequestForScoring } from '@/lib/matching/types'
 import { VendorType } from '@prisma/client'
 
@@ -137,9 +138,20 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
   scored.sort((a, b) => b.score - a.score)
   const top = scored.slice(0, MAX_MATCHES).map((s, i) => ({ ...s, rank: i + 1 }))
 
+  // Filter out vendors who have hit their lead limit
+  const allowedMatches: typeof top = []
+  for (const s of top) {
+    const limitCheck = await checkLeadLimit(s.vendorId)
+    if (limitCheck.allowed) {
+      allowedMatches.push(s)
+    } else {
+      console.log(`[match] Vendor ${s.vendorId} at lead limit, skipping`)
+    }
+  }
+
   await prisma.$transaction([
     prisma.match.createMany({
-      data: top.map(s => ({
+      data: allowedMatches.map(s => ({
         event_request_id: eventRequestId,
         vendor_id: s.vendorId,
         vendor_type: request.vendor_type as VendorType,
@@ -154,7 +166,9 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
     }),
   ])
 
-  console.log(`[match] EventRequest ${eventRequestId}: ${top.length} matches created`)
+  await Promise.all(allowedMatches.map(s => incrementLeadCount(s.vendorId)))
+
+  console.log(`[match] EventRequest ${eventRequestId}: ${allowedMatches.length} matches created`)
 }
 
 export function startMatchWorker() {

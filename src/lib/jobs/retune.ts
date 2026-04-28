@@ -63,7 +63,14 @@ export async function runRetuneJob(): Promise<void> {
 export function startRetuneWorker() {
   return new Worker(
     'retune',
-    async (_job: Job) => runRetuneJob(),
+    async (job: Job) => {
+      if (job.data?.type === 'reset') {
+        const { resetMonthlyLeadCounts } = await import('@/lib/lead-limit')
+        await resetMonthlyLeadCounts()
+      } else {
+        await runRetuneJob()
+      }
+    },
     { connection: redis, concurrency: 1 }
   )
 }

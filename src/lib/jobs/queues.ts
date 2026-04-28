@@ -8,10 +8,21 @@ export const retuneQueue = new Queue('retune', { connection: redis })
 export async function scheduleRetuneJob() {
   await retuneQueue.add(
     'weekly-retune',
-    {},
+    { type: 'retune' },
     {
       repeat: { pattern: '0 3 * * 1' },
       jobId: 'weekly-retune-singleton',
+    }
+  )
+}
+
+export async function scheduleMonthlyReset() {
+  await retuneQueue.add(
+    'monthly-lead-reset',
+    { type: 'reset' },
+    {
+      repeat: { pattern: '0 0 1 * *' },
+      jobId: 'monthly-lead-reset-singleton',
     }
   )
 }
