@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma'
 import { scoreVendor } from '@/lib/matching/scorer'
 import { getWeights } from '@/lib/matching/weights'
 import { checkLeadLimit, incrementLeadCount } from '@/lib/lead-limit'
+import { enqueueNotification } from '@/lib/notifications/enqueue'
+import { NOTIFICATION_EVENTS } from '@/lib/notifications/types'
+import { format } from 'date-fns'
 import type { VendorForScoring, EventRequestForScoring } from '@/lib/matching/types'
 import { VendorType } from '@prisma/client'
 
@@ -167,6 +170,24 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
   ])
 
   await Promise.all(allowedMatches.map(s => incrementLeadCount(s.vendorId)))
+
+  // Notify vendors of new leads
+  await Promise.all(
+    allowedMatches.map(s =>
+      enqueueNotification(
+        NOTIFICATION_EVENTS.NEW_LEAD,
+        s.vendorId,
+        'vendor',
+        {
+          eventName: request.event.event_name,
+          guestCount: request.event.guest_count,
+          eventDate: format(request.event.event_date, 'd MMM yyyy'),
+          city: request.event.city,
+          matchScore: s.score,
+        }
+      ).catch(err => console.error('[match] Failed to enqueue lead notification:', err.message))
+    )
+  )
 
   console.log(`[match] EventRequest ${eventRequestId}: ${allowedMatches.length} matches created`)
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { enqueueNotification } from '@/lib/notifications/enqueue'
+import { NOTIFICATION_EVENTS } from '@/lib/notifications/types'
 
 const createSchema = z.object({
   vendor_id: z.string(),
@@ -50,6 +52,22 @@ export async function POST(req: NextRequest) {
       is_verified: true,
     },
   })
+
+  // Notify vendor of new review
+  const customer = await prisma.customer.findUnique({
+    where: { id: session.user!.id as string },
+    select: { name: true },
+  })
+  enqueueNotification(
+    NOTIFICATION_EVENTS.REVIEW_POSTED,
+    parsed.data.vendor_id,
+    'vendor',
+    {
+      reviewerName: customer?.name ?? 'A customer',
+      rating: parsed.data.overall_rating,
+      eventType: parsed.data.event_type ?? 'event',
+    }
+  ).catch(err => console.error('[reviews] Failed to enqueue review notification:', err.message))
 
   return NextResponse.json(review, { status: 201 })
 }

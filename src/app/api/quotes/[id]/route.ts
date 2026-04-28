@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { QuoteStatus } from '@prisma/client'
+import { enqueueNotification } from '@/lib/notifications/enqueue'
+import { NOTIFICATION_EVENTS } from '@/lib/notifications/types'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -94,5 +96,37 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (parsed.data.expires_at) data.expires_at = new Date(parsed.data.expires_at)
 
   const updated = await prisma.quote.update({ where: { id }, data })
+
+  // Notify customer when vendor sends the quote
+  if (parsed.data.status === 'SENT' && quote.status === 'DRAFT') {
+    const fullQuote = await prisma.quote.findUnique({
+      where: { id },
+      include: {
+        vendor: { select: { business_name: true } },
+        match: {
+          include: {
+            event_request: {
+              include: { event: { select: { event_name: true, customer_id: true, id: true } } },
+            },
+          },
+        },
+      },
+    })
+    if (fullQuote) {
+      enqueueNotification(
+        NOTIFICATION_EVENTS.QUOTE_RECEIVED,
+        fullQuote.match.event_request.event.customer_id,
+        'customer',
+        {
+          vendorName: fullQuote.vendor.business_name,
+          eventName: fullQuote.match.event_request.event.event_name,
+          totalEstimate: Number(fullQuote.total_estimate ?? 0),
+          currency: fullQuote.currency,
+          eventId: fullQuote.match.event_request.event.id,
+        }
+      ).catch(err => console.error('[quotes] Failed to enqueue quote notification:', err.message))
+    }
+  }
+
   return NextResponse.json(updated)
 }

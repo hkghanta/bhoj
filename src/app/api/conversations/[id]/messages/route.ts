@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { enqueueNotification } from '@/lib/notifications/enqueue'
+import { NOTIFICATION_EVENTS } from '@/lib/notifications/types'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -83,6 +85,30 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     where: { id },
     data: { last_message_at: message.created_at },
   })
+
+  // Notify the other party
+  const otherPartyId = role === 'customer' ? conversation.vendor_id : conversation.customer_id
+  const otherPartyType: 'customer' | 'vendor' = role === 'customer' ? 'vendor' : 'customer'
+  const senderName = (session.user as any).name ?? (role === 'vendor' ? 'Vendor' : 'Customer')
+
+  prisma.conversation.findUnique({
+    where: { id },
+    include: { match: { include: { event_request: { include: { event: { select: { event_name: true } } } } } } },
+  }).then(convo => {
+    const eventName = convo?.match?.event_request?.event?.event_name ?? 'your event'
+    enqueueNotification(
+      NOTIFICATION_EVENTS.NEW_MESSAGE,
+      otherPartyId,
+      otherPartyType,
+      {
+        conversationId: id,
+        senderName,
+        bodyPreview: parsed.data.body.slice(0, 100),
+        eventName,
+        recipientName: 'there',
+      }
+    ).catch(err => console.error('[messages] Failed to enqueue message notification:', err.message))
+  }).catch(() => {})
 
   return NextResponse.json(message, { status: 201 })
 }
