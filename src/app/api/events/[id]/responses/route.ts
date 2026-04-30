@@ -53,7 +53,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<Param
 
   for (const er of eventRequests) {
     for (const r of er.responses) {
-      responses.push({ ...r, vendor_type: er.vendor_type })
+      responses.push({
+        ...r,
+        phone: r.status === 'ACCEPTED_RESPONSE' || r.status === 'ACCEPTED' ? r.phone : null,
+        vendor_type: er.vendor_type,
+      })
       token_map[r.id] = er.public_token
     }
   }

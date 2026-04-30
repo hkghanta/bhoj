@@ -44,7 +44,7 @@ type OnesevQuote = {
     profile_photo_url: string | null
   }
   tray_lines: TrayLine[]
-  match: { id: string; score: number; rank: number }
+  match: { id: string; score: number; rank: number; event_request: { vendor_type: string } | null }
 }
 
 // ─── Board response types ──────────────────────────────────────────────────
@@ -669,16 +669,19 @@ export default function EventQuotesPage() {
       fetch(`/api/events/${eventId}/responses`),
     ])
 
-    const [quotesData, responsesData] = await Promise.all([
-      quotesRes.json(),
-      responsesRes.json(),
-    ])
-
-    if (Array.isArray(quotesData)) setOnesevQuotes(quotesData)
-    if (responsesData && Array.isArray(responsesData.responses)) {
-      setBoardResponses(responsesData.responses)
-      setTokenMap(responsesData.token_map ?? {})
+    if (quotesRes.ok) {
+      const quotesData = await quotesRes.json()
+      if (Array.isArray(quotesData)) setOnesevQuotes(quotesData)
     }
+
+    if (responsesRes.ok) {
+      const responsesData = await responsesRes.json()
+      if (responsesData && Array.isArray(responsesData.responses)) {
+        setBoardResponses(responsesData.responses)
+        setTokenMap(responsesData.token_map ?? {})
+      }
+    }
+
     setLoading(false)
   }, [eventId])
 
@@ -707,44 +710,51 @@ export default function EventQuotesPage() {
   async function handleAskQuote(responseId: string) {
     const requestToken = tokenMap[responseId]
     if (!requestToken) return
-    await fetch(`/api/requests/${requestToken}`, {
+    const res = await fetch(`/api/requests/${requestToken}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'request_full_quote', response_id: responseId }),
     })
+    if (!res.ok) {
+      await fetchAll()
+      return
+    }
     setBoardResponses(r => r.map(x => x.id === responseId ? { ...x, status: 'QUOTE_REQUESTED' } : x))
   }
 
   async function handleBoardAccept(responseId: string) {
     const requestToken = tokenMap[responseId]
     if (!requestToken) return
-    await fetch(`/api/requests/${requestToken}`, {
+    const res = await fetch(`/api/requests/${requestToken}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'accept', response_id: responseId }),
     })
+    if (!res.ok) {
+      await fetchAll()
+      return
+    }
     setBoardResponses(r => r.map(x => x.id === responseId ? { ...x, status: 'ACCEPTED_RESPONSE' } : x))
   }
 
   async function handleBoardDecline(responseId: string) {
     const requestToken = tokenMap[responseId]
     if (!requestToken) return
-    await fetch(`/api/requests/${requestToken}`, {
+    const res = await fetch(`/api/requests/${requestToken}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'decline_response', response_id: responseId }),
     })
+    if (!res.ok) {
+      await fetchAll()
+      return
+    }
     setBoardResponses(r => r.map(x => x.id === responseId ? { ...x, status: 'DECLINED' } : x))
   }
 
   // ── Group everything by vendor_type ─────────────────────────────────────
   const allServiceTypes = Array.from(new Set([
-    ...onesevQuotes.map(q => {
-      // OneSeva quotes don't directly have vendor_type on them
-      // They're matched via event_request — for grouping use vendor's city as fallback
-      // Actually group all OneSeva quotes together under a 'Catering' key
-      return 'CATERING_ONESEVA'
-    }),
+    ...onesevQuotes.map(q => q.match?.event_request?.vendor_type ?? 'CATERER'),
     ...boardResponses.map(r => r.vendor_type),
   ])).filter(Boolean)
 
@@ -805,8 +815,7 @@ export default function EventQuotesPage() {
                 className="text-gray-700 bg-transparent focus:outline-none text-sm font-medium"
               >
                 <option value="all">All services</option>
-                {sentOneseva.length > 0 && <option value="CATERING_ONESEVA">Catering (OneSeva)</option>}
-                {Array.from(new Set(boardResponses.map(r => r.vendor_type))).map(t => (
+                {allServiceTypes.map(t => (
                   <option key={t} value={t}>{serviceLabel(t)}</option>
                 ))}
               </select>
@@ -839,52 +848,42 @@ export default function EventQuotesPage() {
       {/* Groups */}
       {!allEmpty && (
         <div className="space-y-6">
-
-          {/* OneSeva quotes group */}
-          {sentOneseva.length > 0 && (filterType === 'all' || filterType === 'CATERING_ONESEVA') && (
-            <ServiceGroup
-              vendorType="Catering — OneSeva Matches"
-              colorIdx={0}
-              count={sentOneseva.length}
-            >
-              {sentOneseva.map(q => (
-                <OnesevQuoteRow
-                  key={q.id}
-                  quote={q}
-                  eventId={eventId}
-                  onAccept={handleOnesevAccept}
-                  onDecline={handleOnesevDecline}
-                />
-              ))}
-            </ServiceGroup>
-          )}
-
-          {/* Board responses grouped by vendor_type */}
-          {Array.from(new Set(boardResponses.map(r => r.vendor_type)))
-            .filter(vt => filterType === 'all' || filterType === vt)
-            .map((vendorType, idx) => {
-              const group = boardResponses.filter(r => r.vendor_type === vendorType)
-              return (
-                <ServiceGroup
-                  key={vendorType}
-                  vendorType={vendorType}
-                  colorIdx={idx + 1}
-                  count={group.length}
-                >
-                  {group.map(r => (
-                    <BoardResponseRow
-                      key={r.id}
-                      response={r}
-                      requestToken={tokenMap[r.id] ?? ''}
-                      onAskQuote={handleAskQuote}
-                      onAccept={handleBoardAccept}
-                      onDecline={handleBoardDecline}
-                    />
-                  ))}
-                </ServiceGroup>
-              )
-            })
-          }
+          {filteredServiceTypes.map((vendorType, idx) => {
+            const onesevGroup = sentOneseva.filter(
+              q => (q.match?.event_request?.vendor_type ?? 'CATERER') === vendorType
+            )
+            const boardGroup = boardResponses.filter(r => r.vendor_type === vendorType)
+            const count = onesevGroup.length + boardGroup.length
+            if (count === 0) return null
+            return (
+              <ServiceGroup
+                key={vendorType}
+                vendorType={vendorType}
+                colorIdx={idx}
+                count={count}
+              >
+                {onesevGroup.map(q => (
+                  <OnesevQuoteRow
+                    key={q.id}
+                    quote={q}
+                    eventId={eventId}
+                    onAccept={handleOnesevAccept}
+                    onDecline={handleOnesevDecline}
+                  />
+                ))}
+                {boardGroup.map(r => (
+                  <BoardResponseRow
+                    key={r.id}
+                    response={r}
+                    requestToken={tokenMap[r.id] ?? ''}
+                    onAskQuote={handleAskQuote}
+                    onAccept={handleBoardAccept}
+                    onDecline={handleBoardDecline}
+                  />
+                ))}
+              </ServiceGroup>
+            )
+          })}
         </div>
       )}
     </div>

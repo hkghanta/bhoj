@@ -27,9 +27,10 @@ export async function GET(req: NextRequest) {
         },
       },
       include: {
-        vendor: { select: { id: true, business_name: true, city: true, profile_photo_url: true } },
+        vendor: { select: { id: true, business_name: true, city: true, tier: true, is_verified: true, profile_photo_url: true } },
         menu_items: { orderBy: [{ category: 'asc' }, { sort_order: 'asc' }] },
-        match: { select: { score: true, rank: true } },
+        tray_lines: { orderBy: { sort_order: 'asc' } },
+        match: { select: { id: true, score: true, rank: true, event_request: { select: { vendor_type: true } } } },
       },
       orderBy: { created_at: 'desc' },
     })
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
         event: { customer_id: (session.user!.id as string) },
       },
     },
-    include: { event_request: true },
+    include: { event_request: { include: { event: true } } },
   })
   if (!match) return NextResponse.json({ error: 'Match not found' }, { status: 404 })
 
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
       match_id: match.id,
       vendor_id: match.vendor_id,
       total_estimate: 0,
-      currency: 'GBP',
+      currency: match.event_request.event.currency ?? 'USD',
       status: 'DRAFT',
     },
   })

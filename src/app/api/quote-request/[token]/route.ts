@@ -6,6 +6,7 @@ type Params = { token: string }
 
 function budgetBand(amount: number, currency: string): string {
   const bands = [500, 1000, 2000, 5000, 10000, 20000]
+  if (amount < bands[0]) return `${currency}${bands[0].toLocaleString()} or under`
   for (let i = 0; i < bands.length - 1; i++) {
     if (amount < bands[i + 1]) return `${currency}${bands[i].toLocaleString()}–${bands[i + 1].toLocaleString()}`
   }
