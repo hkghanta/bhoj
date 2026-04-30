@@ -64,9 +64,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<Param
 
   if (!eventRequest) return NextResponse.json({ error: 'No request found' }, { status: 404 })
 
+  const sanitisedResponses = eventRequest.responses.map(r => ({
+    ...r,
+    phone: r.status === 'ACCEPTED' ? r.phone : null,
+  }))
+
   return NextResponse.json({
     public_token: eventRequest.public_token,
     public_status: eventRequest.public_status,
-    responses: eventRequest.responses,
+    responses: sanitisedResponses,
   })
 }

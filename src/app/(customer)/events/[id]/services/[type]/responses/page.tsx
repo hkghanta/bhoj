@@ -134,7 +134,7 @@ function ResponseCard({
 }: {
   resp: Response
   acting: string | null
-  onAction: (action: string, responseId: string) => void
+  onAction: (action: string, responseId?: string) => void
 }) {
   const name = displayName(resp)
   const isOnPlatform = !!resp.vendor
