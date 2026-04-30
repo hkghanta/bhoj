@@ -359,8 +359,16 @@ model RequestResponse {
   phone            String?
   pitch            String
   price_note       String?
-  portfolio_url    String?
-  status           String       @default("PENDING")
+  portfolio_url      String?
+  email              String?
+  quote_token        String?      @unique @default(cuid())
+  quoted_price       Decimal?
+  price_unit         String?
+  what_includes      String?
+  service_details    String?
+  availability_note  String?
+  quote_submitted_at DateTime?
+  status             String       @default("PENDING")
   created_at       DateTime     @default(now())
   event_request    EventRequest @relation(fields: [event_request_id], references: [id], onDelete: Cascade)
   vendor           Vendor?      @relation(fields: [vendor_id], references: [id], onDelete: SetNull)
