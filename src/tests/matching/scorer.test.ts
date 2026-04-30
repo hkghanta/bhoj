@@ -7,6 +7,9 @@ const baseVendor: VendorForScoring = {
   id: 'v1',
   city: 'London',
   country: 'GB',
+  lat: 51.5074,
+  lng: -0.1278,
+  travel_radius_miles: 30,
   vendor_type: 'CATERER',
   tier: 'PRO',
   is_verified: true,
@@ -22,6 +25,8 @@ const baseRequest: EventRequestForScoring = {
   event: {
     city: 'London',
     country: 'GB',
+    lat: 51.5074,
+    lng: -0.1278,
     event_date: new Date('2027-06-15'),
     guest_count: 150,
     total_budget: 6000,
