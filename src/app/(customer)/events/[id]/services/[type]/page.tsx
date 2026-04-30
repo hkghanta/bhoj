@@ -155,10 +155,14 @@ function RequirementsForm({
   const [notes, setNotes] = useState(initialNotes)
   const changed = notes !== initialNotes
 
+  useEffect(() => {
+    setNotes(initialNotes)
+  }, [initialNotes])
+
   return (
     <div className="space-y-3.5">
       <div>
-        <label className="block text-sm font-semibold text-text-2 mb-1.5">
+        <label htmlFor="service-notes" className="block text-sm font-semibold text-text-2 mb-1.5">
           Requirements &amp; special notes
         </label>
         <p className="text-xs text-text-4 mb-2.5">
@@ -166,6 +170,7 @@ function RequirementsForm({
           count, dietary needs, budget range, or anything else relevant.
         </p>
         <textarea
+          id="service-notes"
           className="w-full border border-brand-border rounded-xl p-3.5 text-sm leading-relaxed min-h-[120px] resize-none
                      bg-cream/40 placeholder:text-text-4 text-text-1
                      focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50
@@ -345,7 +350,7 @@ function PublicRequestPanel({
         <div className="relative p-5">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Globe className="h-4.5 w-4.5 text-brand" />
+              <Globe className="h-[18px] w-[18px] text-brand" />
             </div>
             <div>
               <p className="font-bold text-text-1 text-sm">Public request board</p>
@@ -433,7 +438,7 @@ export default function ServicePage() {
   const [requestingId, setRequestingId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
-  const formRef = useRef<HTMLDivElement>(null)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function load() {
     try {
@@ -458,6 +463,13 @@ export default function ServicePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId, slug])
 
+  // Clear success timer on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) clearTimeout(successTimerRef.current)
+    }
+  }, [])
+
   async function saveRequirements(notes: string) {
     setSaving(true)
     setError('')
@@ -470,6 +482,8 @@ export default function ServicePage() {
       })
       if (res.ok) {
         setSuccessMsg('Requirements saved! Vendors matched below.')
+        if (successTimerRef.current) clearTimeout(successTimerRef.current)
+        successTimerRef.current = setTimeout(() => setSuccessMsg(''), 4000)
         await load()
         setFormOpen(false)
       } else {
@@ -584,10 +598,11 @@ export default function ServicePage() {
       {/* ── Requirements panel ── */}
       <div
         className="bg-white border border-brand-border rounded-2xl overflow-hidden shadow-[0_1px_4px_rgba(26,9,4,0.05)]"
-        ref={formRef}
       >
         {/* Panel header — always visible toggle */}
         <button
+          type="button"
+          aria-expanded={formOpen}
           onClick={() => setFormOpen(o => !o)}
           className="w-full flex items-center justify-between px-5 py-4 hover:bg-cream/50 transition-colors"
         >
@@ -617,7 +632,7 @@ export default function ServicePage() {
         {/* Collapsible form body */}
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            formOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+            formOpen ? 'max-h-[600px] opacity-100 visible' : 'max-h-0 opacity-0 invisible'
           }`}
         >
           <div className="px-5 pb-5 border-t border-brand-border pt-4">
@@ -689,7 +704,7 @@ export default function ServicePage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-cream via-transparent to-transparent pointer-events-none" />
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-cream-2 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <MapPin className="h-4.5 w-4.5 text-text-3" />
+              <MapPin className="h-[18px] w-[18px] text-text-3" />
             </div>
             <div>
               <p className="font-bold text-text-1 text-sm">Other local businesses</p>

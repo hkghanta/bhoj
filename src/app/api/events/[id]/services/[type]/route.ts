@@ -79,7 +79,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
       last_name: true,
       menu_packages: {
         where: { is_active: true },
-        select: { is_halal: true, is_jain: true, cuisine_type: true },
+        select: { is_halal: true, is_jain: true, cuisine_type: true, price_per_head: true, currency: true },
       },
       metrics: {
         orderBy: { period: 'desc' },
@@ -120,13 +120,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
     return acc
   }, {})
 
-  const rankedWithDetails = ranked.map(v => ({
-    ...v,
-    profile_photo_url: vendorDetails[v.id]?.profile_photo_url ?? null,
-    profile_type: vendorDetails[v.id]?.profile_type ?? null,
-    first_name: vendorDetails[v.id]?.first_name ?? null,
-    last_name: vendorDetails[v.id]?.last_name ?? null,
-  }))
+  const rankedWithDetails = ranked.map(v => {
+    const detail = vendorDetails[v.id]
+    const packages = detail?.menu_packages ?? []
+    const prices = packages.map(p => Number(p.price_per_head)).filter(n => !isNaN(n))
+    const price_per_head_min = prices.length > 0 ? Math.min(...prices) : null
+    const price_per_head_max = prices.length > 0 ? Math.max(...prices) : null
+    const currency = packages[0]?.currency ?? 'INR'
+    return {
+      ...v,
+      profile_photo_url: detail?.profile_photo_url ?? null,
+      profile_type: detail?.profile_type ?? null,
+      first_name: detail?.first_name ?? null,
+      last_name: detail?.last_name ?? null,
+      price_per_head_min,
+      price_per_head_max,
+      currency,
+    }
+  })
 
   return NextResponse.json({
     service_config: serviceConfig,
