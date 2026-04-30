@@ -326,7 +326,8 @@ function DishPicker({
     : []
 
   const exactMatch = allLibraryDishes.some(d => d.toLowerCase() === searchQuery.toLowerCase().trim())
-  const canAddCustom = isSearching && searchQuery.trim() && !selected.includes(searchQuery.trim()) && !exactMatch
+  const alreadySelected = selected.some(d => d.toLowerCase() === searchQuery.toLowerCase().trim())
+  const canAddCustom = isSearching && searchQuery.trim() && !alreadySelected && !exactMatch
 
   return (
     <div className="space-y-3">
