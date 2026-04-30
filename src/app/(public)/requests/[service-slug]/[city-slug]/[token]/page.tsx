@@ -128,7 +128,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const data = await fetchRequest(token)
   if (!data) return { title: 'Request not found — OneSeva' }
   const service = SERVICE_LABELS[data.vendor_type] ?? serviceSlug
-  const city = data.event.city ?? citySlug
+  const city = data.event.city ?? citySlug.replace(/-/g, ' ')
   const eventLabel = EVENT_LABELS[data.event.event_type] ?? data.event.event_type.replace(/_/g, ' ')
   return {
     title: `${service} needed in ${city} — OneSeva`,
@@ -217,7 +217,7 @@ export default async function PublicRequestPage({ params }: { params: Promise<Pa
             <StatCard
               icon={<Clock className="w-4 h-4 text-orange-500" />}
               label="Responses"
-              value={`${data.event.guest_count > 0 ? data.response_count : 0} so far`}
+              value={`${String(data.response_count)} so far`}
               className="col-span-2 sm:col-span-1"
             />
           </div>
