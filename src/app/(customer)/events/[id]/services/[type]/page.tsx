@@ -573,6 +573,42 @@ function CateringForm({
         </div>
       )}
 
+      {/* Cuisine preferences */}
+      <div>
+        <div className="flex items-center justify-between mb-2.5">
+          <SectionHeading>Cuisine preferences</SectionHeading>
+          <button
+            type="button"
+            onClick={() => up({ letCatererDecideCuisine: !f.letCatererDecideCuisine, cuisines: [] })}
+            className="text-xs text-brand font-semibold hover:underline"
+          >
+            {f.letCatererDecideCuisine ? 'Choose specific cuisines' : 'Let caterer decide'}
+          </button>
+        </div>
+        {f.letCatererDecideCuisine ? (
+          <p className="text-sm text-text-4 bg-cream px-3 py-2 rounded-lg">Caterer will suggest appropriate cuisines</p>
+        ) : (
+          <PillToggle
+            options={CUISINE_OPTIONS}
+            selected={f.cuisines}
+            onChange={v => up({ cuisines: v })}
+          />
+        )}
+      </div>
+
+      {/* Dietary requirements */}
+      <div>
+        <SectionHeading>Dietary requirements</SectionHeading>
+        <PillToggle
+          options={DIETARY_OPTIONS}
+          selected={f.dietary}
+          onChange={v => up({ dietary: v })}
+        />
+        {f.dietary.length === 0 && (
+          <p className="text-xs text-text-4 mt-2">None selected — all dietary preferences welcome</p>
+        )}
+      </div>
+
       {/* Food requirements */}
       <div>
         <SectionHeading>Menu / dishes</SectionHeading>
@@ -645,42 +681,6 @@ function CateringForm({
           <p className="text-sm text-text-4 bg-cream px-3 py-2 rounded-lg">
             Caterer will propose a suitable menu based on your other requirements
           </p>
-        )}
-      </div>
-
-      {/* Dietary requirements */}
-      <div>
-        <SectionHeading>Dietary requirements</SectionHeading>
-        <PillToggle
-          options={DIETARY_OPTIONS}
-          selected={f.dietary}
-          onChange={v => up({ dietary: v })}
-        />
-        {f.dietary.length === 0 && (
-          <p className="text-xs text-text-4 mt-2">None selected — all dietary preferences welcome</p>
-        )}
-      </div>
-
-      {/* Cuisine preferences */}
-      <div>
-        <div className="flex items-center justify-between mb-2.5">
-          <SectionHeading>Cuisine preferences</SectionHeading>
-          <button
-            type="button"
-            onClick={() => up({ letCatererDecideCuisine: !f.letCatererDecideCuisine, cuisines: [] })}
-            className="text-xs text-brand font-semibold hover:underline"
-          >
-            {f.letCatererDecideCuisine ? 'Choose specific cuisines' : 'Let caterer decide'}
-          </button>
-        </div>
-        {f.letCatererDecideCuisine ? (
-          <p className="text-sm text-text-4 bg-cream px-3 py-2 rounded-lg">Caterer will suggest appropriate cuisines</p>
-        ) : (
-          <PillToggle
-            options={CUISINE_OPTIONS}
-            selected={f.cuisines}
-            onChange={v => up({ cuisines: v })}
-          />
         )}
       </div>
 
