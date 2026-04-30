@@ -37,15 +37,12 @@ const SERVICE_LABELS: Record<string, string> = {
   security: 'Security',
 }
 
-// Services that are typically hired by businesses (not individuals)
-const BUSINESS_SERVICES = new Set([
-  'tent-marquee', 'lighting', 'furniture-rental', 'equipment-rental', 'security',
-])
-
-// Services typically offered by individuals
+// Services typically offered by individuals (freelancers / solo operators)
 const INDIVIDUAL_SLUGS = new Set([
-  'mehendi-artist', 'makeup-hair', 'choreographer', 'pandit-officiant',
-  'mc-host', 'dhol-player', 'classical-musician',
+  'photographer', 'videographer', 'dj', 'mehendi-artist', 'makeup-hair',
+  'dhol-player', 'live-band', 'classical-musician', 'choreographer',
+  'pandit-officiant', 'mc-host', 'bartender', 'chai-station',
+  'games-entertainment', 'invitation-designer',
 ])
 
 const VALID_SLUGS = new Set(Object.keys(SERVICE_LABELS))
@@ -260,7 +257,7 @@ export default async function BrowsePage({
 
   const vendors = await fetchVendors(serviceSlug, cityName)
 
-  const isBusinessService = BUSINESS_SERVICES.has(serviceSlug)
+  const isIndividual = INDIVIDUAL_SLUGS.has(serviceSlug)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -292,21 +289,6 @@ export default async function BrowsePage({
           <EmptyState serviceLabel={serviceLabel} cityName={cityName} />
         ) : (
           <>
-            {/* Business services info banner */}
-            {isBusinessService && (
-              <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 rounded-2xl p-5 mb-8">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl mt-0.5">💡</span>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">Working with {serviceLabel} vendors</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      {serviceLabel} is typically handled by specialist companies. Request a quote and our concierge team will help coordinate the details for your event.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Vendor grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {vendors.map(vendor => (
@@ -314,20 +296,38 @@ export default async function BrowsePage({
               ))}
             </div>
 
-            {/* Bottom CTA */}
-            <div className="mt-12 bg-gradient-to-br from-orange-900 to-amber-800 rounded-2xl p-8 text-center text-white">
-              <h2 className="text-2xl font-black mb-2">Planning an event in {cityName}?</h2>
-              <p className="text-orange-200 mb-6 max-w-lg mx-auto">
-                Our concierge team matches you with the best vendors for your budget and guest count. Free to use.
-              </p>
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2 bg-white text-orange-700 font-bold px-8 py-3 rounded-xl hover:bg-orange-50 transition-colors shadow-lg"
-              >
-                Start planning free
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
+            {/* Bottom CTA — differs by service class */}
+            {isIndividual ? (
+              /* Individual service: invite freelancers to join */
+              <div className="mt-12 bg-orange-50 border border-orange-200 rounded-2xl p-8 text-center">
+                <h2 className="text-xl font-black text-gray-900 mb-2">
+                  Are you a {serviceLabel.toLowerCase().replace(/s$/, '')} in {cityName}?
+                </h2>
+                <p className="text-gray-600 mb-6 max-w-lg mx-auto">
+                  Join OneSeva free and get leads from events in your area.
+                </p>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white font-bold px-8 py-3 rounded-xl transition-colors shadow-sm"
+                >
+                  Join free
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            ) : (
+              /* Business service: Google Places stub */
+              <div className="mt-12 bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
+                <h2 className="text-base font-bold text-gray-700 mb-1">
+                  Other local businesses
+                </h2>
+                <p className="text-sm text-gray-500 max-w-lg mx-auto mb-2">
+                  Additional local businesses not yet on OneSeva will appear here.
+                </p>
+                <p className="text-xs text-gray-400">
+                  Google Places integration — coming soon
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>

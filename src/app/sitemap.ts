@@ -9,6 +9,7 @@ const SERVICE_SLUGS = [
   'live-band', 'classical-musician', 'choreographer', 'pandit-officiant',
   'mc-host', 'bartender', 'chai-station', 'games-entertainment',
   'invitation-designer', 'furniture-rental', 'equipment-rental',
+  'dessert-vendor', 'food-truck', 'lighting', 'security',
 ]
 
 // Normalize a city name to a URL slug
