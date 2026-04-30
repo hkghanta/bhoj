@@ -7,131 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum VendorType {
-  CATERER
-  DESSERT_VENDOR
-  BARTENDER
-  CHAI_STATION
-  FOOD_TRUCK
-  DECORATOR
-  FLORIST
-  TENT_MARQUEE
-  LIGHTING
-  FURNITURE_RENTAL
-  EQUIPMENT_RENTAL
-  DJ
-  LIVE_BAND
-  DHOL_PLAYER
-  CLASSICAL_MUSICIAN
-  GAMES_ENTERTAINMENT
-  PHOTOGRAPHER
-  VIDEOGRAPHER
-  MEHENDI_ARTIST
-  MAKEUP_HAIR
-  CHOREOGRAPHER
-  PANDIT_OFFICIANT
-  INVITATION_DESIGNER
-  TRANSPORT
-  SECURITY
-  MC_HOST
-}
-
-enum VendorTier {
-  FREE
-  PRO
-  PREMIUM
-}
-enum EventStatus {
-  PLANNING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-enum ChecklistStatus {
-  PENDING
-  SEARCHING
-  SHORTLISTED
-  FINALIZED
-  NOT_NEEDED
-}
-enum RequestStatus {
-  OPEN
-  MATCHED
-  CLOSED
-}
-enum MatchStatus {
-  PENDING
-  VIEWED
-  QUOTED
-  SHORTLISTED
-  REJECTED
-}
-enum QuoteStatus {
-  DRAFT
-  SENT
-  VIEWED
-  ACCEPTED
-  DECLINED
-}
-enum MenuMode {
-  CUSTOMER_SPECIFIED
-  CATERER_PROPOSES
-}
-enum MenuCategory {
-  SOUP_SALAD
-  APPETIZER
-  MAIN_COURSE
-  BREAD
-  RICE_BIRYANI
-  DAL
-  DESSERT
-  BEVERAGE
-  LIVE_COUNTER
-  OTHER
-}
-enum SpiceLevel {
-  MILD
-  MEDIUM
-  HOT
-  VERY_HOT
-}
-enum SenderType {
-  CUSTOMER
-  VENDOR
-}
-enum PassStatus {
-  ACTIVE
-  EXPIRED
-  REFUNDED
-}
-enum NotificationChannel {
-  EMAIL
-  PUSH
-  WHATSAPP
-}
-
 model Customer {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String
-  phone         String?
-  location      String?
-  avatar_url    String?
-  password_hash String?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  events             Event[]
-  passes             CustomerEventPass[]
-  reviews            Review[]
+  id                 String                     @id @default(cuid())
+  email              String                     @unique
+  name               String
+  phone              String?
+  location           String?
+  avatar_url         String?
+  password_hash      String?
+  created_at         DateTime                   @default(now())
+  updated_at         DateTime                   @updatedAt
+  concierge_requests ConciergeRequest[]
   conversations      Conversation[]
-  hidden_feedback    HiddenFeedback[]
+  passes             CustomerEventPass[]
   notification_prefs CustomerNotificationPref[]
+  events             Event[]
+  hidden_feedback    HiddenFeedback[]
+  local_invites      LocalVendorInvite[]
+  reviews            Review[]
 }
 
 model Vendor {
-  id                     String     @id @default(cuid())
-  email                  String     @unique
+  id                     String                    @id @default(cuid())
+  email                  String                    @unique
   business_name          String
   vendor_type            VendorType
   phone_business         String?
@@ -143,30 +41,42 @@ model Vendor {
   profile_photo_url      String?
   website                String?
   instagram              String?
+  profile_type           String                    @default("BUSINESS")
+  first_name             String?
+  last_name              String?
   password_hash          String?
-  is_active              Boolean    @default(true)
-  is_verified            Boolean    @default(false)
-  tier                   VendorTier @default(FREE)
+  is_active              Boolean                   @default(true)
+  is_verified            Boolean                   @default(false)
+  tier                   VendorTier                @default(PRO)
   license_number         String?
   health_inspection_date DateTime?
   insurance_number       String?
-  created_at             DateTime   @default(now())
-  updated_at             DateTime   @updatedAt
-
-  documents          VendorDocument[]
-  photos             VendorPhoto[]
-  services           VendorService[]
-  past_events        PastEvent[]
-  menu_items         MenuItem[]
-  menu_packages      MenuPackage[]
-  matches            Match[]
-  quotes             Quote[]
-  reviews            Review[]
-  availability       VendorAvailability[]
-  metrics            VendorMetrics[]
-  subscriptions      Subscription[]
-  conversations      Conversation[]
-  notification_prefs VendorNotificationPref[]
+  created_at             DateTime                  @default(now())
+  updated_at             DateTime                  @updatedAt
+  trial_ends_at          DateTime?
+  verified_at            DateTime?
+  lat                    Float?
+  lng                    Float?
+  travel_radius_miles    Int                       @default(50)
+  conversations          Conversation[]
+  matches                Match[]
+  menu_items             MenuItem[]
+  request_responses      RequestResponse[]
+  menu_packages          MenuPackage[]
+  past_events            PastEvent[]
+  quotes                 Quote[]
+  reviews                Review[]
+  subscriptions          Subscription[]
+  availability           VendorAvailability[]
+  credits                VendorCredit?
+  documents              VendorDocument[]
+  lead                   VendorLead?
+  metrics                VendorMetrics[]
+  notification_prefs     VendorNotificationPref[]
+  operating_schedule     VendorOperatingSchedule[]
+  photos                 VendorPhoto[]
+  services               VendorService[]
+  special_days           VendorSpecialDay[]
 }
 
 model VendorDocument {
@@ -213,7 +123,7 @@ model PastEvent {
 }
 
 model Event {
-  id                 String      @id @default(cuid())
+  id                 String               @id @default(cuid())
   customer_id        String
   event_name         String
   event_type         String
@@ -221,18 +131,22 @@ model Event {
   city               String
   venue              String?
   guest_count        Int
-  total_budget       Decimal     @db.Decimal(10, 2)
-  currency           String      @default("GBP")
-  total_spent        Decimal     @default(0) @db.Decimal(10, 2)
-  checklist_progress Int         @default(0)
-  status             EventStatus @default(PLANNING)
-  created_at         DateTime    @default(now())
-  updated_at         DateTime    @updatedAt
-
-  customer        Customer             @relation(fields: [customer_id], references: [id], onDelete: Cascade)
-  checklist_items EventChecklistItem[]
-  requests        EventRequest[]
-  passes          CustomerEventPass[]
+  total_budget       Decimal              @db.Decimal(10, 2)
+  currency           String               @default("USD")
+  total_spent        Decimal              @default(0) @db.Decimal(10, 2)
+  checklist_progress Int                  @default(0)
+  status             EventStatus          @default(PLANNING)
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
+  invite_image_url   String?
+  invite_message     String?
+  passes             CustomerEventPass[]
+  customer           Customer             @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  checklist_items    EventChecklistItem[]
+  requests           EventRequest[]
+  households         GuestHousehold[]
+  local_invites      LocalVendorInvite[]
+  sub_events         SubEvent[]
 }
 
 model EventChecklistItem {
@@ -241,7 +155,6 @@ model EventChecklistItem {
   category              String
   item_name             String
   status                ChecklistStatus @default(PENDING)
-  bhoj_vendor_id        String?
   external_vendor_name  String?
   external_vendor_phone String?
   external_vendor_email String?
@@ -257,65 +170,157 @@ model EventChecklistItem {
   due_date              DateTime?
   completed_at          DateTime?
   created_at            DateTime        @default(now())
+  sub_event_id          String?
+  oneseva_vendor_id     String?
   event                 Event           @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  sub_event             SubEvent?       @relation(fields: [sub_event_id], references: [id])
+
+  @@index([sub_event_id])
 }
 
 model EventRequest {
-  id          String        @id @default(cuid())
-  event_id    String
-  customer_id String
-  vendor_type VendorType
-  status      RequestStatus @default(OPEN)
-  created_at  DateTime      @default(now())
-
-  event           Event                @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  matches         Match[]
+  id              String               @id @default(cuid())
+  event_id        String
+  customer_id     String
+  vendor_type     VendorType
+  status          RequestStatus        @default(OPEN)
+  public_token    String               @unique @default(cuid())
+  public_status   String               @default("OPEN")
+  service_notes   String?
+  created_at      DateTime             @default(now())
+  sub_event_id    String?
   menu_preference EventMenuPreference?
+  event           Event                @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  sub_event       SubEvent?            @relation(fields: [sub_event_id], references: [id])
+  matches         Match[]
+  responses       RequestResponse[]
+
+  @@index([sub_event_id])
+}
+
+model SubEvent {
+  id              String                @id @default(cuid())
+  event_id        String
+  name            String
+  event_date      DateTime
+  venue           String?
+  guest_count     Int?
+  budget          Decimal?              @db.Decimal(12, 2)
+  currency        String                @default("USD")
+  notes           String?
+  sort_order      Int                   @default(0)
+  created_at      DateTime              @default(now())
+  checklist_items EventChecklistItem[]
+  requests        EventRequest[]
+  invites         GuestSubEventInvite[]
+  event           Event                 @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@index([event_id])
+}
+
+model GuestHousehold {
+  id         String                @id @default(cuid())
+  event_id   String
+  label      String
+  email      String?
+  phone      String?
+  token      String                @unique @default(cuid())
+  declined   Boolean               @default(false)
+  created_at DateTime              @default(now())
+  event      Event                 @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  invites    GuestSubEventInvite[]
+
+  @@index([event_id])
+}
+
+model GuestSubEventInvite {
+  id           String          @id @default(cuid())
+  household_id String
+  sub_event_id String
+  responded_at DateTime?
+  created_at   DateTime        @default(now())
+  attendees    GuestAttendee[]
+  household    GuestHousehold  @relation(fields: [household_id], references: [id], onDelete: Cascade)
+  sub_event    SubEvent        @relation(fields: [sub_event_id], references: [id], onDelete: Cascade)
+
+  @@unique([household_id, sub_event_id])
+  @@index([household_id])
+  @@index([sub_event_id])
+}
+
+model GuestAttendee {
+  id           String              @id @default(cuid())
+  invite_id    String
+  name         String?
+  dietary_type GuestDietaryType    @default(NON_VEG)
+  allergens    String[]            @default([])
+  created_at   DateTime            @default(now())
+  invite       GuestSubEventInvite @relation(fields: [invite_id], references: [id], onDelete: Cascade)
+
+  @@index([invite_id])
 }
 
 model Match {
-  id               String      @id @default(cuid())
+  id               String        @id @default(cuid())
   event_request_id String
   vendor_id        String
   vendor_type      VendorType
   score            Int
   rank             Int
-  status           MatchStatus @default(PENDING)
-  created_at       DateTime    @default(now())
+  status           MatchStatus   @default(PENDING)
+  created_at       DateTime      @default(now())
   viewed_at        DateTime?
-
-  event_request EventRequest  @relation(fields: [event_request_id], references: [id], onDelete: Cascade)
-  vendor        Vendor        @relation(fields: [vendor_id], references: [id])
-  quotes        Quote[]
-  conversation  Conversation?
+  distance_miles   Float?
+  conversation     Conversation?
+  event_request    EventRequest  @relation(fields: [event_request_id], references: [id], onDelete: Cascade)
+  vendor           Vendor        @relation(fields: [vendor_id], references: [id])
+  quotes           Quote[]
 }
 
 model Quote {
-  id               String      @id @default(cuid())
-  match_id         String
-  vendor_id        String
-  price_per_head   Decimal?    @db.Decimal(10, 2)
-  total_estimate   Decimal     @db.Decimal(10, 2)
-  currency         String      @default("GBP")
-  notes            String?
-  tasting_offered  Boolean     @default(false)
-  tasting_cost     Decimal?    @db.Decimal(10, 2)
-  tasting_date     DateTime?
-  tasting_location String?
-  status           QuoteStatus @default(DRAFT)
-  expires_at       DateTime?
-  created_at       DateTime    @default(now())
+  id                  String          @id @default(cuid())
+  match_id            String
+  vendor_id           String
+  price_per_head      Decimal?        @db.Decimal(10, 2)
+  total_estimate      Decimal         @db.Decimal(10, 2)
+  currency            String          @default("USD")
+  notes               String?
+  tasting_offered     Boolean         @default(false)
+  tasting_cost        Decimal?        @db.Decimal(10, 2)
+  tasting_date        DateTime?
+  tasting_location    String?
+  status              QuoteStatus     @default(DRAFT)
+  expires_at          DateTime?
+  created_at          DateTime        @default(now())
+  customer_menu_notes String?
+  is_menu_finalized   Boolean         @default(false)
+  pricing_type        PricingType     @default(PER_HEAD)
+  discount_type       String?         // "FLAT" | "PERCENTAGE"
+  discount_value      Decimal?        @db.Decimal(10, 2)
+  discount_note       String?
+  match               Match           @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  vendor              Vendor          @relation(fields: [vendor_id], references: [id])
+  menu_items          QuoteMenuItem[]
+  tray_lines          QuoteTrayLine[]
+}
 
-  match      Match          @relation(fields: [match_id], references: [id], onDelete: Cascade)
-  vendor     Vendor         @relation(fields: [vendor_id], references: [id])
-  menu_items QuoteMenuItem[]
+model QuoteTrayLine {
+  id          String  @id @default(cuid())
+  quote_id    String
+  item_name   String
+  serves_note String?
+  unit_price  Decimal @db.Decimal(10, 2)
+  qty         Int     @default(1)
+  line_total  Decimal @db.Decimal(10, 2)
+  sort_order  Int     @default(0)
+  quote       Quote   @relation(fields: [quote_id], references: [id], onDelete: Cascade)
 }
 
 model EventMenuPreference {
-  id                  String   @id @default(cuid())
+  id                  String       @id @default(cuid())
   event_id            String
-  caterer_request_id  String   @unique
-  menu_mode           MenuMode @default(CATERER_PROPOSES)
+  caterer_request_id  String       @unique
+  menu_mode           MenuMode     @default(CATERER_PROPOSES)
   cuisine_preferences String[]
   service_style       String?
   soup_salad_count    Int?
@@ -329,68 +334,105 @@ model EventMenuPreference {
   dessert_count       Int?
   live_counter_count  Int?
   beverage_count      Int?
-  is_vegetarian       Boolean  @default(false)
-  is_vegan            Boolean  @default(false)
-  is_jain             Boolean  @default(false)
-  is_halal            Boolean  @default(false)
-  is_kosher           Boolean  @default(false)
-  nut_free            Boolean  @default(false)
-  gluten_free         Boolean  @default(false)
-  dairy_free          Boolean  @default(false)
-  egg_free            Boolean  @default(false)
-  shellfish_free      Boolean  @default(false)
-  soy_free            Boolean  @default(false)
+  is_vegetarian       Boolean      @default(false)
+  is_vegan            Boolean      @default(false)
+  is_jain             Boolean      @default(false)
+  is_halal            Boolean      @default(false)
+  is_kosher           Boolean      @default(false)
+  nut_free            Boolean      @default(false)
+  gluten_free         Boolean      @default(false)
+  dairy_free          Boolean      @default(false)
+  egg_free            Boolean      @default(false)
+  shellfish_free      Boolean      @default(false)
+  soy_free            Boolean      @default(false)
   special_notes       String?
-  caterer_request     EventRequest @relation(fields: [caterer_request_id], references: [id], onDelete: Cascade)
+  pricing_preference       String       @default("NO_PREFERENCE")
+  customer_tray_requests   Json?
+  caterer_request          EventRequest @relation(fields: [caterer_request_id], references: [id], onDelete: Cascade)
+}
+
+model RequestResponse {
+  id               String       @id @default(cuid())
+  event_request_id String
+  vendor_id        String?
+  name             String
+  phone            String?
+  pitch            String
+  price_note       String?
+  portfolio_url    String?
+  status           String       @default("PENDING")
+  created_at       DateTime     @default(now())
+  event_request    EventRequest @relation(fields: [event_request_id], references: [id], onDelete: Cascade)
+  vendor           Vendor?      @relation(fields: [vendor_id], references: [id])
+}
+
+model ServiceConfig {
+  id            String  @id @default(cuid())
+  vendor_type   String  @unique
+  is_enabled    Boolean @default(false)
+  sort_order    Int     @default(0)
+  label         String
+  icon          String
+  service_class String  @default("BUSINESS")
 }
 
 model MenuPackage {
-  id               String   @id @default(cuid())
+  id               String            @id @default(cuid())
   vendor_id        String
   name             String
   description      String?
-  price_per_head   Decimal  @db.Decimal(10, 2)
-  currency         String   @default("GBP")
+  price_per_head   Decimal           @db.Decimal(10, 2)
+  currency         String            @default("USD")
   min_guests       Int?
   max_guests       Int?
   cuisine_type     String?
-  is_vegetarian    Boolean  @default(false)
-  is_vegan         Boolean  @default(false)
-  is_jain          Boolean  @default(false)
-  is_halal         Boolean  @default(false)
-  nut_free         Boolean  @default(false)
-  gluten_free      Boolean  @default(false)
-  dairy_free       Boolean  @default(false)
-  includes_service Boolean  @default(false)
-  includes_setup   Boolean  @default(false)
-  is_active        Boolean  @default(true)
-  created_at       DateTime @default(now())
-  vendor           Vendor   @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
+  is_vegetarian    Boolean           @default(false)
+  is_vegan         Boolean           @default(false)
+  is_jain          Boolean           @default(false)
+  is_halal         Boolean           @default(false)
+  nut_free         Boolean           @default(false)
+  gluten_free      Boolean           @default(false)
+  dairy_free       Boolean           @default(false)
+  includes_service Boolean           @default(false)
+  includes_setup   Boolean           @default(false)
+  is_active        Boolean           @default(true)
+  created_at       DateTime          @default(now())
+  vendor           Vendor            @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
   items            MenuPackageItem[]
 }
 
 model MenuItem {
-  id                 String       @id @default(cuid())
-  vendor_id          String
-  name               String
-  description        String?
-  category           MenuCategory
-  is_vegetarian      Boolean      @default(false)
-  is_vegan           Boolean      @default(false)
-  is_jain            Boolean      @default(false)
-  is_halal           Boolean      @default(false)
-  is_kosher          Boolean      @default(false)
-  contains_nuts      Boolean      @default(false)
-  contains_gluten    Boolean      @default(false)
-  contains_dairy     Boolean      @default(false)
-  contains_eggs      Boolean      @default(false)
-  contains_soy       Boolean      @default(false)
-  contains_shellfish Boolean      @default(false)
-  spice_level        SpiceLevel   @default(MEDIUM)
-  is_active          Boolean      @default(true)
-  vendor             Vendor       @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
-  packages           MenuPackageItem[]
-  quote_items        QuoteMenuItem[]
+  id                   String            @id @default(cuid())
+  vendor_id            String
+  name                 String
+  description          String?
+  category             MenuCategory
+  is_vegetarian        Boolean           @default(false)
+  is_vegan             Boolean           @default(false)
+  is_jain              Boolean           @default(false)
+  is_halal             Boolean           @default(false)
+  is_kosher            Boolean           @default(false)
+  contains_nuts        Boolean           @default(false)
+  contains_gluten      Boolean           @default(false)
+  contains_dairy       Boolean           @default(false)
+  contains_eggs        Boolean           @default(false)
+  contains_soy         Boolean           @default(false)
+  contains_shellfish   Boolean           @default(false)
+  spice_level          SpiceLevel        @default(MEDIUM)
+  is_active            Boolean           @default(true)
+  calories_per_serving Int?
+  carbs_g              Decimal?          @db.Decimal(6, 1)
+  fat_g                Decimal?          @db.Decimal(6, 1)
+  ingredients          String[]
+  is_global            Boolean           @default(false)
+  pending_review       Boolean           @default(false)
+  prep_notes           String?
+  protein_g            Decimal?          @db.Decimal(6, 1)
+  proteins             String[]
+  serves_description   String?
+  vendor               Vendor            @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
+  packages             MenuPackageItem[]
+  quote_items          QuoteMenuItem[]
 }
 
 model MenuPackageItem {
@@ -399,27 +441,30 @@ model MenuPackageItem {
   menu_item_id String
   is_optional  Boolean     @default(false)
   sort_order   Int         @default(0)
-  package      MenuPackage @relation(fields: [package_id], references: [id], onDelete: Cascade)
   menu_item    MenuItem    @relation(fields: [menu_item_id], references: [id], onDelete: Cascade)
+  package      MenuPackage @relation(fields: [package_id], references: [id], onDelete: Cascade)
 }
 
 model QuoteMenuItem {
-  id               String       @id @default(cuid())
-  quote_id         String
-  menu_item_id     String?
-  item_name        String
-  category         MenuCategory
-  is_vegetarian    Boolean      @default(false)
-  is_jain          Boolean      @default(false)
-  is_halal         Boolean      @default(false)
-  contains_nuts    Boolean      @default(false)
-  contains_gluten  Boolean      @default(false)
-  contains_dairy   Boolean      @default(false)
-  is_optional      Boolean      @default(false)
-  notes            String?
-  sort_order       Int          @default(0)
-  quote            Quote        @relation(fields: [quote_id], references: [id], onDelete: Cascade)
-  menu_item        MenuItem?    @relation(fields: [menu_item_id], references: [id], onDelete: SetNull)
+  id                     String       @id @default(cuid())
+  quote_id               String
+  menu_item_id           String?
+  item_name              String
+  category               MenuCategory
+  is_vegetarian          Boolean      @default(false)
+  is_jain                Boolean      @default(false)
+  is_halal               Boolean      @default(false)
+  contains_nuts          Boolean      @default(false)
+  contains_gluten        Boolean      @default(false)
+  contains_dairy         Boolean      @default(false)
+  is_optional            Boolean      @default(false)
+  notes                  String?
+  sort_order             Int          @default(0)
+  is_removed_by_customer Boolean      @default(false)
+  added_by_customer      Boolean      @default(false)
+  description            String?
+  menu_item              MenuItem?    @relation(fields: [menu_item_id], references: [id])
+  quote                  Quote        @relation(fields: [quote_id], references: [id], onDelete: Cascade)
 }
 
 model HiddenFeedback {
@@ -456,8 +501,8 @@ model Review {
   vendor_reply        String?
   is_published        Boolean   @default(true)
   created_at          DateTime  @default(now())
-  vendor              Vendor    @relation(fields: [vendor_id], references: [id])
   customer            Customer  @relation(fields: [customer_id], references: [id])
+  vendor              Vendor    @relation(fields: [vendor_id], references: [id])
 }
 
 model Conversation {
@@ -468,8 +513,8 @@ model Conversation {
   last_message_at DateTime?
   is_archived     Boolean   @default(false)
   created_at      DateTime  @default(now())
-  match           Match     @relation(fields: [match_id], references: [id], onDelete: Cascade)
   customer        Customer  @relation(fields: [customer_id], references: [id])
+  match           Match     @relation(fields: [match_id], references: [id], onDelete: Cascade)
   vendor          Vendor    @relation(fields: [vendor_id], references: [id])
   messages        Message[]
 }
@@ -494,6 +539,33 @@ model VendorAvailability {
   notes        String?
   created_at   DateTime @default(now())
   vendor       Vendor   @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
+
+  @@unique([vendor_id, date])
+}
+
+model VendorOperatingSchedule {
+  id          String  @id @default(cuid())
+  vendor_id   String
+  day_of_week String
+  is_open     Boolean @default(true)
+  opens_at    String?
+  closes_at   String?
+  notes       String?
+  vendor      Vendor  @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
+
+  @@unique([vendor_id, day_of_week])
+}
+
+model VendorSpecialDay {
+  id         String   @id @default(cuid())
+  vendor_id  String
+  date       DateTime @db.Date
+  is_open    Boolean  @default(false)
+  opens_at   String?
+  closes_at  String?
+  reason     String?
+  created_at DateTime @default(now())
+  vendor     Vendor   @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
 
   @@unique([vendor_id, date])
 }
@@ -534,12 +606,31 @@ model CustomerEventPass {
   event_id                 String
   stripe_payment_intent_id String?
   amount                   Decimal    @db.Decimal(10, 2)
-  currency                 String     @default("GBP")
+  currency                 String     @default("USD")
   status                   PassStatus @default(ACTIVE)
   purchased_at             DateTime   @default(now())
   expires_at               DateTime
   customer                 Customer   @relation(fields: [customer_id], references: [id])
   event                    Event      @relation(fields: [event_id], references: [id])
+}
+
+model LocalVendorInvite {
+  id            String   @id @default(cuid())
+  place_id      String
+  business_name String
+  address       String?
+  phone         String?
+  website       String?
+  rating        Float?
+  vendor_type   String
+  city          String
+  customer_id   String
+  event_id      String
+  created_at    DateTime @default(now())
+  customer      Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  event         Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@unique([place_id, customer_id, event_id])
 }
 
 model CustomerNotificationPref {
@@ -564,4 +655,231 @@ model VendorNotificationPref {
   vendor     Vendor              @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
 
   @@unique([vendor_id, channel, event_type])
+}
+
+model VendorCredit {
+  id           String              @id @default(cuid())
+  vendor_id    String              @unique
+  balance      Int                 @default(0)
+  total_bought Int                 @default(0)
+  total_spent  Int                 @default(0)
+  created_at   DateTime            @default(now())
+  updated_at   DateTime            @updatedAt
+  transactions CreditTransaction[]
+  vendor       Vendor              @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
+}
+
+model CreditTransaction {
+  id          String       @id @default(cuid())
+  credit_id   String
+  amount      Int
+  type        CreditTxType
+  description String?
+  reference   String?
+  created_at  DateTime     @default(now())
+  credit      VendorCredit @relation(fields: [credit_id], references: [id], onDelete: Cascade)
+}
+
+model ConciergeRequest {
+  id           String          @id @default(cuid())
+  customer_id  String
+  event_date   DateTime?
+  event_type   String?
+  guest_count  Int?
+  budget       String?
+  city         String
+  vendor_types String[]
+  notes        String?
+  status       ConciergeStatus @default(NEW)
+  admin_notes  String?
+  created_at   DateTime        @default(now())
+  updated_at   DateTime        @updatedAt
+  customer     Customer        @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+}
+
+model VendorLead {
+  id               String           @id @default(cuid())
+  place_id         String?          @unique
+  business_name    String
+  vendor_type      VendorType?
+  address          String?
+  city             String
+  state            String?
+  phone            String?
+  email            String?
+  website          String?
+  maps_url         String?
+  rating           Float?
+  total_ratings    Int              @default(0)
+  opening_hours    String?
+  status           VendorLeadStatus @default(NEW)
+  notes            String?
+  contacted_at     DateTime?
+  invited_at       DateTime?
+  joined_vendor_id String?          @unique
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  invites          VendorInvite[]
+  joined_vendor    Vendor?          @relation(fields: [joined_vendor_id], references: [id])
+}
+
+model VendorInvite {
+  id         String     @id @default(cuid())
+  lead_id    String
+  token      String     @unique @default(cuid())
+  email      String
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime   @default(now())
+  lead       VendorLead @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+}
+
+enum VendorType {
+  CATERER
+  DESSERT_VENDOR
+  BARTENDER
+  CHAI_STATION
+  FOOD_TRUCK
+  DECORATOR
+  FLORIST
+  TENT_MARQUEE
+  LIGHTING
+  FURNITURE_RENTAL
+  EQUIPMENT_RENTAL
+  DJ
+  LIVE_BAND
+  DHOL_PLAYER
+  CLASSICAL_MUSICIAN
+  GAMES_ENTERTAINMENT
+  PHOTOGRAPHER
+  VIDEOGRAPHER
+  MEHENDI_ARTIST
+  MAKEUP_HAIR
+  CHOREOGRAPHER
+  PANDIT_OFFICIANT
+  INVITATION_DESIGNER
+  TRANSPORT
+  SECURITY
+  MC_HOST
+}
+
+enum VendorTier {
+  FREE
+  PRO
+  PREMIUM
+}
+
+enum EventStatus {
+  PLANNING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum ChecklistStatus {
+  PENDING
+  SEARCHING
+  SHORTLISTED
+  FINALIZED
+  NOT_NEEDED
+}
+
+enum RequestStatus {
+  OPEN
+  MATCHED
+  CLOSED
+}
+
+enum MatchStatus {
+  PENDING
+  VIEWED
+  QUOTED
+  SHORTLISTED
+  REJECTED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  DECLINED
+}
+
+enum PricingType {
+  PER_HEAD
+  PER_TRAY
+}
+
+enum MenuMode {
+  CUSTOMER_SPECIFIED
+  CATERER_PROPOSES
+}
+
+enum MenuCategory {
+  SOUP_SALAD
+  APPETIZER
+  MAIN_COURSE
+  BREAD
+  RICE_BIRYANI
+  DAL
+  DESSERT
+  BEVERAGE
+  LIVE_COUNTER
+  OTHER
+}
+
+enum SpiceLevel {
+  MILD
+  MEDIUM
+  HOT
+  VERY_HOT
+}
+
+enum SenderType {
+  CUSTOMER
+  VENDOR
+}
+
+enum PassStatus {
+  ACTIVE
+  EXPIRED
+  REFUNDED
+}
+
+enum NotificationChannel {
+  EMAIL
+  PUSH
+  WHATSAPP
+}
+
+enum GuestDietaryType {
+  NON_VEG
+  VEGETARIAN
+  VEGAN
+  JAIN
+  HALAL
+}
+
+enum CreditTxType {
+  BONUS
+  PURCHASE
+  LEAD_SPEND
+  REFUND
+}
+
+enum ConciergeStatus {
+  NEW
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum VendorLeadStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  NOT_INTERESTED
+  JOINED
+  PERMANENTLY_CLOSED
 }
