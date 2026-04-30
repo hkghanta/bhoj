@@ -37,7 +37,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<Param
           special_notes: true,
           is_vegetarian: true,
           is_vegan: true,
+          is_jain: true,
           is_halal: true,
+          is_kosher: true,
+          nut_free: true,
+          gluten_free: true,
+          dairy_free: true,
+          egg_free: true,
+          shellfish_free: true,
+          soy_free: true,
         },
       },
       _count: { select: { responses: true } },
@@ -112,6 +120,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<Param
     vendorId = session.user!.id as string
   }
 
+  if (vendorId) {
+    const existingVendorResponse = await prisma.requestResponse.findFirst({
+      where: { event_request_id: eventRequest.id, vendor_id: vendorId },
+    })
+    if (existingVendorResponse) {
+      return NextResponse.json({ error: 'You have already responded to this request' }, { status: 409 })
+    }
+  }
+
   const response = await prisma.requestResponse.create({
     data: {
       event_request_id: eventRequest.id,
@@ -166,7 +183,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<Para
 
   if (parsed.data.action === 'accept' && parsed.data.response_id) {
     await prisma.requestResponse.update({
-      where: { id: parsed.data.response_id },
+      where: { id: parsed.data.response_id, event_request_id: eventRequest.id },
       data: { status: 'ACCEPTED' },
     })
     return NextResponse.json({ ok: true })
@@ -174,7 +191,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<Para
 
   if (parsed.data.action === 'decline_response' && parsed.data.response_id) {
     await prisma.requestResponse.update({
-      where: { id: parsed.data.response_id },
+      where: { id: parsed.data.response_id, event_request_id: eventRequest.id },
       data: { status: 'DECLINED' },
     })
     return NextResponse.json({ ok: true })
