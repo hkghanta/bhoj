@@ -145,7 +145,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<Param
 }
 
 const patchSchema = z.object({
-  action: z.enum(['accept', 'fill', 'decline_response']),
+  action: z.enum(['accept', 'fill', 'decline_response', 'request_full_quote']),
   response_id: z.string().optional(),
 })
 
@@ -195,6 +195,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<Para
       data: { status: 'DECLINED' },
     })
     return NextResponse.json({ ok: true })
+  }
+
+  if (parsed.data.action === 'request_full_quote' && parsed.data.response_id) {
+    const updated = await prisma.requestResponse.update({
+      where: { id: parsed.data.response_id, event_request_id: eventRequest.id },
+      data: { status: 'QUOTE_REQUESTED' },
+      select: { quote_token: true, name: true, phone: true, email: true },
+    })
+    console.log(`[magic-link] Send to ${updated.name}: /quote-request/${updated.quote_token}`)
+    return NextResponse.json({ quote_token: updated.quote_token })
   }
 
   return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
