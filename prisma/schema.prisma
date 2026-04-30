@@ -47,7 +47,7 @@ model Vendor {
   password_hash          String?
   is_active              Boolean                   @default(true)
   is_verified            Boolean                   @default(false)
-  tier                   VendorTier                @default(PRO)
+  tier                   VendorTier                @default(FREE)
   license_number         String?
   health_inspection_date DateTime?
   insurance_number       String?
@@ -363,7 +363,9 @@ model RequestResponse {
   status           String       @default("PENDING")
   created_at       DateTime     @default(now())
   event_request    EventRequest @relation(fields: [event_request_id], references: [id], onDelete: Cascade)
-  vendor           Vendor?      @relation(fields: [vendor_id], references: [id])
+  vendor           Vendor?      @relation(fields: [vendor_id], references: [id], onDelete: SetNull)
+
+  @@index([event_request_id])
 }
 
 model ServiceConfig {
