@@ -12,7 +12,7 @@ const createSchema = z.object({
   venue: z.string().optional(),
   guest_count: z.number().int().positive(),
   total_budget: z.number().positive(),
-  currency: z.string().length(3).default('GBP'),
+  currency: z.string().length(3).default('USD'),
 })
 
 export async function GET() {
@@ -45,15 +45,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', issues: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { total_budget, event_date, ...rest } = parsed.data
+  const { event_date, ...rest } = parsed.data
+  const customerId = session.user!.id as string
   const template = getChecklistTemplate(parsed.data.event_type)
 
   const event = await prisma.event.create({
     data: {
       ...rest,
       event_date: new Date(event_date),
-      total_budget,
-      customer_id: (session.user!.id as string),
+      customer_id: customerId,
       checklist_items: {
         create: template.map(item => ({
           category: item.category,

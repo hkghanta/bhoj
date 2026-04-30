@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { Step1EventType } from './steps/Step1EventType'
 import { Step2EventDetails } from './steps/Step2EventDetails'
-import { Step3Confirm } from './steps/Step3Confirm'
+import { Step5Confirm } from './steps/Step5Confirm'
 
 type EventDetails = {
   event_name: string; event_date: string; city: string; venue: string;
@@ -16,9 +16,24 @@ export function EventWizard() {
 
   return (
     <div className="bg-white rounded-xl border p-8 max-w-2xl mx-auto">
+      {/* Progress bar — 3 segments */}
+      {step > 0 && (
+        <div className="flex items-center gap-1.5 mb-8">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full flex-1 transition-all ${
+                i < step ? 'bg-orange-500' : i === step ? 'bg-orange-300' : 'bg-gray-100'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
       {step === 0 && (
         <Step1EventType onNext={(type) => { setEventType(type); setStep(1) }} />
       )}
+
       {step === 1 && (
         <Step2EventDetails
           eventType={eventType}
@@ -26,8 +41,9 @@ export function EventWizard() {
           onBack={() => setStep(0)}
         />
       )}
+
       {step === 2 && details && (
-        <Step3Confirm
+        <Step5Confirm
           eventType={eventType}
           details={details}
           onBack={() => setStep(1)}
