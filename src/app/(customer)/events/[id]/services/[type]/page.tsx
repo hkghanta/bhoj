@@ -1,11 +1,11 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
-  ChevronRight, ChevronDown, ChevronUp, Star, ExternalLink,
-  CheckCircle2, Globe, MapPin, Sparkles, AlertCircle, Send, Plus, X,
+  ChevronRight, ChevronDown, ChevronUp, ExternalLink, Plus,
+  CheckCircle2, Globe, AlertCircle, Send, X,
 } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -28,51 +28,31 @@ type EventRequest = {
   response_count: number
 }
 
-type Vendor = {
+type BoardResponse = {
   id: string
-  business_name: string
-  city: string
-  profile_type: string
-  first_name: string | null
-  last_name: string | null
-  profile_photo_url: string | null
-  avg_rating: number | null
-  is_verified: boolean
-  score: number
-  price_per_head_min: number | null
-  price_per_head_max: number | null
-  currency: string
+  name: string
+  pitch: string
+  price_note: string | null
+  portfolio_url: string | null
+  status: string
+  quote_token: string | null
+  quoted_price: number | null
+  price_unit: string | null
+  what_includes: string | null
+  service_details: string | null
+  availability_note: string | null
+  quote_submitted_at: string | null
+  vendor_type: string
+  created_at: string
 }
 
 type PageData = {
   service_config: ServiceConfig
   event_request: EventRequest | null
-  vendors: Vendor[]
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getInitials(name: string) {
-  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
-function vendorDisplayName(v: Vendor) {
-  if (v.profile_type === 'INDIVIDUAL' && v.first_name)
-    return `${v.first_name}${v.last_name ? ` ${v.last_name}` : ''}`
-  return v.business_name
-}
-function formatPrice(min: number | null, max: number | null, currency: string) {
-  if (min === null && max === null) return null
-  const fmt = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n)
-  if (min !== null && max !== null) return `${fmt(min)} – ${fmt(max)} /head`
-  if (min !== null) return `From ${fmt(min)} /head`
-  return `Up to ${fmt(max!)} /head`
-}
-function scoreColor(score: number) {
-  if (score >= 80) return 'bg-green-500'
-  if (score >= 60) return 'bg-brand'
-  if (score >= 40) return 'bg-amber-400'
-  return 'bg-gray-300'
-}
 
 // ── Pill toggle helper ────────────────────────────────────────────────────────
 
@@ -816,115 +796,25 @@ function LoadingSkeleton() {
           <div className="h-5 w-5 bg-cream-2 rounded-full" />
         </div>
         <div className="border-t border-brand-border px-5 py-5 space-y-3">
-          <div className="h-24 bg-cream-2 rounded-xl" />
+          <div className="h-32 bg-cream-2 rounded-xl" />
         </div>
       </div>
-      {[1, 2, 3].map(i => (
-        <div key={i} className="bg-white border border-brand-border rounded-2xl p-4 flex gap-4">
-          <div className="w-16 h-16 rounded-xl bg-cream-2 flex-shrink-0" />
+      {[1, 2].map(i => (
+        <div key={i} className="bg-white border border-brand-border rounded-2xl p-4 flex gap-3">
+          <div className="w-9 h-9 rounded-xl bg-cream-2 flex-shrink-0" />
           <div className="flex-1 space-y-2">
             <div className="h-4 bg-cream-2 rounded w-32" />
-            <div className="h-3 bg-cream-2 rounded w-20" />
+            <div className="h-3 bg-cream-2 rounded w-48" />
           </div>
-          <div className="h-8 w-28 bg-cream-2 rounded-lg self-center" />
         </div>
       ))}
     </div>
   )
 }
 
-// ── Vendor Card ───────────────────────────────────────────────────────────────
-
-function VendorCard({
-  vendor, onRequestQuote, requesting, requestingId,
-}: {
-  vendor: Vendor
-  onRequestQuote: (vendorId: string) => void
-  requesting: boolean
-  requestingId: string | null
-}) {
-  const name = vendorDisplayName(vendor)
-  const priceStr = formatPrice(vendor.price_per_head_min, vendor.price_per_head_max, vendor.currency)
-  const isThisLoading = requesting && requestingId === vendor.id
-  const avatarBg = [
-    'bg-orange-100 text-orange-700', 'bg-amber-100 text-amber-700',
-    'bg-rose-100 text-rose-700', 'bg-purple-100 text-purple-700', 'bg-teal-100 text-teal-700',
-  ][name.charCodeAt(0) % 5]
-
-  return (
-    <div className="bg-white border border-brand-border rounded-2xl p-4 sm:p-5 flex gap-4 items-start
-                    hover:border-brand/40 hover:shadow-[0_4px_16px_rgba(26,9,4,0.06)] transition-all duration-200 group">
-      {vendor.profile_photo_url ? (
-        <img src={vendor.profile_photo_url} alt={name}
-          className="w-16 h-16 rounded-xl object-cover flex-shrink-0 ring-2 ring-brand-border group-hover:ring-brand/20 transition-all" />
-      ) : (
-        <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-black
-                         ring-2 ring-brand-border group-hover:ring-brand/20 transition-all ${avatarBg}`}>
-          {getInitials(name)}
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <p className="font-bold text-text-1 text-sm leading-tight">{name}</p>
-              {vendor.is_verified && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] bg-green-50 text-green-700
-                                 border border-green-200 rounded-full px-1.5 py-0.5 font-semibold flex-shrink-0">
-                  <CheckCircle2 className="h-2.5 w-2.5" /> Verified
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-text-4">
-              <MapPin className="h-3 w-3 flex-shrink-0" /> {vendor.city}
-            </div>
-          </div>
-          <div className="flex-shrink-0 flex flex-col items-end gap-1">
-            <div className="flex items-center gap-1" title={`Match score: ${vendor.score.toFixed(0)}`}>
-              <div className={`w-2 h-2 rounded-full ${scoreColor(vendor.score)}`} />
-              <span className="text-[10px] text-text-4 font-medium">{vendor.score.toFixed(0)}% match</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 mt-2.5 flex-wrap">
-          {vendor.avg_rating !== null && (
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map(s => (
-                <Star key={s} className={`h-3 w-3 ${s <= Math.round(vendor.avg_rating!) ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}`} />
-              ))}
-              <span className="text-xs font-semibold text-text-2 ml-0.5">{vendor.avg_rating.toFixed(1)}</span>
-            </div>
-          )}
-          {priceStr && (
-            <span className="text-xs font-medium text-text-3 bg-cream px-2 py-0.5 rounded-full">{priceStr}</span>
-          )}
-        </div>
-      </div>
-      <div className="flex-shrink-0 self-center">
-        <Button
-          size="sm"
-          onClick={() => onRequestQuote(vendor.id)}
-          disabled={requesting}
-          className={`text-xs font-semibold transition-all ${
-            isThisLoading
-              ? 'bg-brand/70 text-white'
-              : 'bg-brand hover:bg-brand-hover text-white shadow-[0_2px_8px_rgba(232,85,16,0.2)]'
-          }`}
-        >
-          {isThisLoading ? (
-            <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded-full border-2 border-white/40 border-t-white animate-spin" /> Sending…
-            </span>
-          ) : 'Request Quote'}
-        </Button>
-      </div>
-    </div>
-  )
-}
-
 // ── Public Request Panel ──────────────────────────────────────────────────────
 
-function PublicRequestPanel({ req, slug }: { req: EventRequest | null; slug: string }) {
+function PublicRequestPanel({ req, slug, responseCount }: { req: EventRequest | null; slug: string; responseCount: number }) {
   if (!req) {
     return (
       <div className="relative overflow-hidden rounded-2xl border border-brand-border bg-cream">
@@ -957,7 +847,7 @@ function PublicRequestPanel({ req, slug }: { req: EventRequest | null; slug: str
             <div>
               <p className="font-bold text-text-1 text-sm leading-tight">Your request is live</p>
               <p className="text-xs text-text-4">
-                {req.response_count > 0 ? `${req.response_count} response${req.response_count !== 1 ? 's' : ''} received` : 'Waiting for responses'}
+                {responseCount > 0 ? `${responseCount} pitch${responseCount !== 1 ? 'es' : ''} received` : 'Waiting for responses'}
               </p>
             </div>
           </div>
@@ -979,17 +869,136 @@ function PublicRequestPanel({ req, slug }: { req: EventRequest | null; slug: str
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
+// Map URL slug → VendorType enum value (mirrors SLUG_TO_VENDOR_TYPE in lib)
+function slugToVendorType(slug: string): string {
+  const map: Record<string, string> = {
+    catering: 'CATERER', photography: 'PHOTOGRAPHER', videography: 'VIDEOGRAPHER',
+    decoration: 'DECORATOR', dj: 'DJ', florist: 'FLORIST',
+    'mehendi-artist': 'MEHENDI_ARTIST', 'makeup-hair': 'MAKEUP_HAIR',
+    'dhol-player': 'DHOL_PLAYER', 'live-band': 'LIVE_BAND',
+    choreographer: 'CHOREOGRAPHER', 'pandit-officiant': 'PANDIT_OFFICIANT',
+    'mc-host': 'MC_HOST', bartender: 'BARTENDER', transport: 'TRANSPORT',
+  }
+  return map[slug] ?? slug.toUpperCase()
+}
+
+const PRICE_UNIT_LABEL: Record<string, string> = {
+  per_head: '/head', per_event: ' flat', per_hour: '/hr', per_day: '/day',
+}
+
+const AVAILABILITY_LABEL: Record<string, string> = {
+  available: 'Available',
+  need_to_confirm: 'Needs to confirm',
+  not_available: 'Not available',
+}
+
+function ResponseCard({
+  resp, eventRequestToken, onAction, acting,
+}: {
+  resp: BoardResponse
+  eventRequestToken: string | null
+  onAction: (action: string, responseId: string, token: string) => void
+  acting: string | null
+}) {
+  const [open, setOpen] = useState(false)
+  const hasQuote = !!resp.quote_submitted_at
+  const statusColors: Record<string, string> = {
+    PENDING: 'bg-gray-100 text-gray-600',
+    QUOTE_REQUESTED: 'bg-blue-50 text-blue-700',
+    QUOTE_SUBMITTED: 'bg-indigo-50 text-indigo-700',
+    ACCEPTED_RESPONSE: 'bg-green-50 text-green-700',
+    DECLINED: 'bg-gray-100 text-gray-400',
+  }
+  const statusLabel: Record<string, string> = {
+    PENDING: 'Pitched', QUOTE_REQUESTED: 'Quote requested',
+    QUOTE_SUBMITTED: 'Full quote', ACCEPTED_RESPONSE: 'Accepted', DECLINED: 'Declined',
+  }
+  return (
+    <div className="bg-white border border-brand-border rounded-2xl overflow-hidden hover:border-brand/30 transition-colors">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-start gap-3 p-4 text-left"
+      >
+        <div className="w-9 h-9 rounded-xl bg-cream-2 flex items-center justify-center flex-shrink-0 text-sm font-black text-text-3">
+          {resp.name.slice(0, 1).toUpperCase()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-sm text-text-1">{resp.name}</span>
+            {hasQuote && (
+              <span className="text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-full px-1.5 py-0.5 font-semibold">Full quote</span>
+            )}
+          </div>
+          <p className="text-xs text-text-3 mt-0.5 line-clamp-1">{resp.pitch}</p>
+          {resp.quoted_price && (
+            <p className="text-xs font-semibold text-brand mt-0.5">
+              £{resp.quoted_price.toLocaleString()}{PRICE_UNIT_LABEL[resp.price_unit ?? ''] ?? ''}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[resp.status] ?? 'bg-gray-100 text-gray-500'}`}>
+            {statusLabel[resp.status] ?? resp.status}
+          </span>
+          {open ? <ChevronUp className="h-3.5 w-3.5 text-text-4" /> : <ChevronDown className="h-3.5 w-3.5 text-text-4" />}
+        </div>
+      </button>
+
+      {open && (
+        <div className="border-t border-brand-border px-4 pb-4 pt-3 space-y-3">
+          <p className="text-sm text-text-2 italic">"{resp.pitch}"</p>
+          {resp.what_includes && (
+            <div>
+              <p className="text-xs font-semibold text-text-4 mb-0.5">What's included</p>
+              <p className="text-sm text-text-2">{resp.what_includes}</p>
+            </div>
+          )}
+          {resp.service_details && (
+            <div>
+              <p className="text-xs font-semibold text-text-4 mb-0.5">Service details</p>
+              <p className="text-sm text-text-2">{resp.service_details}</p>
+            </div>
+          )}
+          {resp.availability_note && (
+            <p className="text-xs text-text-4">{AVAILABILITY_LABEL[resp.availability_note] ?? resp.availability_note}</p>
+          )}
+          {resp.portfolio_url && (
+            <a href={resp.portfolio_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-brand hover:underline">
+              View portfolio <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+          {resp.status === 'PENDING' && eventRequestToken && (
+            <button
+              type="button"
+              disabled={acting === resp.id}
+              onClick={() => onAction('request_full_quote', resp.id, eventRequestToken)}
+              className="text-xs font-semibold text-brand border border-brand/30 rounded-lg px-3 py-1.5 hover:bg-cream transition-colors disabled:opacity-50"
+            >
+              {acting === resp.id ? 'Sending…' : 'Ask for formal quote →'}
+            </button>
+          )}
+          {resp.status === 'ACCEPTED_RESPONSE' && (
+            <p className="text-sm font-semibold text-green-700">✓ Accepted — they'll be in touch</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ServicePage() {
   const { id: eventId, type: slug } = useParams<{ id: string; type: string }>()
-  const router = useRouter()
   const isCatering = slug === 'catering'
 
   const [data, setData] = useState<PageData | null>(null)
   const [loading, setLoading] = useState(true)
   const [formOpen, setFormOpen] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [requesting, setRequesting] = useState(false)
-  const [requestingId, setRequestingId] = useState<string | null>(null)
+  const [responses, setResponses] = useState<BoardResponse[]>([])
+  const [tokenMap, setTokenMap] = useState<Record<string, string>>({})
+  const [acting, setActing] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -1030,11 +1039,24 @@ export default function ServicePage() {
 
   async function load() {
     try {
-      const res = await fetch(`/api/events/${eventId}/services/${slug}`)
-      if (!res.ok) { setLoading(false); return }
-      const json = (await res.json()) as PageData
+      const [svcRes, respRes] = await Promise.all([
+        fetch(`/api/events/${eventId}/services/${slug}`),
+        fetch(`/api/events/${eventId}/responses`),
+      ])
+      if (!svcRes.ok) { setLoading(false); return }
+      const json = (await svcRes.json()) as PageData
       setData(json)
       if (json.event_request?.service_notes) setFormOpen(false)
+
+      if (respRes.ok) {
+        const respData = await respRes.json()
+        const vendorTypeForSlug = slugToVendorType(slug)
+        const filtered = (respData.responses ?? []).filter(
+          (r: BoardResponse) => r.vendor_type === vendorTypeForSlug
+        )
+        setResponses(filtered)
+        setTokenMap(respData.token_map ?? {})
+      }
     } catch { /* network */ } finally { setLoading(false) }
   }
 
@@ -1053,7 +1075,10 @@ export default function ServicePage() {
         setSuccessMsg('Requirements saved!')
         successTimerRef.current = setTimeout(() => setSuccessMsg(''), 4000)
         await load(); setFormOpen(false)
-      } else { setError('Could not save. Please try again.') }
+      } else {
+        const body = await res.json().catch(() => ({}))
+        setError((body as { error?: string }).error ?? 'Could not save. Please try again.')
+      }
     } catch { setError('Network error.') } finally { setSaving(false) }
   }
 
@@ -1066,29 +1091,26 @@ export default function ServicePage() {
         body: JSON.stringify({ service_notes: notes }),
       })
       if (res.ok) {
-        setSuccessMsg('Requirements saved! Vendors matched below.')
+        setSuccessMsg('Requirements saved!')
         successTimerRef.current = setTimeout(() => setSuccessMsg(''), 4000)
         await load(); setFormOpen(false)
-      } else { setError('Could not save. Please try again.') }
+      } else {
+        const body = await res.json().catch(() => ({}))
+        setError((body as { error?: string }).error ?? 'Could not save. Please try again.')
+      }
     } catch { setError('Network error.') } finally { setSaving(false) }
   }
 
-  async function requestQuote(vendorId: string) {
-    setRequesting(true); setRequestingId(vendorId); setError(''); setSuccessMsg('')
+  async function handleAction(action: string, responseId: string, erToken: string) {
+    setActing(responseId)
     try {
-      const res = await fetch(`/api/events/${eventId}/services/${slug}/request-quote`, {
-        method: 'POST',
+      await fetch(`/api/requests/${erToken}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vendor_id: vendorId }),
+        body: JSON.stringify({ action, response_id: responseId }),
       })
-      if (res.ok) {
-        router.push(`/events/${eventId}/quotes`)
-      } else {
-        const body = await res.json().catch(() => ({}))
-        setError((body as { error?: string }).error ?? 'Could not send quote request.')
-        setRequesting(false); setRequestingId(null)
-      }
-    } catch { setError('Network error.'); setRequesting(false); setRequestingId(null) }
+      await load()
+    } finally { setActing(null) }
   }
 
   if (loading) return <LoadingSkeleton />
@@ -1104,8 +1126,7 @@ export default function ServicePage() {
     )
   }
 
-  const { service_config: svc, event_request: req, vendors } = data
-  const isBusinessService = svc.service_class === 'BUSINESS'
+  const { service_config: svc, event_request: req } = data
   const hasReq = !!req
   const hasNotes = !!req?.service_notes
 
@@ -1126,8 +1147,8 @@ export default function ServicePage() {
         </div>
         <p className="text-sm text-text-3 ml-[calc(2rem+0.75rem)]">
           {hasReq
-            ? 'Your requirements are saved. Review matched vendors below or update them.'
-            : `Tell us what you need and we'll match you with the best ${svc.label.toLowerCase()} vendors.`}
+            ? 'Your request is live — vendors pitch to you.'
+            : `Tell us what you need and vendors will pitch to you.`}
         </p>
       </div>
 
@@ -1187,53 +1208,73 @@ export default function ServicePage() {
         </div>
       </div>
 
-      {/* Vendor list */}
-      {vendors.length > 0 ? (
-        <section>
-          <div className="flex items-center justify-between mb-3.5">
-            <div>
-              <h2 className="text-base font-black text-text-1">
-                {isBusinessService ? `${svc.label} vendors on OneSeva` : `${svc.label} professionals on OneSeva`}
+      {/* Post-save hub: public board status + responses + browse CTA */}
+      {hasReq && (
+        <>
+          {/* Live request status bar */}
+          <PublicRequestPanel req={req} slug={slug} responseCount={responses.length} />
+
+          {/* Incoming pitches / responses */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-black text-text-1">
+                Pitches received
+                {responses.length > 0 && (
+                  <span className="ml-2 text-xs font-semibold text-brand bg-brand/10 rounded-full px-2 py-0.5">{responses.length}</span>
+                )}
               </h2>
-              <p className="text-xs text-text-4 mt-0.5">Ranked by relevance · {vendors.length} found</p>
+              <Link
+                href={`/events/${eventId}/quotes`}
+                className="text-xs text-brand font-semibold hover:underline"
+              >
+                View all quotes →
+              </Link>
             </div>
-            {hasReq && <span className="inline-flex items-center gap-1 text-xs text-brand font-semibold"><Sparkles className="h-3.5 w-3.5" /> Matched</span>}
-          </div>
-          <div className="space-y-3">
-            {vendors.map(v => (
-              <VendorCard key={v.id} vendor={v} onRequestQuote={requestQuote} requesting={requesting} requestingId={requestingId} />
-            ))}
-          </div>
-        </section>
-      ) : hasReq ? (
-        <div className="bg-white border border-brand-border rounded-2xl p-8 text-center">
-          <span className="text-4xl block mb-3">{svc.icon}</span>
-          <h3 className="font-bold text-text-1 text-sm mb-1">No vendors found yet</h3>
-          <p className="text-xs text-text-3 max-w-xs mx-auto leading-relaxed">
-            We're building our vendor network. Your public request is live — vendors can find and respond to it.
-          </p>
-        </div>
-      ) : null}
 
-      {/* Public request panel */}
-      {hasReq && <PublicRequestPanel req={req} slug={slug} />}
+            {responses.length === 0 ? (
+              <div className="bg-white border border-brand-border rounded-2xl p-6 text-center">
+                <p className="text-2xl mb-2">📬</p>
+                <p className="text-sm font-semibold text-text-1 mb-1">No pitches yet</p>
+                <p className="text-xs text-text-3 leading-relaxed max-w-xs mx-auto">
+                  Vendors typically respond within 24 hours. Share your public request link to get faster replies.
+                </p>
+                <a
+                  href={`/requests/${slug}/${req.public_token}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand mt-3 hover:underline"
+                >
+                  Share request link <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {responses.map(resp => (
+                  <ResponseCard
+                    key={resp.id}
+                    resp={resp}
+                    eventRequestToken={tokenMap[resp.id] ?? null}
+                    onAction={handleAction}
+                    acting={acting}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
 
-      {/* Google Places stub */}
-      {isBusinessService && (
-        <div className="bg-white border border-brand-border rounded-2xl p-5">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-cream-2 flex items-center justify-center flex-shrink-0">
-              <MapPin className="h-[18px] w-[18px] text-text-3" />
-            </div>
+          {/* Browse vendors CTA */}
+          <div className="bg-cream border border-brand-border rounded-2xl p-5 flex items-center justify-between gap-4">
             <div>
-              <p className="font-bold text-text-1 text-sm">Other local businesses</p>
-              <p className="text-xs text-text-3 mt-1 leading-relaxed">
-                Local {svc.label.toLowerCase()} businesses not yet on OneSeva will appear here.
-              </p>
-              <p className="text-[11px] text-text-4 mt-2 italic">Google Places integration — coming soon</p>
+              <p className="text-sm font-bold text-text-1">Want to invite a specific vendor?</p>
+              <p className="text-xs text-text-3 mt-0.5">Browse {svc.label.toLowerCase()} vendors on OneSeva and request a quote directly.</p>
             </div>
+            <Link
+              href={`/events/${eventId}/vendors`}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold bg-white border border-brand/30 text-brand rounded-xl px-3 py-2 hover:bg-cream-2 transition-colors whitespace-nowrap"
+            >
+              Browse vendors <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-        </div>
+        </>
       )}
 
       <div className="pb-6" />

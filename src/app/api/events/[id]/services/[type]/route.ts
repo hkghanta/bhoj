@@ -3,31 +3,10 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { rankVendors, type VendorForRanking } from '@/lib/matching/rank-vendors'
 import { VendorType } from '@prisma/client'
+import { VENDOR_TYPE_CHECKLIST_ITEM } from '@/lib/checklist-templates'
+import { SLUG_TO_VENDOR_TYPE } from '@/lib/service-slugs'
 
-const SLUG_TO_TYPE: Record<string, VendorType> = {
-  catering: VendorType.CATERER,
-  photographer: VendorType.PHOTOGRAPHER,
-  videographer: VendorType.VIDEOGRAPHER,
-  decorator: VendorType.DECORATOR,
-  dj: VendorType.DJ,
-  florist: VendorType.FLORIST,
-  'mehendi-artist': VendorType.MEHENDI_ARTIST,
-  'makeup-hair': VendorType.MAKEUP_HAIR,
-  transport: VendorType.TRANSPORT,
-  'tent-marquee': VendorType.TENT_MARQUEE,
-  'dhol-player': VendorType.DHOL_PLAYER,
-  'live-band': VendorType.LIVE_BAND,
-  'classical-musician': VendorType.CLASSICAL_MUSICIAN,
-  choreographer: VendorType.CHOREOGRAPHER,
-  'pandit-officiant': VendorType.PANDIT_OFFICIANT,
-  'mc-host': VendorType.MC_HOST,
-  bartender: VendorType.BARTENDER,
-  'chai-station': VendorType.CHAI_STATION,
-  'games-entertainment': VendorType.GAMES_ENTERTAINMENT,
-  'invitation-designer': VendorType.INVITATION_DESIGNER,
-  'furniture-rental': VendorType.FURNITURE_RENTAL,
-  'equipment-rental': VendorType.EQUIPMENT_RENTAL,
-}
+const SLUG_TO_TYPE = SLUG_TO_VENDOR_TYPE
 
 type Params = { id: string; type: string }
 
@@ -188,6 +167,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<Param
         service_notes: body.service_notes ?? null,
       },
     })
+
+    // Add checklist item for this service (if not already present)
+    const checklistItem = VENDOR_TYPE_CHECKLIST_ITEM[vendorType as string]
+    if (checklistItem) {
+      const existing = await prisma.eventChecklistItem.findFirst({
+        where: { event_id: eventId, vendor_type: vendorType },
+      })
+      if (!existing) {
+        await prisma.eventChecklistItem.create({
+          data: {
+            event_id: eventId,
+            category: checklistItem.category,
+            item_name: checklistItem.item_name,
+            vendor_type: vendorType,
+            status: 'PENDING',
+          },
+        })
+      }
+    }
   } else {
     eventRequest = await prisma.eventRequest.update({
       where: { id: eventRequest.id },
@@ -206,8 +204,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<Param
       special_notes: cp.special_notes ?? null,
       pricing_preference: cp.pricing_preference ?? 'NO_PREFERENCE',
       customer_tray_requests: cp.customer_tray_requests ?? [],
-      is_vegetarian: cp.dietary_type === 'vegetarian' || cp.dietary_type === 'vegan',
-      is_vegan: cp.dietary_type === 'vegan',
+      selected_dishes: cp.selected_dishes ?? [],
+      appetizer_count: cp.appetizer_count ?? null,
+      main_count: cp.main_count ?? null,
+      bread_count: cp.bread_count ?? null,
+      dessert_count: cp.dessert_count ?? null,
+      is_vegetarian: cp.is_vegetarian ?? false,
+      is_vegan: cp.is_vegan ?? false,
       is_halal: cp.is_halal ?? false,
       is_jain: cp.is_jain ?? false,
       is_kosher: cp.is_kosher ?? false,
