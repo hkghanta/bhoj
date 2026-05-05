@@ -16,7 +16,7 @@ export function NewMessageEmail({ recipientName, senderName, eventName, bodyPrev
       <Body style={{ backgroundColor: '#f9fafb', fontFamily: 'Arial, sans-serif' }}>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 20px' }}>
           <Section style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e5e7eb' }}>
-            <Text style={{ color: '#ea580c', fontSize: '20px', fontWeight: 'bold' }}>Bhoj</Text>
+            <Text style={{ color: '#ea580c', fontSize: '20px', fontWeight: 'bold' }}>OneSeva</Text>
             <Text style={{ color: '#374151', fontSize: '15px' }}>
               Hi {recipientName}, you have a new message from <strong>{senderName}</strong> about <strong>{eventName}</strong>.
             </Text>

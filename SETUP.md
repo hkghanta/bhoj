@@ -1,4 +1,4 @@
-# Bhoj — Developer Setup
+# OneSeva — Developer Setup
 
 ## Prerequisites
 - Node.js 20+
@@ -10,8 +10,8 @@
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/hkghanta/bhoj.git
-cd bhoj
+git clone https://github.com/hkghanta/oneseva.git
+cd oneseva
 pnpm install
 ```
 
@@ -32,7 +32,7 @@ openssl rand -base64 32
 
 Also create a `.env` file for Prisma CLI:
 ```bash
-echo 'DATABASE_URL="postgresql://bhoj:bhoj_dev@localhost:5434/bhoj_dev"' > .env
+echo 'DATABASE_URL="postgresql://oneseva:oneseva_dev@localhost:5434/oneseva_dev"' > .env
 ```
 
 ### 4. Run database migrations

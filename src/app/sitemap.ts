@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { id: true, updated_at: true },
     })
     vendorRoutes = vendors.map(v => ({
-      url: `${BASE_URL}/vendors/${v.id}`,
+      url: `${BASE_URL}/vendors/v/${v.id}`,
       lastModified: v.updated_at,
       changeFrequency: 'weekly' as const,
       priority: 0.8,

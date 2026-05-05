@@ -63,7 +63,7 @@ src/
 - [ ] **Step 1: Install additional shadcn components**
 
 ```bash
-cd /home/hareesh/projects/bhoj
+cd /home/hareesh/projects/oneseva
 pnpm dlx shadcn@latest add separator scroll-area avatar progress dialog sheet
 ```
 
@@ -108,7 +108,7 @@ export function VendorSidebar() {
     <aside className="w-56 min-h-screen bg-white border-r flex flex-col">
       <div className="px-6 py-5 border-b">
         <Link href="/vendor/dashboard" className="text-xl font-bold text-orange-600">
-          Bhoj
+          OneSeva
         </Link>
         <p className="text-xs text-gray-400 mt-0.5">Vendor Portal</p>
       </div>
@@ -831,7 +831,7 @@ git push
 - [ ] **Step 1: Install Cloudinary SDK**
 
 ```bash
-cd /home/hareesh/projects/bhoj
+cd /home/hareesh/projects/oneseva
 pnpm add cloudinary
 ```
 
@@ -865,7 +865,7 @@ export async function GET() {
   }
 
   const timestamp = Math.round(Date.now() / 1000)
-  const folder = `bhoj/vendors/${session.user.id}`
+  const folder = `oneseva/vendors/${session.user.id}`
   const signature = cloudinary.utils.api_sign_request(
     { timestamp, folder, transformation: 'c_limit,w_1600,q_auto' },
     process.env.CLOUDINARY_API_SECRET!
@@ -1559,7 +1559,7 @@ export default function OnboardingPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Set up your vendor profile</h1>
           <p className="text-gray-500 mt-2">
-            Complete these steps to start receiving leads from Bhoj.
+            Complete these steps to start receiving leads from OneSeva.
           </p>
         </div>
         <OnboardingWizard />
@@ -1670,8 +1670,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const vendor = await prisma.vendor.findUnique({ where: { id, is_active: true } })
   if (!vendor) return { title: 'Vendor not found' }
   return {
-    title: `${vendor.business_name} — Bhoj`,
-    description: vendor.description ?? `${vendor.business_name} on Bhoj Indian Events`,
+    title: `${vendor.business_name} — OneSeva`,
+    description: vendor.description ?? `${vendor.business_name} on OneSeva Indian Events`,
   }
 }
 
@@ -1710,7 +1710,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
     <div className="min-h-screen bg-gray-50">
       {/* Nav */}
       <nav className="bg-white border-b px-6 py-4">
-        <a href="/" className="text-xl font-bold text-orange-600">Bhoj</a>
+        <a href="/" className="text-xl font-bold text-orange-600">OneSeva</a>
       </nav>
 
       {/* Cover */}

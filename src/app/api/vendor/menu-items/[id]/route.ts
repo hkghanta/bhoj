@@ -15,6 +15,7 @@ const updateSchema = z.object({
   contains_nuts: z.boolean().optional(),
   contains_gluten: z.boolean().optional(),
   contains_dairy: z.boolean().optional(),
+  proteins: z.array(z.string()).optional(),
   spice_level: z.nativeEnum(SpiceLevel).optional(),
   is_active: z.boolean().optional(),
 })
@@ -37,7 +38,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   })
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const item = await prisma.menuItem.update({ where: { id }, data: parsed.data })
+  // If the dish was published to the global library, detach it on vendor edit
+  // so the global entry stays pristine and vendor changes are private.
+  const item = await prisma.menuItem.update({
+    where: { id },
+    data: { ...parsed.data, is_global: false, pending_review: false },
+  })
   return NextResponse.json(item)
 }
 

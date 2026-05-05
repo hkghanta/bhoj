@@ -13,7 +13,7 @@ function Progress({ className, value = 0, ...props }: ProgressProps) {
       aria-valuemin={0}
       aria-valuemax={100}
       data-slot="progress"
-      className={cn("h-2 w-full overflow-hidden rounded-full bg-gray-100", className)}
+      className={cn("h-2 w-full overflow-hidden rounded-full bg-cream", className)}
       {...props}
     >
       <div

@@ -9,6 +9,15 @@ export type LeadLimitResult =
  * Called from the match job before creating a Match row.
  */
 export async function checkLeadLimit(vendorId: string): Promise<LeadLimitResult> {
+  // During free trial, all vendors get unlimited leads
+  const vendor = await prisma.vendor.findUnique({
+    where: { id: vendorId },
+    select: { trial_ends_at: true },
+  })
+  if (vendor?.trial_ends_at && vendor.trial_ends_at > new Date()) {
+    return { allowed: true }
+  }
+
   const subscription = await prisma.subscription.findFirst({
     where: { vendor_id: vendorId },
     orderBy: { created_at: 'desc' },

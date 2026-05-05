@@ -4,6 +4,9 @@ export interface VendorForScoring {
   id: string
   city: string
   country: string
+  lat: number | null
+  lng: number | null
+  travel_radius_miles: number
   vendor_type: VendorType
   tier: 'FREE' | 'PRO' | 'PREMIUM'
   is_verified: boolean
@@ -30,6 +33,8 @@ export interface EventRequestForScoring {
   event: {
     city: string
     country: string
+    lat: number | null
+    lng: number | null
     event_date: Date
     guest_count: number
     total_budget: number
@@ -52,6 +57,7 @@ export interface ScoreBreakdown {
   response_rate: number   // 0–15
   rating: number          // 0–20
   budget_fit: number      // 0–15
+  distance_miles: number | null
 }
 
 export const DEFAULT_WEIGHTS = {

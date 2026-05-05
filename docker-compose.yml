@@ -3,15 +3,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: bhoj
-      POSTGRES_PASSWORD: bhoj_dev
-      POSTGRES_DB: bhoj_dev
+      POSTGRES_USER: oneseva
+      POSTGRES_PASSWORD: oneseva_dev
+      POSTGRES_DB: oneseva_dev
     ports:
       - '5434:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U bhoj']
+      test: ['CMD-SHELL', 'pg_isready -U oneseva']
       interval: 5s
       timeout: 5s
       retries: 5

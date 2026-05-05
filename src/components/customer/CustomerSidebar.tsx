@@ -6,6 +6,7 @@ import {
   ListChecks, CalendarPlus, ChevronLeft,
   LayoutDashboard, LogOut, User, Mail,
   Clock, Globe, LayoutGrid, CreditCard, Gift, Search,
+  ClipboardList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -43,7 +44,9 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
   ] : []
 
   const planningNav = eventId ? [
+    { href: `/events/${eventId}/planning`,         label: 'Event Plan',     icon: ClipboardList },
     { href: `/events/${eventId}/timeline`,         label: 'Timeline',       icon: Clock },
+    { href: `/events/${eventId}/checklist`,        label: 'Checklist',      icon: ListChecks },
     { href: `/events/${eventId}/website`,          label: 'Event Website',  icon: Globe },
     { href: `/events/${eventId}/seating`,          label: 'Seating',        icon: LayoutGrid },
     { href: `/events/${eventId}/payment-schedule`, label: 'Payments',       icon: CreditCard },
@@ -145,7 +148,6 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
             {planningNav.map(({ href, label, icon: Icon }) =>
               navLink(href, label, Icon, isActive(href))
             )}
-            {navLink(`/events/${eventId}/checklist`, 'Checklist', ListChecks, isActive(`/events/${eventId}/checklist`))}
           </nav>
         </>
       )}

@@ -5,8 +5,8 @@ import { Step2EventDetails } from './steps/Step2EventDetails'
 import { Step5Confirm } from './steps/Step5Confirm'
 
 type EventDetails = {
-  event_name: string; event_date: string; city: string; venue: string;
-  guest_count: number; total_budget: number; currency: string
+  event_name: string; event_date: string; city: string; state: string; venue: string;
+  guest_count: number; total_budget: number; currency: string; country: string
 }
 
 export function EventWizard() {
@@ -15,7 +15,7 @@ export function EventWizard() {
   const [details, setDetails] = useState<EventDetails | null>(null)
 
   return (
-    <div className="bg-white rounded-xl border p-8 max-w-2xl mx-auto">
+    <div className="bg-white dark:bg-cream-2 rounded-xl border p-8 max-w-2xl mx-auto">
       {/* Progress bar — 3 segments */}
       {step > 0 && (
         <div className="flex items-center gap-1.5 mb-8">
@@ -23,7 +23,7 @@ export function EventWizard() {
             <div
               key={i}
               className={`h-1.5 rounded-full flex-1 transition-all ${
-                i < step ? 'bg-orange-500' : i === step ? 'bg-orange-300' : 'bg-gray-100'
+                i < step ? 'bg-brand' : i === step ? 'bg-brand/50' : 'bg-cream'
               }`}
             />
           ))}

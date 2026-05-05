@@ -196,6 +196,7 @@ model Event {
   mood_boards        MoodBoard[]
   invitation_design  EventInvitationDesign?
   event_vendors      EventVendor[]
+  plan_items         EventPlanItem[]
 }
 
 model EventPhoto {
@@ -470,9 +471,11 @@ model RequestResponse {
   availability_note  String?
   quote_submitted_at DateTime?
   status             String       @default("PENDING")
+  external_vendor_id String?
   created_at       DateTime     @default(now())
   event_request    EventRequest @relation(fields: [event_request_id], references: [id], onDelete: Cascade)
   vendor           Vendor?      @relation(fields: [vendor_id], references: [id], onDelete: SetNull)
+  external_vendor  ExternalVendor? @relation(fields: [external_vendor_id], references: [id])
 
   @@index([event_request_id])
 }
@@ -753,6 +756,7 @@ model ExternalVendor {
   updated_at      DateTime    @updatedAt
   claimed_by      Vendor?     @relation(fields: [claimed_by_vendor_id], references: [id])
   invites         LocalVendorInvite[]
+  quote_requests  RequestResponse[]
 
   @@index([city, vendor_type])
   @@index([vendor_type])
@@ -1633,6 +1637,29 @@ model EventTimelineEntry {
   @@index([start_time])
 }
 
+
+// ─── Feature: Event Plan Items (external vendors + personal helpers) ─────────
+
+model EventPlanItem {
+  id            String    @id @default(cuid())
+  event_id      String
+  source        String    // "EXTERNAL" or "PERSONAL"
+  title         String    // "Rose & Bloom Decorators" or "Bring garlands from home"
+  role          String?   // "Decorator", "Cake", "Flowers", etc.
+  contact_name  String?
+  contact_phone String?
+  contact_email String?
+  start_time    DateTime?
+  end_time      DateTime?
+  location      String?
+  notes         String?
+  sort_order    Int       @default(0)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  event         Event     @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@index([event_id])
+}
 
 // ─── Feature: Instant Book Packages ───────────────────────────────────────────
 

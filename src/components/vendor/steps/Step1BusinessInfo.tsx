@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CityInput } from '@/components/ui/CityInput'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -40,8 +41,8 @@ type Props = { onNext: () => void }
 export function Step1BusinessInfo({ onNext }: Props) {
   const [form, setForm] = useState({
     business_name: '', vendor_type: '', description: '',
-    city: '', country: 'GB', website: '', instagram: '',
-    phone_business: '',
+    city: '', country: 'US', website: '', instagram: '',
+    phone_business: '', travel_radius_miles: 50,
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -65,7 +66,7 @@ export function Step1BusinessInfo({ onNext }: Props) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-gray-900">Tell us about your business</h2>
+      <h2 className="text-2xl font-black text-text-1">Tell us about your business</h2>
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="space-y-1">
@@ -83,24 +84,45 @@ export function Step1BusinessInfo({ onNext }: Props) {
         </Select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-5">
         <div className="space-y-1">
           <Label>City *</Label>
-          <Input value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="London" />
+          <CityInput value={form.city} onChange={city => setForm(f => ({ ...f, city }))} placeholder="New York, Chicago, Houston…" required />
         </div>
         <div className="space-y-1">
           <Label>Country</Label>
-          <Select value={form.country} onValueChange={(v: string | null) => setForm(f => ({ ...f, country: v ?? 'GB' }))}>
+          <Select value={form.country} onValueChange={(v: string | null) => setForm(f => ({ ...f, country: v ?? 'US' }))}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="GB">United Kingdom</SelectItem>
               <SelectItem value="US">United States</SelectItem>
+              <SelectItem value="GB">United Kingdom</SelectItem>
               <SelectItem value="CA">Canada</SelectItem>
               <SelectItem value="AU">Australia</SelectItem>
               <SelectItem value="IN">India</SelectItem>
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label>How far can you travel to serve events?</Label>
+        <Select
+          value={String(form.travel_radius_miles)}
+          onValueChange={v => setForm(f => ({ ...f, travel_radius_miles: Number(v) }))}
+        >
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="25">Up to 25 miles</SelectItem>
+            <SelectItem value="50">Up to 50 miles</SelectItem>
+            <SelectItem value="100">Up to 100 miles</SelectItem>
+            <SelectItem value="150">Up to 150 miles</SelectItem>
+            <SelectItem value="200">Up to 200 miles</SelectItem>
+            <SelectItem value="300">Up to 300 miles</SelectItem>
+            <SelectItem value="400">Up to 400 miles</SelectItem>
+            <SelectItem value="500">Up to 500 miles</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-text-4">You'll only appear in searches within this radius from your city.</p>
       </div>
 
       <div className="space-y-1">
@@ -113,7 +135,7 @@ export function Step1BusinessInfo({ onNext }: Props) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-5">
         <div className="space-y-1">
           <Label>Phone</Label>
           <Input value={form.phone_business} onChange={e => setForm(f => ({ ...f, phone_business: e.target.value }))} placeholder="+44 20 1234 5678" />
@@ -124,7 +146,7 @@ export function Step1BusinessInfo({ onNext }: Props) {
         </div>
       </div>
 
-      <Button onClick={handleSave} disabled={saving} className="w-full bg-orange-600 hover:bg-orange-700">
+      <Button onClick={handleSave} disabled={saving} className="w-full bg-brand hover:bg-brand-hover rounded-xl font-bold">
         {saving ? 'Saving…' : 'Save & Continue →'}
       </Button>
     </div>

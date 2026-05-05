@@ -83,19 +83,19 @@ function serviceLabel(vendorType: string) {
 }
 
 const SOURCE_BADGE = {
-  oneseva: 'bg-orange-100 text-orange-700 border border-orange-200',
-  board: 'bg-gray-100 text-gray-600 border border-gray-200',
+  oneseva: 'bg-brand/10 text-brand border border-brand/20',
+  board: 'bg-cream-2 text-text-3 border border-brand-border',
 }
 
 // ─── Status configs ────────────────────────────────────────────────────────
 
 const ONESEVA_STATUS: Record<string, { label: string; dot: string; text: string }> = {
-  DRAFT:    { label: 'Draft',    dot: 'bg-gray-300',   text: 'text-gray-500' },
+  DRAFT:    { label: 'Draft',    dot: 'bg-brand-border',   text: 'text-text-4' },
   SENT:     { label: 'Received', dot: 'bg-blue-500',   text: 'text-blue-700' },
   VIEWED:   { label: 'Viewed',   dot: 'bg-blue-500',   text: 'text-blue-700' },
   ACCEPTED: { label: 'Accepted', dot: 'bg-green-500',  text: 'text-green-700' },
   DECLINED: { label: 'Declined', dot: 'bg-red-400',    text: 'text-red-500' },
-  EXPIRED:  { label: 'Expired',  dot: 'bg-gray-300',   text: 'text-gray-400' },
+  EXPIRED:  { label: 'Expired',  dot: 'bg-brand-border',   text: 'text-text-4' },
 }
 
 const BOARD_STATUS: Record<string, { label: string; dot: string; text: string; bg: string }> = {
@@ -128,48 +128,48 @@ function TrayBill({ lines, discountType, discountValue, discountNote, currency }
   const total = Math.max(0, subtotal - discount)
 
   return (
-    <div className="border border-gray-100 rounded-xl overflow-hidden mt-3">
-      <div className="bg-gray-50 px-4 py-2 border-b">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+    <div className="border border-brand-border rounded-xl overflow-hidden mt-3">
+      <div className="bg-cream px-4 py-2 border-b">
+        <p className="text-xs font-bold text-text-4 uppercase tracking-widest">
           Order Summary · {lines.length} item{lines.length !== 1 ? 's' : ''}
         </p>
       </div>
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-orange-50/50 border-b border-gray-100">
-            <th className="text-left px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Item</th>
-            <th className="text-center px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden sm:table-cell">Serves</th>
-            <th className="text-center px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Qty</th>
-            <th className="text-right px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Unit</th>
-            <th className="text-right px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
+          <tr className="bg-cream border-b border-brand-border">
+            <th className="text-left px-4 py-2 text-sm font-bold text-text-4 uppercase tracking-wide">Item</th>
+            <th className="text-center px-3 py-2 text-sm font-bold text-text-4 uppercase tracking-wide hidden sm:table-cell">Serves</th>
+            <th className="text-center px-3 py-2 text-sm font-bold text-text-4 uppercase tracking-wide">Qty</th>
+            <th className="text-right px-3 py-2 text-sm font-bold text-text-4 uppercase tracking-wide">Unit</th>
+            <th className="text-right px-4 py-2 text-sm font-bold text-text-4 uppercase tracking-wide">Total</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-cream">
           {lines.map(l => (
             <tr key={l.id}>
-              <td className="px-4 py-2.5 font-medium text-gray-800">{l.item_name}</td>
-              <td className="px-3 py-2.5 text-center text-xs text-gray-400 hidden sm:table-cell">{l.serves_note ?? '—'}</td>
-              <td className="px-3 py-2.5 text-center text-gray-600">{l.qty}</td>
-              <td className="px-3 py-2.5 text-right text-gray-600">{fmt(Number(l.unit_price), currency)}</td>
-              <td className="px-4 py-2.5 text-right font-semibold text-gray-800">{fmt(Number(l.line_total), currency)}</td>
+              <td className="px-4 py-2.5 font-medium text-text-1">{l.item_name}</td>
+              <td className="px-3 py-2.5 text-center text-xs text-text-4 hidden sm:table-cell">{l.serves_note ?? '—'}</td>
+              <td className="px-3 py-2.5 text-center text-text-3">{l.qty}</td>
+              <td className="px-3 py-2.5 text-right text-text-3">{fmt(Number(l.unit_price), currency)}</td>
+              <td className="px-4 py-2.5 text-right font-semibold text-text-1">{fmt(Number(l.line_total), currency)}</td>
             </tr>
           ))}
         </tbody>
-        <tfoot className="border-t border-gray-200">
+        <tfoot className="border-t border-brand-border">
           {discount > 0 && (
             <tr>
               <td colSpan={3} className="hidden sm:table-cell" />
               <td className="px-3 py-1.5 text-right text-xs text-green-600">
                 Discount{discountType === 'PERCENTAGE' ? ` (${discountValue}%)` : ''}
-                {discountNote && <span className="block text-gray-400">{discountNote}</span>}
+                {discountNote && <span className="block text-text-4">{discountNote}</span>}
               </td>
               <td className="px-4 py-1.5 text-right text-sm font-medium text-green-600">−{fmt(discount, currency)}</td>
             </tr>
           )}
-          <tr className="bg-orange-50/60">
+          <tr className="bg-cream">
             <td colSpan={3} className="hidden sm:table-cell" />
-            <td className="px-3 py-3 text-right text-sm font-bold text-gray-900">Total</td>
-            <td className="px-4 py-3 text-right text-base font-black text-orange-600">{fmt(total, currency)}</td>
+            <td className="px-3 py-3 text-right text-sm font-bold text-text-1">Total</td>
+            <td className="px-4 py-3 text-right text-base font-black text-text-1">{fmt(total, currency)}</td>
           </tr>
         </tfoot>
       </table>
@@ -217,9 +217,9 @@ function OnesevQuoteRow({
   }
 
   return (
-    <div className={`bg-white rounded-2xl border overflow-hidden transition-all ${
+    <div className={`bg-white dark:bg-cream-2 rounded-2xl border overflow-hidden transition-all ${
       quote.status === 'ACCEPTED' ? 'ring-2 ring-green-500' :
-      quote.status === 'DECLINED' ? 'opacity-55' : 'border-gray-200'
+      quote.status === 'DECLINED' ? 'opacity-55' : 'border-brand-border'
     }`}>
       {/* Row header */}
       <button
@@ -228,14 +228,14 @@ function OnesevQuoteRow({
       >
         <div className="flex items-center gap-4 px-5 py-4">
           {/* Avatar */}
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center flex-shrink-0 text-orange-600 font-bold text-sm">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cream to-cream-2 flex items-center justify-center flex-shrink-0 text-brand font-bold text-sm">
             {quote.vendor.business_name[0]}
           </div>
 
           {/* Name + badges */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-              <span className="font-bold text-gray-900 text-sm truncate">
+              <span className="font-bold text-text-1 text-sm truncate">
                 {quote.vendor.business_name}
               </span>
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${SOURCE_BADGE.oneseva}`}>
@@ -247,9 +247,9 @@ function OnesevQuoteRow({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-2 text-xs text-text-4">
               <MapPin className="h-3 w-3" />{quote.vendor.city}
-              <span className="text-gray-200">·</span>
+              <span className="text-brand-border">·</span>
               <Calendar className="h-3 w-3" />
               {quote.expires_at ? `Expires ${fmtDate(quote.expires_at)}` : 'No expiry'}
             </div>
@@ -259,27 +259,27 @@ function OnesevQuoteRow({
           <div className="text-right flex-shrink-0">
             {!isTray && quote.price_per_head ? (
               <div>
-                <div className="text-xl font-black text-orange-600">
+                <div className="text-xl font-black text-text-1">
                   {fmt(Number(quote.price_per_head), currency)}
-                  <span className="text-xs font-normal text-gray-400">/head</span>
+                  <span className="text-xs font-normal text-text-4">/head</span>
                 </div>
-                <div className="text-xs text-gray-400">Total: {fmt(Number(quote.total_estimate), currency)}</div>
+                <div className="text-xs text-text-4">Total: {fmt(Number(quote.total_estimate), currency)}</div>
               </div>
             ) : (
-              <div className="text-lg font-bold text-gray-900">
+              <div className="text-xl font-black text-text-1">
                 {fmt(Number(quote.total_estimate), currency)}
-                <div className="text-xs text-gray-400 font-normal">tray order</div>
+                <div className="text-xs text-text-4 font-normal">tray order</div>
               </div>
             )}
           </div>
 
           {/* Status badge */}
           <div className="flex-shrink-0 flex flex-col items-end gap-2">
-            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-50 border border-gray-100">
+            <span className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-cream border border-brand-border">
               <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
               <span className={statusCfg.text}>{statusCfg.label}</span>
             </span>
-            <span className="text-gray-300">
+            <span className="text-text-4">
               {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </span>
           </div>
@@ -288,7 +288,7 @@ function OnesevQuoteRow({
 
       {/* Expanded detail */}
       {expanded && (
-        <div className="border-t border-gray-50 px-5 pb-5 pt-4 space-y-4">
+        <div className="border-t border-brand-border px-5 pb-5 pt-4 space-y-4">
           {/* Tray bill */}
           {isTray && quote.tray_lines.length > 0 && (
             <TrayBill
@@ -302,14 +302,14 @@ function OnesevQuoteRow({
 
           {/* Price/head breakdown for PER_HEAD */}
           {!isTray && quote.price_per_head && (
-            <div className="bg-orange-50 rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-cream rounded-xl p-5 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-orange-600 uppercase tracking-wider mb-0.5">Price per head</p>
-                <p className="text-2xl font-black text-orange-700">{fmt(Number(quote.price_per_head), currency)}</p>
+                <p className="text-xs font-bold text-brand uppercase tracking-wider mb-0.5">Price per head</p>
+                <p className="text-2xl font-black text-text-1">{fmt(Number(quote.price_per_head), currency)}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Total estimate</p>
-                <p className="text-lg font-bold text-gray-900">{fmt(Number(quote.total_estimate), currency)}</p>
+                <p className="text-sm font-bold text-text-4 uppercase tracking-wider mb-0.5">Total estimate</p>
+                <p className="text-lg font-bold text-text-1">{fmt(Number(quote.total_estimate), currency)}</p>
               </div>
             </div>
           )}
@@ -330,7 +330,7 @@ function OnesevQuoteRow({
 
           {/* Notes */}
           {quote.notes && (
-            <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-sm text-gray-700">
+            <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-sm text-text-2">
               {quote.notes}
             </div>
           )}
@@ -338,7 +338,7 @@ function OnesevQuoteRow({
           {/* Actions */}
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <Link href={`/events/${eventId}/quotes/${quote.id}`}>
-              <button className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+              <button className="text-sm font-medium px-4 py-2 rounded-xl border border-brand-border text-text-2 hover:bg-cream transition-colors">
                 View details →
               </button>
             </Link>
@@ -346,7 +346,7 @@ function OnesevQuoteRow({
               <button
                 onClick={openConversation}
                 disabled={messaging}
-                className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-brand-border text-text-2 hover:bg-cream transition-colors disabled:opacity-50"
               >
                 <MessageSquare className="h-4 w-4" />
                 {messaging ? 'Opening…' : 'Message'}
@@ -371,7 +371,7 @@ function OnesevQuoteRow({
               </>
             )}
             {quote.status === 'ACCEPTED' && (
-              <span className="flex items-center gap-1.5 text-green-700 text-sm font-semibold">
+              <span className="flex items-center gap-1.5 text-green-700 text-sm font-bold">
                 <CheckCircle2 className="h-4 w-4" /> Accepted
               </span>
             )}
@@ -404,22 +404,22 @@ function BoardResponseRow({
   }
 
   return (
-    <div className={`bg-white rounded-2xl border overflow-hidden transition-all ${
+    <div className={`bg-white dark:bg-cream-2 rounded-2xl border overflow-hidden transition-all ${
       response.status === 'ACCEPTED_RESPONSE' ? 'ring-2 ring-green-500' :
-      response.status === 'DECLINED' ? 'opacity-55' : 'border-gray-200'
+      response.status === 'DECLINED' ? 'opacity-55' : 'border-brand-border'
     }`}>
       {/* Row header */}
       <button className="w-full text-left" onClick={() => setExpanded(v => !v)}>
         <div className="flex items-center gap-4 px-5 py-4">
           {/* Avatar */}
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-slate-100 flex items-center justify-center flex-shrink-0 text-gray-600 font-bold text-sm">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cream to-cream-2 flex items-center justify-center flex-shrink-0 text-text-3 font-bold text-sm">
             {response.name[0]}
           </div>
 
           {/* Name + badges */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-              <span className="font-bold text-gray-900 text-sm">{response.name}</span>
+              <span className="font-bold text-text-1 text-sm">{response.name}</span>
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${SOURCE_BADGE.board}`}>
                 Board
               </span>
@@ -429,12 +429,12 @@ function BoardResponseRow({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-2 text-xs text-text-4">
               <Clock className="h-3 w-3" />
               {fmtDate(response.created_at)}
               {response.portfolio_url && (
                 <>
-                  <span className="text-gray-200">·</span>
+                  <span className="text-brand-border">·</span>
                   <a
                     href={response.portfolio_url}
                     target="_blank"
@@ -455,24 +455,24 @@ function BoardResponseRow({
               <div>
                 <div className="text-xl font-black text-purple-700">
                   {new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Number(response.quoted_price))}
-                  <span className="text-xs font-normal text-gray-400">
+                  <span className="text-xs font-normal text-text-4">
                     {priceUnitLabel[response.price_unit ?? ''] ?? ''}
                   </span>
                 </div>
-                <div className="text-xs text-gray-400">Quote submitted</div>
+                <div className="text-xs text-text-4">Quote submitted</div>
               </div>
             ) : response.price_note ? (
-              <div className="text-xs text-gray-500 max-w-[120px] text-right leading-tight">{response.price_note}</div>
+              <div className="text-xs text-text-3 max-w-[120px] text-right leading-tight">{response.price_note}</div>
             ) : null}
           </div>
 
           {/* Status badge + chevron */}
           <div className="flex-shrink-0 flex flex-col items-end gap-2">
-            <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${statusCfg.bg} border border-transparent`}>
+            <span className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${statusCfg.bg} border border-transparent`}>
               <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
               <span className={statusCfg.text}>{statusCfg.label}</span>
             </span>
-            <span className="text-gray-300">
+            <span className="text-text-4">
               {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </span>
           </div>
@@ -481,17 +481,17 @@ function BoardResponseRow({
 
       {/* Expanded detail */}
       {expanded && (
-        <div className="border-t border-gray-50 px-5 pb-5 pt-4 space-y-4">
+        <div className="border-t border-brand-border px-5 pb-5 pt-4 space-y-4">
 
           {/* Pitch */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Their Pitch</p>
-            <p className="text-sm text-gray-700 leading-relaxed">{response.pitch}</p>
+            <p className="text-sm font-bold text-text-4 uppercase tracking-wider mb-1.5">Their Pitch</p>
+            <p className="text-sm text-text-2 leading-relaxed">{response.pitch}</p>
           </div>
 
           {/* Phone — only when accepted */}
           {showPhone && response.phone && (
-            <a href={`tel:${response.phone}`} className="flex items-center gap-2 text-sm text-gray-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3 hover:bg-green-100 transition-colors w-fit">
+            <a href={`tel:${response.phone}`} className="flex items-center gap-2 text-sm text-text-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 hover:bg-green-100 transition-colors w-fit">
               <Phone className="h-4 w-4 text-green-600" />
               <span className="font-semibold">{response.phone}</span>
             </a>
@@ -499,9 +499,9 @@ function BoardResponseRow({
 
           {/* Quote details when submitted */}
           {response.status === 'QUOTE_SUBMITTED' && response.quoted_price && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {/* Price box */}
-              <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-purple-50 border border-purple-100 rounded-xl p-5 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold text-purple-500 uppercase tracking-wider mb-0.5">Quoted Price</p>
                   <p className="text-2xl font-black text-purple-700">
@@ -523,22 +523,22 @@ function BoardResponseRow({
               {/* What's included */}
               {response.what_includes && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">What's Included</p>
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{response.what_includes}</p>
+                  <p className="text-sm font-bold text-text-4 uppercase tracking-wider mb-1.5">What's Included</p>
+                  <p className="text-sm text-text-2 leading-relaxed whitespace-pre-line">{response.what_includes}</p>
                 </div>
               )}
 
               {/* Service details */}
               {response.service_details && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Service Details</p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{response.service_details}</p>
+                  <p className="text-sm font-bold text-text-4 uppercase tracking-wider mb-1.5">Service Details</p>
+                  <p className="text-sm text-text-2 leading-relaxed">{response.service_details}</p>
                 </div>
               )}
 
               {/* Quote date */}
               {response.quote_submitted_at && (
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-text-4">
                   Quote submitted {fmtDate(response.quote_submitted_at)}
                 </p>
               )}
@@ -553,7 +553,7 @@ function BoardResponseRow({
               <button
                 onClick={async () => { setActing(true); await onAskQuote(response.id); setActing(false) }}
                 disabled={acting}
-                className="flex items-center gap-1.5 text-sm font-bold px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 text-sm font-bold px-5 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white transition-colors disabled:opacity-50"
               >
                 <ArrowLeftRight className="h-4 w-4" />
                 {acting ? 'Requesting…' : 'Ask for full quote'}
@@ -592,7 +592,7 @@ function BoardResponseRow({
 
             {/* Accepted state */}
             {response.status === 'ACCEPTED_RESPONSE' && (
-              <span className="flex items-center gap-1.5 text-green-700 text-sm font-semibold">
+              <span className="flex items-center gap-1.5 text-green-700 text-sm font-bold">
                 <CheckCircle2 className="h-4 w-4" /> Accepted
               </span>
             )}
@@ -603,7 +603,7 @@ function BoardResponseRow({
                 href={response.portfolio_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-brand-border text-text-3 hover:bg-cream transition-colors"
               >
                 <ExternalLink className="h-4 w-4" /> Portfolio
               </a>
@@ -618,7 +618,7 @@ function BoardResponseRow({
 // ─── Service Group ─────────────────────────────────────────────────────────
 
 const GROUP_COLORS = [
-  'from-orange-500 to-amber-500',
+  'from-brand to-amber-500',
   'from-blue-500 to-cyan-500',
   'from-purple-500 to-violet-500',
   'from-green-500 to-emerald-500',
@@ -636,17 +636,17 @@ function ServiceGroup({
 }) {
   const gradient = GROUP_COLORS[colorIdx % GROUP_COLORS.length]
   return (
-    <div className="rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+    <div className="rounded-3xl border border-brand-border overflow-hidden shadow-sm">
       <div className={`bg-gradient-to-r ${gradient} px-6 py-4 flex items-center justify-between`}>
         <div>
-          <h2 className="text-white font-bold text-lg">{serviceLabel(vendorType)}</h2>
+          <h2 className="text-white font-bold text-xl">{serviceLabel(vendorType)}</h2>
           <p className="text-white/70 text-sm mt-0.5">{count} response{count !== 1 ? 's' : ''}</p>
         </div>
-        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+        <div className="w-10 h-10 bg-white/20 dark:bg-cream-2/20 rounded-xl flex items-center justify-center">
           <Users className="h-5 w-5 text-white" />
         </div>
       </div>
-      <div className="bg-gray-50/50 p-4 space-y-3">
+      <div className="bg-cream p-5 space-y-4">
         {children}
       </div>
     </div>
@@ -767,16 +767,16 @@ export default function EventQuotesPage() {
   if (loading) {
     return (
       <div className="max-w-4xl">
-        <div className="flex items-center gap-1.5 text-sm text-gray-400 mb-4">
-          <Link href="/dashboard" className="hover:text-orange-600">My Events</Link>
+        <div className="flex items-center gap-1.5 text-sm text-text-4 mb-4">
+          <Link href="/dashboard" className="hover:text-brand">My Events</Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link href={`/events/${eventId}`} className="hover:text-orange-600">Event</Link>
+          <Link href={`/events/${eventId}`} className="hover:text-brand">Event</Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-gray-700">Quotes</span>
+          <span className="text-text-2">Quotes</span>
         </div>
         <div className="space-y-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse" />
+            <div key={i} className="h-20 bg-cream-2 rounded-2xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -789,30 +789,30 @@ export default function EventQuotesPage() {
   return (
     <div className="max-w-4xl">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-sm text-gray-400 mb-6">
-        <Link href="/dashboard" className="hover:text-orange-600">My Events</Link>
+      <div className="flex items-center gap-1.5 text-sm text-text-4 mb-6">
+        <Link href="/dashboard" className="hover:text-brand">My Events</Link>
         <ChevronRight className="h-3.5 w-3.5" />
-        <Link href={`/events/${eventId}`} className="hover:text-orange-600">Event</Link>
+        <Link href={`/events/${eventId}`} className="hover:text-brand">Event</Link>
         <ChevronRight className="h-3.5 w-3.5" />
-        <span className="text-gray-700">Quotes & Responses</span>
+        <span className="text-text-2">Quotes & Responses</span>
       </div>
 
       {/* Page header */}
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Quotes & Responses</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-3xl sm:text-4xl font-black text-text-1 tracking-tight">Quotes & Responses</h1>
+          <p className="text-text-3 mt-1">
             {totalCount} total · {sentOneseva.length} from OneSeva · {boardResponses.length} from public board
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {allServiceTypes.length > 1 && (
-            <div className="flex items-center gap-1.5 border border-gray-200 rounded-xl px-3 py-2 bg-white text-sm">
-              <Filter className="h-3.5 w-3.5 text-gray-400" />
+            <div className="flex items-center gap-1.5 border border-brand-border rounded-xl px-3 py-2 bg-white dark:bg-cream-2 text-sm">
+              <Filter className="h-3.5 w-3.5 text-text-4" />
               <select
                 value={filterType}
                 onChange={e => setFilterType(e.target.value)}
-                className="text-gray-700 bg-transparent focus:outline-none text-sm font-medium"
+                className="text-text-2 bg-transparent focus:outline-none text-sm font-medium"
               >
                 <option value="all">All services</option>
                 {allServiceTypes.map(t => (
@@ -822,7 +822,7 @@ export default function EventQuotesPage() {
             </div>
           )}
           <Link href={`/events/${eventId}/vendors`}>
-            <button className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+            <button className="text-sm font-medium px-4 py-2 rounded-xl border border-brand-border text-text-2 hover:bg-cream transition-colors">
               Find vendors
             </button>
           </Link>
@@ -831,14 +831,14 @@ export default function EventQuotesPage() {
 
       {/* Empty state */}
       {allEmpty && (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-16 text-center">
+        <div className="bg-white dark:bg-cream-2 rounded-3xl border border-brand-border shadow-sm p-16 text-center">
           <div className="text-6xl mb-4">📬</div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">No quotes yet</h3>
-          <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+          <h3 className="text-xl font-black text-text-1 mb-2">No quotes yet</h3>
+          <p className="text-text-3 mb-6 max-w-sm mx-auto">
             Start matching with vendors to receive OneSeva quotes, or share your public request board to collect responses directly.
           </p>
           <Link href={`/events/${eventId}/vendors`}>
-            <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl transition-colors">
+            <button className="bg-brand hover:bg-brand-hover text-white font-bold px-6 py-3 rounded-xl transition-colors">
               Find Vendors
             </button>
           </Link>
@@ -847,7 +847,7 @@ export default function EventQuotesPage() {
 
       {/* Groups */}
       {!allEmpty && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {filteredServiceTypes.map((vendorType, idx) => {
             const onesevGroup = sentOneseva.filter(
               q => (q.match?.event_request?.vendor_type ?? 'CATERER') === vendorType

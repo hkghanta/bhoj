@@ -54,15 +54,15 @@ export default function PhotosPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Photos</h1>
-          <p className="text-gray-500 mt-1">Showcase your food and events. First photo is your cover image.</p>
+          <h1 className="text-3xl font-black tracking-tight text-text-1">Photos</h1>
+          <p className="text-text-4 mt-1">Showcase your food and events. First photo is your cover image.</p>
         </div>
         <Button
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className="bg-orange-600 hover:bg-orange-700"
+          className="bg-brand hover:bg-brand-hover"
         >
           <Upload className="h-4 w-4 mr-2" />
           {uploading ? 'Uploading…' : 'Upload Photo'}
@@ -77,18 +77,18 @@ export default function PhotosPage() {
       </div>
 
       {photos.length === 0 ? (
-        <div className="border-2 border-dashed border-gray-200 rounded-xl p-16 text-center">
-          <p className="text-gray-400">No photos yet. Upload your first photo to get started.</p>
+        <div className="border-2 border-dashed border-brand-border rounded-2xl p-16 text-center">
+          <p className="text-base text-text-4">No photos yet. Upload your first photo to get started.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-6">
           {photos.map(photo => (
-            <div key={photo.id} className="relative group rounded-xl overflow-hidden border">
+            <div key={photo.id} className="relative group rounded-2xl overflow-hidden border border-brand-border">
               <div className="aspect-video relative">
                 <Image src={photo.url} alt={photo.caption ?? ''} fill className="object-cover" />
               </div>
               {photo.is_cover && (
-                <Badge className="absolute top-2 left-2 bg-orange-600">
+                <Badge className="absolute top-2 left-2 bg-brand">
                   <Star className="h-3 w-3 mr-1" /> Cover
                 </Badge>
               )}

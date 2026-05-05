@@ -34,7 +34,7 @@ function buildPushMessage(job: NotificationJob, pushToken: string): ExpoPushMess
     },
   }
 
-  const msg = messages[eventType] ?? { title: 'Bhoj', body: 'You have a new notification' }
+  const msg = messages[eventType] ?? { title: 'OneSeva', body: 'You have a new notification' }
 
   return {
     to: pushToken,

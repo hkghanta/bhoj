@@ -41,9 +41,9 @@ export default function AdminServicesPage() {
     return (
       <div className="p-8">
         <div className="animate-pulse space-y-4 max-w-2xl">
-          <div className="h-8 bg-gray-100 rounded w-48" />
-          <div className="h-4 bg-gray-100 rounded w-64" />
-          <div className="h-64 bg-gray-100 rounded-xl" />
+          <div className="h-8 bg-cream rounded w-48" />
+          <div className="h-4 bg-cream rounded w-64" />
+          <div className="h-64 bg-cream rounded-xl" />
         </div>
       </div>
     )
@@ -57,10 +57,10 @@ export default function AdminServicesPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
-          <Settings className="h-5 w-5 text-orange-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Service Catalogue</h1>
+          <Settings className="h-5 w-5 text-brand" />
+          <h1 className="text-3xl font-black tracking-tight text-text-1">Service Catalogue</h1>
         </div>
-        <p className="text-sm text-gray-500 ml-8">
+        <p className="text-sm text-text-4 ml-8">
           {enabled.length} of {configs.length} service types visible to customers.
           Enabled services appear on every event dashboard.
         </p>
@@ -73,19 +73,19 @@ export default function AdminServicesPage() {
         ].map(({ title, subtitle, items, emptyMsg }) => (
           <div key={title}>
             <div className="mb-3">
-              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{title}</h2>
-              <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+              <h2 className="text-xs font-bold text-text-4 uppercase tracking-widest">{title}</h2>
+              <p className="text-xs text-text-4 mt-0.5">{subtitle}</p>
             </div>
             {items.length === 0 ? (
-              <p className="text-sm text-gray-400 italic pl-1">{emptyMsg}</p>
+              <p className="text-sm text-text-4 italic pl-1">{emptyMsg}</p>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+              <div className="bg-white rounded-xl border border-brand-border divide-y divide-brand-border overflow-hidden">
                 {items.map(c => (
-                  <div key={c.vendor_type} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors">
+                  <div key={c.vendor_type} className="flex items-center gap-4 px-5 py-3.5 hover:bg-cream transition-colors">
                     <span className="text-2xl w-8 text-center flex-shrink-0">{c.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">{c.label}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-sm font-semibold text-text-1">{c.label}</p>
+                      <p className="text-xs text-text-4 mt-0.5">
                         {c.vendor_type}
                         <span className="mx-1.5">·</span>
                         <span className={c.service_class === 'INDIVIDUAL' ? 'text-indigo-500' : 'text-emerald-500'}>
@@ -98,8 +98,8 @@ export default function AdminServicesPage() {
                     <button
                       onClick={() => toggle(c.vendor_type, c.is_enabled)}
                       disabled={toggling === c.vendor_type}
-                      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                        c.is_enabled ? 'bg-orange-500' : 'bg-gray-200'
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                        c.is_enabled ? 'bg-brand' : 'bg-cream-2'
                       } ${toggling === c.vendor_type ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                       aria-label={`${c.is_enabled ? 'Disable' : 'Enable'} ${c.label}`}
                     >
@@ -121,9 +121,9 @@ export default function AdminServicesPage() {
           { label: 'Business services', value: configs.filter(c => c.service_class === 'BUSINESS').length, color: 'text-emerald-600' },
           { label: 'Individual services', value: configs.filter(c => c.service_class === 'INDIVIDUAL').length, color: 'text-indigo-600' },
         ].map(stat => (
-          <div key={stat.label} className="bg-white rounded-xl border border-gray-200 px-5 py-4">
+          <div key={stat.label} className="bg-white rounded-xl border border-brand-border px-5 py-4">
             <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
+            <p className="text-xs text-text-4 mt-0.5">{stat.label}</p>
           </div>
         ))}
       </div>

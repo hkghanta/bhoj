@@ -157,12 +157,14 @@ const PHOTO_STYLE = [
   { value: 'artistic', label: 'Artistic / Editorial', emoji: '🎨' },
 ]
 const PHOTO_COVERAGE = [
-  { value: 'getting-ready', label: 'Getting Ready', emoji: '💄', desc: 'Pre-ceremony prep shots' },
-  { value: 'ceremony', label: 'Ceremony', emoji: '💍', desc: 'Full ceremony coverage' },
-  { value: 'reception', label: 'Reception', emoji: '🎉', desc: 'Party, dancing, speeches' },
-  { value: 'couple-portraits', label: 'Couple Portraits', emoji: '💑', desc: 'Dedicated couple shoot' },
-  { value: 'family-portraits', label: 'Family Portraits', emoji: '👨‍👩‍👧‍👦', desc: 'Formal group/family photos' },
+  { value: 'getting-ready', label: 'Getting Ready', emoji: '💄', desc: 'Pre-event prep shots' },
+  { value: 'ceremony', label: 'Ceremony / Main Event', emoji: '💍', desc: 'Full ceremony or main event coverage' },
+  { value: 'reception', label: 'Reception / Party', emoji: '🎉', desc: 'Party, dancing, speeches, cake cutting' },
+  { value: 'portraits', label: 'Portraits / Group Shots', emoji: '📸', desc: 'Dedicated portrait sessions' },
+  { value: 'family-portraits', label: 'Family & Group Photos', emoji: '👨‍👩‍👧‍👦', desc: 'Formal family and group photos' },
+  { value: 'candid-moments', label: 'Candid Moments', emoji: '😄', desc: 'Spontaneous guest interactions and reactions' },
   { value: 'drone', label: 'Drone / Aerial', emoji: '🚁', desc: 'Aerial venue and group shots' },
+  { value: 'decor-details', label: 'Décor & Details', emoji: '🌸', desc: 'Table settings, decorations, venue details' },
 ]
 const PHOTO_DELIVERABLES = [
   { value: 'digital', label: 'Digital Files Only', emoji: '💻' },
@@ -245,13 +247,15 @@ const DECOR_STYLE = [
 ]
 const DECOR_AREAS = [
   { value: 'entrance', label: 'Entrance / Welcome Area', emoji: '🚪', desc: 'Arch, signage, welcome decor' },
-  { value: 'mandap', label: 'Mandap / Altar / Stage', emoji: '🛕', desc: 'Main ceremony structure' },
-  { value: 'reception-stage', label: 'Reception Stage', emoji: '🎤', desc: 'Backdrop for speeches and performances' },
+  { value: 'stage', label: 'Stage / Main Focal Point', emoji: '🎤', desc: 'Mandap, altar, stage, or ceremony structure' },
+  { value: 'backdrop', label: 'Backdrop / Photo Wall', emoji: '🖼️', desc: 'Backdrop for photos, performances, or speeches' },
   { value: 'dining', label: 'Dining Area', emoji: '🍽️', desc: 'Table centrepieces, runners, chair covers' },
-  { value: 'photo-booth', label: 'Photo Booth / Selfie Wall', emoji: '📸', desc: 'Dedicated photo area with props' },
-  { value: 'aisle', label: 'Aisle / Walkway', emoji: '🚶', desc: 'Aisle décor, petal pathway, pillars' },
+  { value: 'photo-booth', label: 'Photo Booth / Selfie Corner', emoji: '📸', desc: 'Dedicated photo area with props' },
+  { value: 'walkway', label: 'Walkway / Aisle', emoji: '🚶', desc: 'Aisle décor, pathways, pillars' },
   { value: 'ceiling', label: 'Ceiling / Draping', emoji: '🎪', desc: 'Fabric draping, hanging flowers, fairy lights' },
   { value: 'outdoor', label: 'Outdoor / Garden', emoji: '🌳', desc: 'Garden, poolside, or terrace décor' },
+  { value: 'dessert-table', label: 'Dessert / Cake Table', emoji: '🎂', desc: 'Cake display, dessert station, sweet table' },
+  { value: 'kids-area', label: 'Kids Area', emoji: '🧸', desc: 'Children\'s play area or activity corner' },
 ]
 const DECOR_EXTRAS = [
   { value: 'flowers-fresh', label: 'Fresh Flowers', emoji: '🌹' },
@@ -404,12 +408,14 @@ const MC_STYLE = [
   { value: 'comedy', label: 'Comedy / Roast Style', emoji: '😂' },
 ]
 const MC_SEGMENTS = [
-  { value: 'introductions', label: 'Guest Introductions', emoji: '👋', desc: 'Introduce VIPs, family, wedding party' },
+  { value: 'introductions', label: 'Guest Introductions', emoji: '👋', desc: 'Introduce VIPs, family, honourees' },
   { value: 'speeches', label: 'Speech Coordination', emoji: '🎤', desc: 'Manage toasts, speeches, order of events' },
   { value: 'games', label: 'Games & Activities', emoji: '🎲', desc: 'Interactive games for guests' },
   { value: 'dance-floor', label: 'Dance Floor Management', emoji: '💃', desc: 'Get guests dancing, manage playlist requests' },
   { value: 'cultural', label: 'Cultural Segments', emoji: '🪔', desc: 'Manage cultural rituals and traditions' },
   { value: 'timeline', label: 'Full Event Timeline', emoji: '⏱️', desc: 'Run the entire event schedule' },
+  { value: 'kids-entertainment', label: 'Kids Entertainment', emoji: '🧸', desc: 'Engage children with activities and games' },
+  { value: 'performances', label: 'Performance Coordination', emoji: '🎭', desc: 'Coordinate dance, music, or stage performances' },
 ]
 
 function MCForm({ initialNotes, onSave, saving }: { initialNotes: string; onSave: (notes: string) => Promise<void>; saving: boolean }) {
@@ -469,17 +475,29 @@ const MEHENDI_STYLE = [
   { value: 'minimal', label: 'Minimal / Simple', emoji: '🤍' },
   { value: 'portrait', label: 'Portrait / Figure', emoji: '🎨' },
 ]
-const BRIDAL_COVERAGE = [
+const MEHENDI_COVERAGE = [
   { value: 'full-arms', label: 'Full Arms (up to elbow)', emoji: '💪' },
   { value: 'full-hands-feet', label: 'Full Arms + Feet', emoji: '🦶' },
   { value: 'half-arms', label: 'Half Arms (wrists)', emoji: '🤚' },
   { value: 'hands-only', label: 'Hands Only', emoji: '✋' },
 ]
+const MEHENDI_OCCASION = [
+  { value: 'wedding', label: 'Wedding / Sangeet', emoji: '💍' },
+  { value: 'engagement', label: 'Engagement', emoji: '💎' },
+  { value: 'baby-shower', label: 'Baby Shower / Godh Bharai', emoji: '🍼' },
+  { value: 'karva-chauth', label: 'Karva Chauth', emoji: '🌙' },
+  { value: 'eid', label: 'Eid / Festival', emoji: '🌟' },
+  { value: 'birthday', label: 'Birthday Party', emoji: '🎂' },
+  { value: 'bridal-shower', label: 'Bridal Shower / Hen Party', emoji: '🥂' },
+  { value: 'corporate', label: 'Corporate / Brand Event', emoji: '🏢' },
+  { value: 'other', label: 'Other', emoji: '✨' },
+]
 
 function MehendiForm({ initialNotes, onSave, saving }: { initialNotes: string; onSave: (notes: string) => Promise<void>; saving: boolean }) {
+  const [occasion, setOccasion] = useState<string[]>([])
   const [style, setStyle] = useState<string[]>([])
-  const [bridalCoverage, setBridalCoverage] = useState<string[]>([])
-  const [bridalCount, setBridalCount] = useState(1)
+  const [vipCoverage, setVipCoverage] = useState<string[]>([])
+  const [vipCount, setVipCount] = useState(1)
   const [guestCount, setGuestCount] = useState(0)
   const [guestComplexity, setGuestComplexity] = useState<string[]>([])
   const [notes, setNotes] = useState(initialNotes)
@@ -487,9 +505,10 @@ function MehendiForm({ initialNotes, onSave, saving }: { initialNotes: string; o
 
   const save = () => {
     const summary = summarize([
+      occasion.length > 0 && `Occasion: ${occasion.map(o => MEHENDI_OCCASION.find(x => x.value === o)?.label ?? o).join(', ')}`,
       style.length > 0 && `Style: ${style.map(s => MEHENDI_STYLE.find(o => o.value === s)?.label ?? s).join(', ')}`,
-      `${bridalCount} bridal mehendi`,
-      bridalCoverage.length > 0 && `Bridal coverage: ${bridalCoverage.map(c => BRIDAL_COVERAGE.find(o => o.value === c)?.label ?? c).join(', ')}`,
+      `${vipCount} VIP/featured design${vipCount > 1 ? 's' : ''}`,
+      vipCoverage.length > 0 && `VIP coverage: ${vipCoverage.map(c => MEHENDI_COVERAGE.find(o => o.value === c)?.label ?? c).join(', ')}`,
       guestCount > 0 && `${guestCount} guests`,
       guestComplexity.length > 0 && `Guest designs: ${guestComplexity.join(', ')}`,
       notes.trim(),
@@ -499,16 +518,20 @@ function MehendiForm({ initialNotes, onSave, saving }: { initialNotes: string; o
 
   return (
     <div className="space-y-1">
+      <FormSection title="Occasion">
+        <PillSelect options={MEHENDI_OCCASION} selected={occasion} onChange={setOccasion} multi={false} />
+      </FormSection>
+
       <FormSection title="Mehendi Style">
         <PillSelect options={MEHENDI_STYLE} selected={style} onChange={setStyle} />
       </FormSection>
 
-      <FormSection title="Bridal Mehendi">
+      <FormSection title="VIP / Featured Designs">
         <div className="space-y-4">
-          <NumberInput label="Brides / VIP designs" value={bridalCount} onChange={setBridalCount} min={1} max={5} />
+          <NumberInput label="VIP designs (bride, honouree, etc.)" value={vipCount} onChange={setVipCount} min={1} max={5} />
           <div>
             <p className="text-sm font-bold text-text-2 mb-3">Coverage</p>
-            <PillSelect options={BRIDAL_COVERAGE} selected={bridalCoverage} onChange={setBridalCoverage} multi={false} />
+            <PillSelect options={MEHENDI_COVERAGE} selected={vipCoverage} onChange={setVipCoverage} multi={false} />
           </div>
         </div>
       </FormSection>
@@ -540,16 +563,18 @@ function MehendiForm({ initialNotes, onSave, saving }: { initialNotes: string; o
 const MAKEUP_STYLE = [
   { value: 'natural', label: 'Natural / Dewy', emoji: '🌿' },
   { value: 'glamorous', label: 'Glamorous / Bold', emoji: '💄' },
-  { value: 'traditional', label: 'Traditional / Bridal', emoji: '👰' },
-  { value: 'airbrush', label: 'Airbrush', emoji: '✨' },
+  { value: 'traditional', label: 'Traditional / Cultural', emoji: '🪔' },
+  { value: 'airbrush', label: 'Airbrush / HD', emoji: '✨' },
+  { value: 'editorial', label: 'Editorial / Fashion', emoji: '📸' },
 ]
 const MAKEUP_SERVICES = [
-  { value: 'bridal-makeup', label: 'Bridal Makeup', emoji: '👰', desc: 'Full bridal look with HD/airbrush' },
-  { value: 'bridal-hair', label: 'Bridal Hair Styling', emoji: '💇‍♀️', desc: 'Updo, curls, extensions' },
-  { value: 'bridesmaid-makeup', label: 'Bridesmaid Makeup', emoji: '💄', desc: 'Makeup for bridesmaids' },
-  { value: 'bridesmaid-hair', label: 'Bridesmaid Hair', emoji: '💇', desc: 'Hair styling for bridesmaids' },
-  { value: 'family-makeup', label: 'Family Members Makeup', emoji: '👩', desc: 'Mother of bride/groom, etc.' },
-  { value: 'groom-grooming', label: 'Groom Grooming', emoji: '🤵', desc: 'Groom skincare and light makeup' },
+  { value: 'main-person', label: 'Main Person (Bride / Honouree)', emoji: '👰', desc: 'Full look for the star of the event' },
+  { value: 'main-hair', label: 'Hair Styling (Main)', emoji: '💇‍♀️', desc: 'Updo, curls, extensions for honouree' },
+  { value: 'party-makeup', label: 'Party / Group Makeup', emoji: '💄', desc: 'Makeup for bridesmaids, friends, family' },
+  { value: 'party-hair', label: 'Party / Group Hair', emoji: '💇', desc: 'Hair styling for the group' },
+  { value: 'family-makeup', label: 'Family Members', emoji: '👩', desc: 'Makeup for parents, relatives' },
+  { value: 'mens-grooming', label: 'Men\'s Grooming', emoji: '🤵', desc: 'Skincare, light makeup, grooming' },
+  { value: 'kids-makeup', label: 'Kids / Teen Makeup', emoji: '🧒', desc: 'Age-appropriate party looks' },
 ]
 
 function MakeupForm({ initialNotes, onSave, saving }: { initialNotes: string; onSave: (notes: string) => Promise<void>; saving: boolean }) {
@@ -609,25 +634,50 @@ function MakeupForm({ initialNotes, onSave, saving }: { initialNotes: string; on
 
 // ── Pandit / Officiant Form ──────────────────────────────────────────────────
 
-const CEREMONY_TYPE = [
+const PANDIT_OCCASION = [
+  { value: 'wedding', label: 'Wedding Ceremony', emoji: '💍' },
+  { value: 'engagement', label: 'Engagement / Roka / Sagai', emoji: '💎' },
+  { value: 'griha-pravesh', label: 'Griha Pravesh (House Warming)', emoji: '🏠' },
+  { value: 'satyanarayan', label: 'Satyanarayan Puja', emoji: '🙏' },
+  { value: 'naming', label: 'Naming Ceremony / Naamkaran', emoji: '👶' },
+  { value: 'mundan', label: 'Mundan (First Haircut)', emoji: '✂️' },
+  { value: 'thread', label: 'Thread Ceremony / Upanayanam', emoji: '🧵' },
+  { value: 'baby-shower', label: 'Baby Shower / Godh Bharai', emoji: '🍼' },
+  { value: 'birthday', label: 'Birthday Puja', emoji: '🎂' },
+  { value: 'anniversary', label: 'Anniversary Puja', emoji: '🎊' },
+  { value: 'navgraha', label: 'Navgraha Puja', emoji: '🌟' },
+  { value: 'vastu', label: 'Vastu Puja / Shanti', emoji: '🧭' },
+  { value: 'ganesh', label: 'Ganesh Puja / Chaturthi', emoji: '🐘' },
+  { value: 'lakshmi', label: 'Lakshmi Puja / Diwali', emoji: '🪔' },
+  { value: 'durga', label: 'Durga Puja / Navratri', emoji: '🔱' },
+  { value: 'last-rites', label: 'Last Rites / Funeral / Shradh', emoji: '🕊️' },
+  { value: 'arangetram', label: 'Arangetram', emoji: '💃' },
+  { value: 'other', label: 'Other Ceremony', emoji: '✨' },
+]
+const RELIGIOUS_TRADITION = [
   { value: 'hindu', label: 'Hindu', emoji: '🕉️' },
   { value: 'sikh', label: 'Sikh', emoji: '☬' },
+  { value: 'jain', label: 'Jain', emoji: '🙏' },
+  { value: 'buddhist', label: 'Buddhist', emoji: '☸️' },
   { value: 'muslim', label: 'Muslim / Nikah', emoji: '☪️' },
   { value: 'christian', label: 'Christian', emoji: '✝️' },
   { value: 'interfaith', label: 'Interfaith', emoji: '🤝' },
-  { value: 'civil', label: 'Civil / Non-religious', emoji: '📜' },
+  { value: 'non-religious', label: 'Non-religious / Civil', emoji: '📜' },
 ]
 const CEREMONY_NEEDS = [
   { value: 'materials', label: 'Puja Materials / Samagri', emoji: '🪔', desc: 'All ritual items provided by pandit' },
-  { value: 'mandap-setup', label: 'Mandap / Altar Setup', emoji: '🛕', desc: 'Sacred fire, seating arrangement' },
+  { value: 'mandap-setup', label: 'Mandap / Altar / Havan Setup', emoji: '🛕', desc: 'Sacred fire, seating arrangement' },
   { value: 'explanation', label: 'English Explanation', emoji: '🗣️', desc: 'Translate rituals for non-Hindi speakers' },
   { value: 'short-ceremony', label: 'Short Ceremony (under 1 hr)', emoji: '⏱️', desc: 'Abbreviated version of traditional rituals' },
-  { value: 'mehendi-ceremony', label: 'Mehendi / Sangeet Puja', emoji: '🎉', desc: 'Separate pre-wedding ceremony' },
-  { value: 'ganesh-puja', label: 'Ganesh Puja / Opening', emoji: '🙏', desc: 'Opening prayer before main ceremony' },
+  { value: 'pre-ceremony', label: 'Pre-event Puja / Ganesh Puja', emoji: '🐘', desc: 'Opening prayer before main ceremony' },
+  { value: 'specific-mantras', label: 'Specific Mantras / Hymns', emoji: '📿', desc: 'Particular mantras or prayers you want' },
+  { value: 'home-visit', label: 'Home Visit', emoji: '🏡', desc: 'Pandit to come to your home' },
+  { value: 'venue-visit', label: 'Venue / Hall Visit', emoji: '🏛️', desc: 'Pandit to come to event venue' },
 ]
 
 function PanditForm({ initialNotes, onSave, saving }: { initialNotes: string; onSave: (notes: string) => Promise<void>; saving: boolean }) {
-  const [ceremony, setCeremony] = useState<string[]>([])
+  const [occasion, setOccasion] = useState<string[]>([])
+  const [tradition, setTradition] = useState<string[]>([])
   const [needs, setNeeds] = useState<string[]>([])
   const [languages, setLanguages] = useState('')
   const [notes, setNotes] = useState(initialNotes)
@@ -635,7 +685,8 @@ function PanditForm({ initialNotes, onSave, saving }: { initialNotes: string; on
 
   const save = () => {
     const summary = summarize([
-      ceremony.length > 0 && `Ceremony: ${ceremony.map(c => CEREMONY_TYPE.find(o => o.value === c)?.label ?? c).join(', ')}`,
+      occasion.length > 0 && `Occasion: ${occasion.map(o => PANDIT_OCCASION.find(x => x.value === o)?.label ?? o).join(', ')}`,
+      tradition.length > 0 && `Tradition: ${tradition.map(t => RELIGIOUS_TRADITION.find(o => o.value === t)?.label ?? t).join(', ')}`,
       languages && `Languages: ${languages}`,
       needs.length > 0 && `Needs: ${needs.map(n => CEREMONY_NEEDS.find(o => o.value === n)?.label ?? n).join(', ')}`,
       notes.trim(),
@@ -645,13 +696,17 @@ function PanditForm({ initialNotes, onSave, saving }: { initialNotes: string; on
 
   return (
     <div className="space-y-1">
-      <FormSection title="Ceremony Type">
-        <PillSelect options={CEREMONY_TYPE} selected={ceremony} onChange={setCeremony} />
+      <FormSection title="Occasion / Purpose">
+        <PillSelect options={PANDIT_OCCASION} selected={occasion} onChange={setOccasion} />
+      </FormSection>
+
+      <FormSection title="Religious Tradition">
+        <PillSelect options={RELIGIOUS_TRADITION} selected={tradition} onChange={setTradition} multi={false} />
       </FormSection>
 
       <FormSection title="Language Preference">
         <input type="text" value={languages} onChange={e => setLanguages(e.target.value)}
-          placeholder="e.g. Hindi, Sanskrit with English explanation, Punjabi…"
+          placeholder="e.g. Hindi, Sanskrit with English explanation, Punjabi, Tamil…"
           className="w-full border-2 border-brand-border rounded-xl px-4 py-3 text-sm bg-white dark:bg-cream-2 text-text-1 placeholder:text-text-4 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40" />
       </FormSection>
 
@@ -660,7 +715,7 @@ function PanditForm({ initialNotes, onSave, saving }: { initialNotes: string; on
       </FormSection>
 
       <FormSection title="Additional Notes">
-        <NotesField value={notes} onChange={setNotes} placeholder="Specific rituals, regional traditions, timing, venue constraints…" />
+        <NotesField value={notes} onChange={setNotes} placeholder="Specific rituals, regional traditions, timing, venue constraints, regional style…" />
       </FormSection>
 
       <SaveButton saving={saving} onClick={save} />
@@ -683,12 +738,13 @@ const INVITE_STYLE = [
   { value: 'luxury', label: 'Luxury / Foil / Letterpress', emoji: '👑' },
 ]
 const INVITE_ITEMS = [
-  { value: 'main-invite', label: 'Main Invitation', emoji: '💌', desc: 'Primary wedding/event invite' },
+  { value: 'main-invite', label: 'Main Invitation', emoji: '💌', desc: 'Primary event invitation' },
   { value: 'save-the-date', label: 'Save the Date', emoji: '📅', desc: 'Pre-invite announcement' },
   { value: 'rsvp', label: 'RSVP Cards', emoji: '✉️', desc: 'Response cards with envelope' },
   { value: 'itinerary', label: 'Event Itinerary', emoji: '📋', desc: 'Schedule card for multi-day events' },
-  { value: 'menu-card', label: 'Menu Cards', emoji: '🍽️', desc: 'Table menu cards for reception' },
+  { value: 'menu-card', label: 'Menu Cards', emoji: '🍽️', desc: 'Table menu cards' },
   { value: 'thank-you', label: 'Thank You Cards', emoji: '🙏', desc: 'Post-event thank you notes' },
+  { value: 'program', label: 'Event Program', emoji: '📃', desc: 'Order of events, performer bios' },
 ]
 
 function InvitationForm({ initialNotes, onSave, saving }: { initialNotes: string; onSave: (notes: string) => Promise<void>; saving: boolean }) {
@@ -758,11 +814,12 @@ const VEHICLE_TYPE = [
   { value: 'minibus', label: 'Minibus / Coach', emoji: '🚌' },
 ]
 const TRANSPORT_PURPOSE = [
-  { value: 'bridal-entry', label: 'Bridal / Groom Entry', emoji: '👰', desc: 'Grand arrival at venue' },
-  { value: 'baraat', label: 'Baraat Procession', emoji: '🐎', desc: 'Groom\'s wedding procession' },
+  { value: 'grand-entry', label: 'Grand Entry / Arrival', emoji: '🌟', desc: 'Grand arrival at venue for VIPs or honourees' },
+  { value: 'baraat', label: 'Baraat / Procession', emoji: '🐎', desc: 'Wedding or celebration procession' },
   { value: 'guest-shuttle', label: 'Guest Shuttle', emoji: '🚌', desc: 'Hotel ↔ venue transfers' },
   { value: 'airport', label: 'Airport Transfers', emoji: '✈️', desc: 'Pick up/drop off out-of-town guests' },
-  { value: 'getaway', label: 'Post-Event Getaway', emoji: '💕', desc: 'Couple\'s departure vehicle' },
+  { value: 'getaway', label: 'Post-Event Departure', emoji: '💕', desc: 'VIP departure vehicle' },
+  { value: 'multi-venue', label: 'Multi-venue Transfers', emoji: '🔄', desc: 'Transport between multiple event locations' },
 ]
 
 function TransportForm({ initialNotes, onSave, saving }: { initialNotes: string; onSave: (notes: string) => Promise<void>; saving: boolean }) {

@@ -19,20 +19,20 @@ export default async function VendorReviewsPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Reviews</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-black tracking-tight text-text-1">Reviews</h1>
         {avgRating && (
-          <p className="text-gray-500 mt-1">
-            Average: <strong className="text-orange-600">{avgRating.toFixed(1)}</strong> / 5 ({reviews.length} reviews)
+          <p className="text-text-4 mt-1">
+            Average: <strong className="text-brand">{avgRating.toFixed(1)}</strong> / 5 ({reviews.length} reviews)
           </p>
         )}
       </div>
-      <div className="space-y-4">
+      <div className="space-y-5">
         {reviews.map(review => (
           <ReviewCard key={review.id} review={review as any} isVendorView={true} />
         ))}
         {reviews.length === 0 && (
-          <p className="text-gray-400 text-center py-12">No reviews yet.</p>
+          <p className="text-base text-text-4 text-center py-16">No reviews yet.</p>
         )}
       </div>
     </div>

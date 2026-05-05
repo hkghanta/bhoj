@@ -5,6 +5,7 @@ export type VendorForRanking = {
   id: string
   business_name: string
   city: string
+  country: string
   vendor_type: string
   avg_rating: number | null
   is_verified: boolean
@@ -17,6 +18,7 @@ export type VendorForRanking = {
 
 export type RankingRequirements = {
   city?: string
+  country?: string
   is_halal?: boolean
   is_jain?: boolean
   cuisines?: string[]
@@ -32,9 +34,11 @@ export function rankVendors(
     .map(v => {
       let score = 0
 
-      // Location: 40 points if same city (case-insensitive)
+      // Location: 40 points for same city, 15 points for same country
       if (requirements.city && v.city.toLowerCase() === requirements.city.toLowerCase()) {
         score += 40
+      } else if (requirements.country && v.country === requirements.country) {
+        score += 15
       }
 
       // Requirements fit: 35 points total

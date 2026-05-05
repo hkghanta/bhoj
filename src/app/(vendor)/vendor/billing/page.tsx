@@ -56,14 +56,14 @@ export default function VendorBillingPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Billing</h1>
+          <h1 className="text-3xl font-black tracking-tight text-text-1">Billing</h1>
           {subscription && (
-            <p className="text-gray-500 mt-1">
-              Current plan: <strong className="text-orange-600">{subscription.tier}</strong>
+            <p className="text-text-4 mt-1">
+              Current plan: <strong className="text-brand">{subscription.tier}</strong>
               {subscription.leads_limit < 999 && (
-                <span className="ml-2 text-gray-400">
+                <span className="ml-2 text-text-4">
                   ({subscription.leads_this_month}/{subscription.leads_limit} leads this month)
                 </span>
               )}
@@ -82,7 +82,7 @@ export default function VendorBillingPage() {
       </div>
 
       {successMessage && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 text-green-800">
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-5 text-green-800">
           {successMessage}
         </div>
       )}
@@ -101,9 +101,9 @@ export default function VendorBillingPage() {
       </div>
 
       {currentTier !== 'FREE' && subscription?.current_period_end && (
-        <p className="text-sm text-gray-400 mt-6 text-center">
+        <p className="text-sm text-text-4 mt-6 text-center">
           Current billing period ends{' '}
-          {new Date(subscription.current_period_end).toLocaleDateString('en-GB', {
+          {new Date(subscription.current_period_end).toLocaleDateString('en-US', {
             day: 'numeric',
             month: 'long',
             year: 'numeric',

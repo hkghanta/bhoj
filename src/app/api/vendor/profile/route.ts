@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { VendorType } from '@prisma/client'
+import { geocodeCity } from '@/lib/geocode'
 
 const updateSchema = z.object({
   business_name: z.string().min(2).optional(),
@@ -18,6 +19,8 @@ const updateSchema = z.object({
   license_number: z.string().optional(),
   insurance_number: z.string().optional(),
   health_inspection_date: z.string().optional(),
+  travel_radius_miles: z.number().int().min(10).max(500).optional(),
+  sustainability_tags: z.array(z.string()).optional(),
 })
 
 export async function GET() {
@@ -56,6 +59,10 @@ export async function PUT(req: NextRequest) {
   const data: Record<string, unknown> = { ...parsed.data }
   if (parsed.data.health_inspection_date) {
     data.health_inspection_date = new Date(parsed.data.health_inspection_date)
+  }
+  if (parsed.data.city) {
+    const geo = await geocodeCity(parsed.data.city)
+    if (geo) { data.lat = geo.lat; data.lng = geo.lng }
   }
 
   const vendor = await prisma.vendor.update({

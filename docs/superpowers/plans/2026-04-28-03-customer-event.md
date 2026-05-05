@@ -54,7 +54,7 @@ src/
 - [ ] **Step 1: Install date-fns**
 
 ```bash
-cd /home/hareesh/projects/bhoj
+cd /home/hareesh/projects/oneseva
 pnpm add date-fns
 ```
 
@@ -381,7 +381,7 @@ git push
 - [ ] **Step 1: Install additional shadcn components**
 
 ```bash
-cd /home/hareesh/projects/bhoj
+cd /home/hareesh/projects/oneseva
 pnpm dlx shadcn@latest add popover calendar
 ```
 

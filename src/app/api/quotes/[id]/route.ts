@@ -23,6 +23,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     include: {
       vendor: true,
       menu_items: { orderBy: [{ category: 'asc' }, { sort_order: 'asc' }] },
+      tray_lines: { orderBy: { sort_order: 'asc' } },
       match: {
         include: {
           event_request: {
@@ -88,6 +89,33 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       where: { id },
       data: { status: parsed.data.status },
     })
+
+    // Auto-create EventVendor when quote is accepted
+    if (parsed.data.status === 'ACCEPTED') {
+      const fullQuote = await prisma.quote.findUnique({
+        where: { id },
+        include: {
+          match: { include: { event_request: { select: { event_id: true } } } },
+        },
+      })
+      if (fullQuote) {
+        await prisma.eventVendor.upsert({
+          where: {
+            event_id_vendor_id: {
+              event_id: fullQuote.match.event_request.event_id,
+              vendor_id: fullQuote.vendor_id,
+            },
+          },
+          update: { quote_id: id },
+          create: {
+            event_id: fullQuote.match.event_request.event_id,
+            vendor_id: fullQuote.vendor_id,
+            quote_id: id,
+          },
+        })
+      }
+    }
+
     return NextResponse.json(updated)
   }
 

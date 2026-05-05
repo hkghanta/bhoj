@@ -53,22 +53,22 @@ export function MenuBrief({ preference, selectedByCategory, guestCount }: Props)
   ].filter(Boolean) as string[] : []
 
   return (
-    <div className="bg-gray-50 rounded-xl border p-5 h-full overflow-y-auto">
-      <h3 className="font-semibold text-gray-900 mb-4">Event Requirements</h3>
+    <div className="bg-cream rounded-xl border p-5 h-full overflow-y-auto">
+      <h3 className="font-semibold text-text-1 mb-4">Event Requirements</h3>
 
       <div className="space-y-2 mb-5 text-sm">
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between text-text-3">
           <span>Guests</span>
           <span className="font-medium">{guestCount}</span>
         </div>
         {preference?.service_style && (
-          <div className="flex justify-between text-gray-600">
+          <div className="flex justify-between text-text-3">
             <span>Service style</span>
             <span className="font-medium">{preference.service_style}</span>
           </div>
         )}
         {preference?.cuisine_preferences && preference.cuisine_preferences.length > 0 && (
-          <div className="text-gray-600">
+          <div className="text-text-3">
             <span>Cuisines: </span>
             <span className="font-medium">{preference.cuisine_preferences.join(', ')}</span>
           </div>
@@ -77,10 +77,10 @@ export function MenuBrief({ preference, selectedByCategory, guestCount }: Props)
 
       {flags.length > 0 && (
         <div className="mb-5">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Dietary Requirements</p>
+          <p className="text-xs font-medium text-text-4 uppercase tracking-wide mb-2">Dietary Requirements</p>
           <div className="flex flex-wrap gap-1.5">
             {flags.map(f => (
-              <span key={f} className="px-2 py-0.5 text-xs bg-orange-50 text-orange-700 border border-orange-200 rounded-full">
+              <span key={f} className="px-2 py-0.5 text-xs bg-cream text-brand border border-brand rounded-full">
                 {f}
               </span>
             ))}
@@ -89,7 +89,7 @@ export function MenuBrief({ preference, selectedByCategory, guestCount }: Props)
       )}
 
       <div>
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Menu Checklist</p>
+        <p className="text-xs font-medium text-text-4 uppercase tracking-wide mb-3">Menu Checklist</p>
         <div className="space-y-2">
           {CATEGORY_MAP.map(({ key, label, category }) => {
             const required = preference ? (preference[key] as number | null) ?? 0 : 0
@@ -102,10 +102,10 @@ export function MenuBrief({ preference, selectedByCategory, guestCount }: Props)
                 <div className="flex items-center gap-2">
                   {done
                     ? <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    : <Circle className="h-4 w-4 text-gray-300" />}
-                  <span className={done ? 'text-green-700' : 'text-gray-700'}>{label}</span>
+                    : <Circle className="h-4 w-4 text-text-4" />}
+                  <span className={done ? 'text-green-700' : 'text-text-2'}>{label}</span>
                 </div>
-                <span className={`text-xs font-medium ${done ? 'text-green-600' : 'text-orange-600'}`}>
+                <span className={`text-xs font-medium ${done ? 'text-green-600' : 'text-brand'}`}>
                   {selected}/{required}
                 </span>
               </div>

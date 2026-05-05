@@ -857,13 +857,15 @@ const SECTION_STYLES: Record<string, { emoji: string; color: string }> = {
   'Languages':    { emoji: '🌐', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   'Services':     { emoji: '💼', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   'Ceremony':     { emoji: '🕉️', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  'Occasion':     { emoji: '🎉', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  'Tradition':    { emoji: '🕉️', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
   'Needs':        { emoji: '📋', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   'Type':         { emoji: '📋', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   'Items':        { emoji: '📝', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   'Vehicles':     { emoji: '🚗', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   'Purpose':      { emoji: '🎯', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   'Quantity':     { emoji: '📊', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  'Bridal coverage': { emoji: '💍', color: 'bg-pink-50 text-pink-700 border-pink-200' },
+  'VIP coverage': { emoji: '💎', color: 'bg-pink-50 text-pink-700 border-pink-200' },
   'Guest designs': { emoji: '👥', color: 'bg-blue-50 text-blue-700 border-blue-200' },
 }
 

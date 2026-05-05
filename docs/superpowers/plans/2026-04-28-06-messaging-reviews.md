@@ -1002,7 +1002,7 @@ export function HiddenFeedbackForm({ vendorId, vendorName, eventRequestId, match
 
         <div className="flex items-center justify-between py-2">
           <div>
-            <Label className="text-sm text-gray-600">Did you book them outside Bhoj?</Label>
+            <Label className="text-sm text-gray-600">Did you book them outside OneSeva?</Label>
             <p className="text-xs text-gray-400">Helps us improve the matching</p>
           </div>
           <Switch checked={form.booked_offline} onCheckedChange={v => setForm(f => ({ ...f, booked_offline: v }))} />

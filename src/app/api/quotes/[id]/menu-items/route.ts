@@ -7,6 +7,7 @@ import { MenuCategory } from '@prisma/client'
 const addItemSchema = z.object({
   menu_item_id: z.string().optional(),
   item_name: z.string().min(1),
+  description: z.string().optional().nullable(),
   category: z.nativeEnum(MenuCategory),
   is_vegetarian: z.boolean().default(false),
   is_jain: z.boolean().default(false),
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { id } = await params
   const quote = await prisma.quote.findFirst({
-    where: { id, vendor_id: (session.user!.id as string), status: { in: ['DRAFT'] } },
+    where: { id, vendor_id: (session.user!.id as string), status: { in: ['DRAFT', 'SENT', 'VIEWED'] } },
   })
   if (!quote) return NextResponse.json({ error: 'Not found or not editable' }, { status: 404 })
 

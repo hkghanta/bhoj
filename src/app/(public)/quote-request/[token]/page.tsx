@@ -42,11 +42,11 @@ function StatusScreen({ icon, title, subtitle, cta }: {
   cta?: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl border border-gray-100 shadow-xl p-10 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-cream via-white to-cream-2 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white dark:bg-cream-2 rounded-3xl border border-brand-border shadow-xl p-10 text-center">
         <div className="text-6xl mb-5">{icon}</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
-        <p className="text-gray-500 leading-relaxed mb-6">{subtitle}</p>
+        <h2 className="text-3xl font-black tracking-tight text-text-1 mb-2">{title}</h2>
+        <p className="text-text-3 leading-relaxed mb-6">{subtitle}</p>
         {cta}
       </div>
     </div>
@@ -128,10 +128,10 @@ export default function QuoteRequestPage() {
 
   if (loadState === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-cream via-white to-cream-2 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
-          <p className="text-gray-500 text-sm">Loading your quote request…</p>
+          <div className="w-10 h-10 border-4 border-brand/20 border-t-brand rounded-full animate-spin" />
+          <p className="text-text-3 text-sm">Loading your quote request…</p>
         </div>
       </div>
     )
@@ -165,15 +165,15 @@ export default function QuoteRequestPage() {
         subtitle={`Your quote has been delivered to the host. They'll review it and reach out if they'd like to book you for their ${context?.event.event_type.toLowerCase().replace('_', ' ')}.`}
         cta={
           <div className="space-y-4">
-            <p className="text-sm text-gray-400">You can close this tab.</p>
-            <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 text-center">
-              <p className="font-semibold text-orange-900 mb-1">Want more leads like this?</p>
-              <p className="text-sm text-orange-700 mb-3">
+            <p className="text-sm text-text-4">You can close this tab.</p>
+            <div className="bg-cream border border-brand-border rounded-2xl p-5 text-center">
+              <p className="font-semibold text-text-1 mb-1">Want more leads like this?</p>
+              <p className="text-sm text-text-2 mb-3">
                 Create your free OneSeva profile to get notified about new events in your area, manage bookings, and build your reputation with reviews.
               </p>
               <Link
                 href="/register?role=vendor"
-                className="inline-block bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                className="inline-block bg-brand hover:bg-brand-hover text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
               >
                 Create free profile →
               </Link>
@@ -190,72 +190,72 @@ export default function QuoteRequestPage() {
   const vendorTypeLabel = vendor_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
-      <div className="max-w-2xl mx-auto px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-cream via-white to-cream-2">
+      <div className="max-w-3xl mx-auto px-4 py-10">
 
         {/* Header greeting */}
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+          <div className="inline-flex items-center gap-2 bg-cream border border-brand-border text-brand text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             <span>📋</span> Quote Request
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl sm:text-4xl font-black text-text-1 mb-2">
             Hi {responder_name}!
           </h1>
-          <p className="text-gray-500 text-lg">
-            You've been invited to quote for a <strong className="text-gray-700">{vendorTypeLabel}</strong> service.
+          <p className="text-text-3 text-lg">
+            You've been invited to quote for a <strong className="text-text-2">{vendorTypeLabel}</strong> service.
           </p>
         </div>
 
         {/* Event context card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-6 overflow-hidden">
-          <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4">
+        <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm mb-6 overflow-hidden">
+          <div className="bg-gradient-to-r from-[#1a0904] to-[#3d1f10] px-6 py-4">
             <h2 className="text-white font-bold text-lg">Event Details</h2>
-            <p className="text-orange-100 text-sm mt-0.5">Here's what we know about this event</p>
+            <p className="text-white/60 text-sm mt-0.5">Here's what we know about this event</p>
           </div>
-          <div className="p-6 grid grid-cols-2 gap-4">
+          <div className="p-6 sm:p-8 grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Event Type</p>
-              <p className="text-gray-900 font-semibold">{event.event_type.replace(/_/g, ' ')}</p>
+              <p className="text-xs font-bold text-text-4 uppercase tracking-wider mb-1">Event Type</p>
+              <p className="text-text-1 font-semibold">{event.event_type.replace(/_/g, ' ')}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Date</p>
-              <p className="text-gray-900 font-semibold">{event.fuzzy_date}</p>
+              <p className="text-xs font-bold text-text-4 uppercase tracking-wider mb-1">Date</p>
+              <p className="text-text-1 font-semibold">{event.fuzzy_date}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">City</p>
-              <p className="text-gray-900 font-semibold">{event.city}</p>
+              <p className="text-xs font-bold text-text-4 uppercase tracking-wider mb-1">City</p>
+              <p className="text-text-1 font-semibold">{event.city}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Guest Count</p>
-              <p className="text-gray-900 font-semibold">{event.guest_count} guests</p>
+              <p className="text-xs font-bold text-text-4 uppercase tracking-wider mb-1">Guest Count</p>
+              <p className="text-text-1 font-semibold">{event.guest_count} guests</p>
             </div>
             <div className="col-span-2">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Budget Range</p>
-              <p className="text-gray-900 font-semibold">{event.budget_band}</p>
+              <p className="text-xs font-bold text-text-4 uppercase tracking-wider mb-1">Budget Range</p>
+              <p className="text-text-1 font-semibold">{event.budget_band}</p>
             </div>
             {service_notes && (
-              <div className="col-span-2 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-                <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1">Host's Notes</p>
-                <p className="text-amber-900 text-sm">{service_notes}</p>
+              <div className="col-span-2 bg-cream border border-brand-border rounded-xl px-4 py-3">
+                <p className="text-xs font-bold text-brand uppercase tracking-wider mb-1">Host's Notes</p>
+                <p className="text-text-2 text-sm">{service_notes}</p>
               </div>
             )}
             {menu_preference && (
-              <div className="col-span-2 border-t border-gray-50 pt-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Catering Preferences</p>
+              <div className="col-span-2 border-t border-brand-border pt-4">
+                <p className="text-xs font-bold text-text-4 uppercase tracking-wider mb-2">Catering Preferences</p>
                 <div className="flex flex-wrap gap-2">
                   {menu_preference.cuisine_preferences.map(c => (
-                    <span key={c} className="text-xs bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-full font-medium">
+                    <span key={c} className="text-xs bg-cream text-brand border border-brand-border px-2.5 py-1 rounded-full font-medium">
                       {c}
                     </span>
                   ))}
                   {menu_preference.service_style && (
-                    <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-cream-2 text-text-2 border border-brand-border px-2.5 py-1 rounded-full font-medium">
                       {menu_preference.service_style.replace(/_/g, ' ')}
                     </span>
                   )}
                 </div>
                 {menu_preference.special_notes && (
-                  <p className="text-sm text-gray-600 mt-2 italic">{menu_preference.special_notes}</p>
+                  <p className="text-sm text-text-3 mt-2 italic">{menu_preference.special_notes}</p>
                 )}
               </div>
             )}
@@ -266,19 +266,19 @@ export default function QuoteRequestPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
 
           {/* Pricing card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-50">
-              <h3 className="font-bold text-gray-900">Your Price</h3>
-              <p className="text-sm text-gray-500 mt-0.5">Enter the amount you'd charge for this event</p>
+          <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-brand-border">
+              <h3 className="font-bold text-lg text-text-1">Your Price</h3>
+              <p className="text-sm text-text-3 mt-0.5">Enter the amount you'd charge for this event</p>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 sm:p-8 space-y-4">
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-sm font-bold text-text-2 mb-1.5">
                     Amount ({event.currency})
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3 font-semibold text-sm">
                       {event.currency}
                     </span>
                     <input
@@ -289,18 +289,18 @@ export default function QuoteRequestPage() {
                       value={quotedPrice}
                       onChange={e => setQuotedPrice(e.target.value)}
                       placeholder="0.00"
-                      className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl text-gray-900 font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-colors"
+                      className="w-full pl-12 pr-4 py-3 border border-brand-border rounded-xl text-text-1 font-semibold text-base focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors"
                     />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-sm font-bold text-text-2 mb-1.5">
                     Pricing Basis
                   </label>
                   <select
                     value={priceUnit}
                     onChange={e => setPriceUnit(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-colors"
+                    className="w-full px-3 py-3 border border-brand-border rounded-xl text-text-1 text-base bg-white dark:bg-cream-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors"
                   >
                     {PRICE_UNITS.map(u => (
                       <option key={u.value} value={u.value}>{u.label}</option>
@@ -312,12 +312,12 @@ export default function QuoteRequestPage() {
           </div>
 
           {/* What's included card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-50">
-              <h3 className="font-bold text-gray-900">What's Included</h3>
-              <p className="text-sm text-gray-500 mt-0.5">Describe what this price covers — menu, setup, service, etc.</p>
+          <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-brand-border">
+              <h3 className="font-bold text-lg text-text-1">What's Included</h3>
+              <p className="text-sm text-text-3 mt-0.5">Describe what this price covers — menu, setup, service, etc.</p>
             </div>
-            <div className="p-6">
+            <div className="p-6 sm:p-8">
               <textarea
                 required
                 minLength={5}
@@ -326,45 +326,45 @@ export default function QuoteRequestPage() {
                 onChange={e => setWhatIncludes(e.target.value)}
                 placeholder="e.g. Full buffet setup for 150 guests including welcome drinks, 3-course meal, dessert table, and 2 service staff. Includes all crockery and linen."
                 rows={4}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-800 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-colors placeholder:text-gray-400"
+                className="w-full px-4 py-3 border border-brand-border rounded-xl text-text-1 text-base resize-none focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors placeholder:text-text-4"
               />
-              <p className="text-xs text-gray-400 mt-1.5 text-right">{whatIncludes.length}/1000</p>
+              <p className="text-xs text-text-4 mt-1.5 text-right">{whatIncludes.length}/1000</p>
             </div>
           </div>
 
           {/* Service details card (optional) */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-50">
-              <h3 className="font-bold text-gray-900">Service Details <span className="text-gray-400 font-normal text-sm">(optional)</span></h3>
-              <p className="text-sm text-gray-500 mt-0.5">Any additional information about your service, experience, or team</p>
+          <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-brand-border">
+              <h3 className="font-bold text-lg text-text-1">Service Details <span className="text-text-4 font-normal text-sm">(optional)</span></h3>
+              <p className="text-sm text-text-3 mt-0.5">Any additional information about your service, experience, or team</p>
             </div>
-            <div className="p-6">
+            <div className="p-6 sm:p-8">
               <textarea
                 maxLength={1000}
                 value={serviceDetails}
                 onChange={e => setServiceDetails(e.target.value)}
                 placeholder="e.g. 8 years experience in Indian weddings. Our team specialises in North Indian cuisine and live chaat counters. Fully insured, references available."
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-800 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-colors placeholder:text-gray-400"
+                className="w-full px-4 py-3 border border-brand-border rounded-xl text-text-1 text-base resize-none focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors placeholder:text-text-4"
               />
-              <p className="text-xs text-gray-400 mt-1.5 text-right">{serviceDetails.length}/1000</p>
+              <p className="text-xs text-text-4 mt-1.5 text-right">{serviceDetails.length}/1000</p>
             </div>
           </div>
 
           {/* Availability card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-50">
-              <h3 className="font-bold text-gray-900">Your Availability</h3>
-              <p className="text-sm text-gray-500 mt-0.5">For {event.fuzzy_date} in {event.city}</p>
+          <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-brand-border">
+              <h3 className="font-bold text-lg text-text-1">Your Availability</h3>
+              <p className="text-sm text-text-3 mt-0.5">For {event.fuzzy_date} in {event.city}</p>
             </div>
-            <div className="p-6 space-y-2.5">
+            <div className="p-6 sm:p-8 space-y-2.5">
               {AVAILABILITY_OPTIONS.map(opt => (
                 <label
                   key={opt.value}
                   className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                     availability === opt.value
-                      ? 'border-orange-400 bg-orange-50'
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                      ? 'border-brand bg-brand/5'
+                      : 'border-brand-border hover:border-brand/40 bg-white dark:bg-cream-2'
                   }`}
                 >
                   <input
@@ -373,9 +373,9 @@ export default function QuoteRequestPage() {
                     value={opt.value}
                     checked={availability === opt.value}
                     onChange={() => setAvailability(opt.value)}
-                    className="accent-orange-500 flex-shrink-0"
+                    className="accent-brand flex-shrink-0"
                   />
-                  <span className={`text-sm font-medium ${availability === opt.value ? 'text-orange-900' : 'text-gray-700'}`}>
+                  <span className={`text-sm font-medium ${availability === opt.value ? 'text-text-1' : 'text-text-2'}`}>
                     {opt.label}
                   </span>
                 </label>
@@ -384,19 +384,19 @@ export default function QuoteRequestPage() {
           </div>
 
           {/* Extra notes card (optional) */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-50">
-              <h3 className="font-bold text-gray-900">Extra Notes <span className="text-gray-400 font-normal text-sm">(optional)</span></h3>
-              <p className="text-sm text-gray-500 mt-0.5">Anything else you'd like the host to know?</p>
+          <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-brand-border">
+              <h3 className="font-bold text-lg text-text-1">Extra Notes <span className="text-text-4 font-normal text-sm">(optional)</span></h3>
+              <p className="text-sm text-text-3 mt-0.5">Anything else you'd like the host to know?</p>
             </div>
-            <div className="p-6">
+            <div className="p-6 sm:p-8">
               <textarea
                 maxLength={500}
                 value={extraNotes}
                 onChange={e => setExtraNotes(e.target.value)}
                 placeholder="e.g. Happy to arrange a tasting session. Please call me to discuss the menu in more detail."
                 rows={2}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-800 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-colors placeholder:text-gray-400"
+                className="w-full px-4 py-3 border border-brand-border rounded-xl text-text-1 text-base resize-none focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors placeholder:text-text-4"
               />
             </div>
           </div>
@@ -412,7 +412,7 @@ export default function QuoteRequestPage() {
           <button
             type="submit"
             disabled={submitting || !quotedPrice || !whatIncludes}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-2xl shadow-lg shadow-orange-200 transition-all flex items-center justify-center gap-3"
+            className="w-full bg-brand hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-xl transition-all flex items-center justify-center gap-3"
           >
             {submitting ? (
               <>
@@ -426,7 +426,7 @@ export default function QuoteRequestPage() {
             )}
           </button>
 
-          <p className="text-center text-xs text-gray-400 pb-4">
+          <p className="text-center text-xs text-text-4 pb-4">
             By submitting you agree to be contacted by the event host via OneSeva.
           </p>
         </form>

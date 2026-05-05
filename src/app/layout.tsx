@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Caveat } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
+import ThemeProvider from "@/components/ThemeProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-dancing-script",
+  weight: ["700"],
+});
 
 export const metadata: Metadata = {
-  title: "Bhoj — Indian Event Services",
-  description: "Find the best Indian caterers and event vendors for your celebration",
+  title: "OneSeva — Plan Your Perfect Celebration",
+  description:
+    "Find, compare and book trusted caterers, decorators, photographers and more for your wedding, birthday, corporate event or any celebration.",
 };
 
 export default async function RootLayout({
@@ -18,11 +25,15 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
   return (
-    <html lang="en" className={`${inter.className} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <SessionProvider session={session}>
-          {children}
-        </SessionProvider>
+    <html
+      lang="en"
+      className={`${inter.variable} ${caveat.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className={`${inter.className} min-h-full flex flex-col`}>
+        <ThemeProvider>
+          <SessionProvider session={session}>{children}</SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

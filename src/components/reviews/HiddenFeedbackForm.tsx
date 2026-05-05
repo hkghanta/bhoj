@@ -17,14 +17,14 @@ type Props = {
 function StarRating({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) {
   return (
     <div className="flex items-center gap-3">
-      <Label className="w-48 text-sm text-gray-600">{label}</Label>
+      <Label className="w-48 text-sm text-text-3">{label}</Label>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map(n => (
           <button
             key={n}
             type="button"
             onClick={() => onChange(n)}
-            className={`text-xl transition-colors ${n <= value ? 'text-yellow-400' : 'text-gray-200 hover:text-yellow-300'}`}
+            className={`text-xl transition-colors ${n <= value ? 'text-yellow-400' : 'text-text-4 hover:text-yellow-300'}`}
           >
             ★
           </button>
@@ -71,8 +71,8 @@ export function HiddenFeedbackForm({ vendorId, vendorName, eventRequestId, match
   return (
     <div className="bg-white rounded-xl border p-6 max-w-lg">
       <div className="mb-4">
-        <h3 className="font-semibold text-gray-900">Private Feedback</h3>
-        <p className="text-sm text-gray-500 mt-1">
+        <h3 className="font-semibold text-text-1">Private Feedback</h3>
+        <p className="text-sm text-text-4 mt-1">
           This feedback about <strong>{vendorName}</strong> is completely private — only used to improve our matching.
           It will never be shown publicly.
         </p>
@@ -87,20 +87,20 @@ export function HiddenFeedbackForm({ vendorId, vendorName, eventRequestId, match
         <StarRating label="Overall experience" value={form.overall_experience} onChange={v => setForm(f => ({ ...f, overall_experience: v }))} />
 
         <div className="flex items-center justify-between py-2">
-          <Label className="text-sm text-gray-600">Would you recommend this vendor?</Label>
+          <Label className="text-sm text-text-3">Would you recommend this vendor?</Label>
           <Switch checked={form.would_recommend} onCheckedChange={v => setForm(f => ({ ...f, would_recommend: v }))} />
         </div>
 
         <div className="flex items-center justify-between py-2">
           <div>
-            <Label className="text-sm text-gray-600">Did you book them outside Bhoj?</Label>
-            <p className="text-xs text-gray-400">Helps us improve the matching</p>
+            <Label className="text-sm text-text-3">Did you book them outside OneSeva?</Label>
+            <p className="text-xs text-text-4">Helps us improve the matching</p>
           </div>
           <Switch checked={form.booked_offline} onCheckedChange={v => setForm(f => ({ ...f, booked_offline: v }))} />
         </div>
 
         <div className="space-y-1">
-          <Label className="text-sm text-gray-600">Any other notes? <span className="text-gray-400">(optional)</span></Label>
+          <Label className="text-sm text-text-3">Any other notes? <span className="text-text-4">(optional)</span></Label>
           <Textarea
             value={form.notes}
             onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
@@ -112,7 +112,7 @@ export function HiddenFeedbackForm({ vendorId, vendorName, eventRequestId, match
         <button
           type="submit"
           disabled={submitting}
-          className={cn(buttonVariants(), 'w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50')}
+          className={cn(buttonVariants(), 'w-full bg-brand hover:bg-brand-hover disabled:opacity-50')}
         >
           {submitting ? 'Submitting…' : 'Submit Private Feedback'}
         </button>

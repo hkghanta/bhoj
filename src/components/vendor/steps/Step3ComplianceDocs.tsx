@@ -61,16 +61,16 @@ export function Step3ComplianceDocs({ onNext, onBack }: Props) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-gray-900">Compliance Documents</h2>
-      <p className="text-gray-500 text-sm">
+      <h2 className="text-xl font-semibold text-text-1">Compliance Documents</h2>
+      <p className="text-text-4 text-sm">
         Upload your certifications. Required documents must be provided before receiving leads.
       </p>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {REQUIRED_DOCS.map(doc => (
-          <div key={doc.key} className="flex items-center justify-between p-4 border rounded-lg">
+          <div key={doc.key} className="flex items-center justify-between p-5 border rounded-xl">
             <div>
-              <p className="text-sm font-medium text-gray-800">{doc.label}</p>
+              <p className="text-sm font-medium text-text-1">{doc.label}</p>
               {doc.required && <Badge variant="outline" className="text-xs mt-0.5">Required</Badge>}
             </div>
             <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export function Step3ComplianceDocs({ onNext, onBack }: Props) {
                     disabled={uploading === doc.key}
                     onChange={e => e.target.files?.[0] && uploadDoc(doc.key, e.target.files[0])}
                   />
-                  <span className="flex items-center gap-1.5 px-3 py-1.5 border rounded-md text-sm text-gray-600 hover:bg-gray-50 cursor-pointer">
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 border rounded-md text-sm text-text-3 hover:bg-cream cursor-pointer">
                     <Upload className="h-3.5 w-3.5" />
                     {uploading === doc.key ? 'Uploading…' : 'Upload'}
                   </span>
@@ -98,7 +98,7 @@ export function Step3ComplianceDocs({ onNext, onBack }: Props) {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-5">
         <div className="space-y-1">
           <Label>License / Registration number</Label>
           <Input value={profile.license_number} onChange={e => setProfile(p => ({ ...p, license_number: e.target.value }))} />
@@ -111,7 +111,7 @@ export function Step3ComplianceDocs({ onNext, onBack }: Props) {
 
       <div className="flex gap-3 pt-2">
         <Button variant="outline" onClick={onBack}>← Back</Button>
-        <Button onClick={handleSave} disabled={saving} className="flex-1 bg-orange-600 hover:bg-orange-700">
+        <Button onClick={handleSave} disabled={saving} className="flex-1 bg-brand hover:bg-brand-hover">
           {saving ? 'Saving…' : 'Save & Continue →'}
         </Button>
       </div>

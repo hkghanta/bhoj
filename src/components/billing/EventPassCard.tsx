@@ -52,13 +52,13 @@ export function EventPassCard({ eventId, eventName }: Props) {
           {hasPass ? (
             <CheckCircle2 className="h-5 w-5 text-green-600" />
           ) : (
-            <Zap className="h-5 w-5 text-orange-600" />
+            <Zap className="h-5 w-5 text-brand" />
           )}
-          <h3 className="font-semibold text-gray-900">Event Pass</h3>
+          <h3 className="font-semibold text-text-1">Event Pass</h3>
           {hasPass && <Badge className="bg-green-600 text-white text-xs">Active</Badge>}
         </div>
         {!hasPass && (
-          <span className="text-xl font-bold text-orange-600">£9.99</span>
+          <span className="text-xl font-bold text-brand">£9.99</span>
         )}
       </div>
 
@@ -68,13 +68,13 @@ export function EventPassCard({ eventId, eventName }: Props) {
         </p>
       ) : (
         <>
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-text-4 mb-3">
             Unlock premium planning features for <strong>{eventName}</strong>. One-time payment.
           </p>
           <ul className="space-y-1.5 mb-4">
             {FEATURES.map(f => (
-              <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                <Lock className="h-3.5 w-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <li key={f} className="flex items-start gap-2 text-sm text-text-3">
+                <Lock className="h-3.5 w-3.5 text-text-4 mt-0.5 flex-shrink-0" />
                 {f}
               </li>
             ))}
@@ -82,7 +82,7 @@ export function EventPassCard({ eventId, eventName }: Props) {
           <button
             onClick={handlePurchase}
             disabled={purchasing}
-            className={cn(buttonVariants(), 'w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50')}
+            className={cn(buttonVariants(), 'w-full bg-brand hover:bg-brand-hover disabled:opacity-50')}
           >
             {purchasing ? 'Redirecting to checkout…' : 'Get Event Pass — £9.99'}
           </button>

@@ -16,7 +16,7 @@ export function QuoteReceivedEmail({ customerName, vendorName, eventName, totalE
       <Body style={{ backgroundColor: '#f9fafb', fontFamily: 'Arial, sans-serif' }}>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 20px' }}>
           <Section style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e5e7eb' }}>
-            <Heading style={{ color: '#ea580c', fontSize: '24px', marginBottom: '8px' }}>Bhoj</Heading>
+            <Heading style={{ color: '#ea580c', fontSize: '24px', marginBottom: '8px' }}>OneSeva</Heading>
             <Text style={{ color: '#374151', fontSize: '16px', fontWeight: 'bold' }}>
               You received a quote!
             </Text>
@@ -52,7 +52,7 @@ export function QuoteReceivedEmail({ customerName, vendorName, eventName, totalE
           </Section>
 
           <Text style={{ color: '#9ca3af', fontSize: '12px', textAlign: 'center', marginTop: '24px' }}>
-            Bhoj · Indian Event Services
+            OneSeva · Indian Event Services
           </Text>
         </Container>
       </Body>

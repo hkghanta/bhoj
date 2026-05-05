@@ -15,8 +15,8 @@ function Switch({ checked, onCheckedChange, className }: Props) {
       aria-checked={checked}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500',
-        checked ? 'bg-orange-600' : 'bg-gray-200',
+        'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+        checked ? 'bg-brand' : 'bg-cream-2',
         className
       )}
     >

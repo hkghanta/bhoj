@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { matchQueue } from '@/lib/jobs/queues'
+import { runMatchJob } from '@/lib/jobs/match'
 import { z } from 'zod'
 import { VendorType, MenuMode } from '@prisma/client'
 
@@ -21,6 +21,7 @@ const createSchema = z.object({
     gluten_free: z.boolean().default(false),
     dairy_free: z.boolean().default(false),
     special_notes: z.string().optional(),
+    pricing_preference: z.enum(['NO_PREFERENCE', 'PER_HEAD', 'PER_TRAY']).default('NO_PREFERENCE'),
     soup_salad_count: z.number().int().optional(),
     appetizer_count: z.number().int().optional(),
     main_count: z.number().int().optional(),
@@ -79,11 +80,9 @@ export async function POST(req: NextRequest) {
     include: { menu_preference: true },
   })
 
-  await matchQueue.add(
-    'run-match',
-    { eventRequestId: eventRequest.id },
-    { attempts: 3, backoff: { type: 'exponential', delay: 5000 } }
-  )
+  runMatchJob({ eventRequestId: eventRequest.id }).catch(err => {
+    console.error('[event-requests] Match job failed:', (err as Error).message)
+  })
 
   return NextResponse.json(eventRequest, { status: 201 })
 }

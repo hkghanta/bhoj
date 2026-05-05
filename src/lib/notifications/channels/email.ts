@@ -8,8 +8,8 @@ import type { NotificationJob } from '../types'
 import { NOTIFICATION_EVENTS } from '../types'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.RESEND_FROM_EMAIL ?? 'hello@bhoj.app'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://bhoj.app'
+const FROM = process.env.RESEND_FROM_EMAIL ?? 'hello@oneseva.com'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://oneseva.com'
 
 export async function sendEmail(job: NotificationJob, recipientEmail: string): Promise<void> {
   const { eventType, context } = job

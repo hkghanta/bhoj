@@ -26,10 +26,10 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-cream">
       <div className="bg-white rounded-xl border p-8 w-full max-w-sm">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Bhoj Admin</h1>
-        <p className="text-xs text-gray-400 mb-6">Password: <code className="bg-gray-100 px-1 rounded">change-me-in-production</code></p>
+        <h1 className="text-xl font-bold text-text-1 mb-1">OneSeva Admin</h1>
+        <p className="text-xs text-text-4 mb-6">Password: <code className="bg-cream px-1 rounded">change-me-in-production</code></p>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -37,13 +37,13 @@ export default function AdminLoginPage() {
             value={secret}
             onChange={e => setSecret(e.target.value)}
             placeholder="Admin secret"
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             required
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 rounded-lg text-sm disabled:opacity-50"
+            className="w-full bg-brand hover:bg-brand-hover text-white font-medium py-2 rounded-lg text-sm disabled:opacity-50"
           >
             {loading ? 'Signing in…' : 'Sign In'}
           </button>
@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
           type="button"
           disabled={loading}
           onClick={() => setSecret('change-me-in-production')}
-          className="w-full mt-3 border border-orange-200 hover:bg-orange-50 text-orange-700 text-xs font-medium py-2 rounded-lg disabled:opacity-50"
+          className="w-full mt-3 border border-brand hover:bg-cream text-brand text-xs font-medium py-2 rounded-lg disabled:opacity-50"
         >
           Use demo secret
         </button>

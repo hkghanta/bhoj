@@ -46,9 +46,32 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* ── Brand design tokens (dark-aware via CSS vars) ── */
+  --color-brand:        var(--brand);
+  --color-brand-hover:  var(--brand-hover);
+  --color-cream:        var(--cream);
+  --color-cream-2:      var(--cream-2);
+  --color-brand-border: var(--brand-border);
+  --color-text-1:       var(--text-1);
+  --color-text-2:       var(--text-2);
+  --color-text-3:       var(--text-3);
+  --color-text-4:       var(--text-4);
+  --font-script:        var(--font-dancing-script);
 }
 
 :root {
+  /* Brand tokens – light */
+  --brand:        #e85510;
+  --brand-hover:  #c8420c;
+  --cream:        #faf5f0;
+  --cream-2:      #f2ebe3;
+  --brand-border: #e8ddd4;
+  --text-1:       #1a0904;
+  --text-2:       #3d1f10;
+  --text-3:       #7a5240;
+  --text-4:       #b08070;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -84,6 +107,17 @@
 }
 
 .dark {
+  /* Brand tokens – dark */
+  --brand:        #f07030;
+  --brand-hover:  #e85510;
+  --cream:        #1a1412;
+  --cream-2:      #241c16;
+  --brand-border: #3a2e26;
+  --text-1:       #f2ebe3;
+  --text-2:       #d4c0b0;
+  --text-3:       #a08070;
+  --text-4:       #6a5548;
+
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -127,4 +161,24 @@
   html {
     @apply font-sans;
   }
+}
+
+/* ── Dot-grid hero texture ── */
+@layer utilities {
+  .bg-dot-grid {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(180, 120, 70, 0.12) 1px,
+      transparent 0
+    );
+    background-size: 28px 28px;
+  }
+}
+
+.dark .bg-dot-grid {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(240, 112, 48, 0.08) 1px,
+    transparent 0
+  );
 }

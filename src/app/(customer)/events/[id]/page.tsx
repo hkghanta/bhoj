@@ -8,7 +8,7 @@ import {
   MessageSquare, ChevronRight, Wallet, CalendarPlus,
   Users2, Globe, Gift, LayoutGrid, Clock,
   UtensilsCrossed, CreditCard, UserPlus, Wrench,
-  ArrowRight, Sparkles,
+  ArrowRight, Sparkles, ClipboardList,
 } from 'lucide-react'
 import Link from 'next/link'
 import { vendorTypeToSlug } from '@/lib/service-slugs'
@@ -412,6 +412,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
         {/* Planning tools grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
+            { href: `/events/${id}/planning`, icon: ClipboardList, label: 'Event Plan', bg: 'bg-brand/10 dark:bg-brand/20', color: 'text-brand' },
             { href: `/events/${id}/checklist`, icon: FileText, label: 'Checklist', bg: 'bg-amber-50 dark:bg-amber-950/40', color: 'text-amber-600 dark:text-amber-400' },
             { href: `/events/${id}/timeline`, icon: Clock, label: 'Timeline', bg: 'bg-purple-50 dark:bg-purple-950/40', color: 'text-purple-600 dark:text-purple-400' },
             { href: `/events/${id}/seating`, icon: LayoutGrid, label: 'Seating', bg: 'bg-blue-50 dark:bg-blue-950/40', color: 'text-blue-600 dark:text-blue-400' },

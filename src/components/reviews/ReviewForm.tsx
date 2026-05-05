@@ -17,14 +17,14 @@ type Props = {
 function StarPicker({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) {
   return (
     <div className="flex items-center gap-3">
-      <Label className="w-36 text-sm text-gray-600">{label}</Label>
+      <Label className="w-36 text-sm text-text-3">{label}</Label>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map(n => (
           <button
             key={n}
             type="button"
             onClick={() => onChange(n)}
-            className={`text-2xl ${n <= value ? 'text-yellow-400' : 'text-gray-200 hover:text-yellow-300'}`}
+            className={`text-2xl ${n <= value ? 'text-yellow-400' : 'text-text-4 hover:text-yellow-300'}`}
           >
             ★
           </button>
@@ -66,7 +66,7 @@ export function ReviewForm({ vendorId, vendorName, eventId, eventType, onSubmitt
 
   return (
     <div className="bg-white rounded-xl border p-6 max-w-lg">
-      <h3 className="font-semibold text-gray-900 mb-4">Review {vendorName}</h3>
+      <h3 className="font-semibold text-text-1 mb-4">Review {vendorName}</h3>
       {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <StarPicker label="Overall *" value={form.overall_rating} onChange={v => setForm(f => ({ ...f, overall_rating: v }))} />
@@ -84,7 +84,7 @@ export function ReviewForm({ vendorId, vendorName, eventId, eventType, onSubmitt
         <button
           type="submit"
           disabled={submitting}
-          className={cn(buttonVariants(), 'w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50')}
+          className={cn(buttonVariants(), 'w-full bg-brand hover:bg-brand-hover disabled:opacity-50')}
         >
           {submitting ? 'Submitting…' : 'Submit Review'}
         </button>

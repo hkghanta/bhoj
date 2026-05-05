@@ -1,4 +1,8 @@
+import { distanceMiles } from '@/lib/geocode'
 import type { VendorForScoring, EventRequestForScoring, ScoreBreakdown, DEFAULT_WEIGHTS } from './types'
+
+const LOCAL_RADIUS_MILES = 50  // within 50 miles of vendor's base city → full location score
+const MAX_MATCH_RADIUS_MILES = 100 // hard cutoff — never show vendors beyond 100 miles
 
 /**
  * Score a vendor against an event request.
@@ -23,12 +27,34 @@ export function scoreVendor(
 
   // ─── Location score (0–weights.location) ─────────────────────────────────
   let location = 0
-  const vendorCity = vendor.city.toLowerCase().trim()
-  const eventCity = request.event.city.toLowerCase().trim()
-  if (vendorCity === eventCity) {
-    location = weights.location  // exact city match
-  } else if (vendor.country === request.event.country) {
-    location = Math.round(weights.location * 0.4)  // same country
+  let distanceMilesValue: number | null = null
+  if (vendor.lat !== null && vendor.lng !== null && request.event.lat !== null && request.event.lng !== null) {
+    distanceMilesValue = distanceMiles(request.event.lat, request.event.lng, vendor.lat, vendor.lng)
+
+    // Hard exclude if beyond platform max or vendor's stated travel radius
+    if (distanceMilesValue > MAX_MATCH_RADIUS_MILES) return null
+    if (distanceMilesValue > vendor.travel_radius_miles) return null
+
+    if (distanceMilesValue <= LOCAL_RADIUS_MILES) {
+      location = weights.location                            // local (≤50 mi) → full score
+    } else {
+      // Travelling vendor: score decays linearly from 100% at 50 mi to 40% at travel radius
+      const travelRange = vendor.travel_radius_miles - LOCAL_RADIUS_MILES
+      const overLocal = distanceMilesValue - LOCAL_RADIUS_MILES
+      const decay = travelRange > 0 ? 1 - (overLocal / travelRange) * 0.6 : 0.4
+      location = Math.round(weights.location * decay)
+    }
+  } else {
+    // Fallback to city name matching when lat/lng not available
+    const normalizeCity = (c: string) => c.split(',')[0].trim().toLowerCase()
+    const vendorCity = normalizeCity(vendor.city)
+    const eventCity = normalizeCity(request.event.city)
+    if (vendorCity === eventCity) {
+      location = weights.location
+    } else {
+      // Different city without lat/lng — can't verify distance, exclude
+      return null
+    }
   }
 
   // ─── Dietary / cuisine match (0–weights.dietary) ─────────────────────────
@@ -108,5 +134,5 @@ export function scoreVendor(
 
   const total = location + dietary + tier_boost + response_rate + rating + budget_fit
 
-  return { total, location, dietary, tier_boost, response_rate, rating, budget_fit }
+  return { total, location, dietary, tier_boost, response_rate, rating, budget_fit, distance_miles: distanceMilesValue }
 }

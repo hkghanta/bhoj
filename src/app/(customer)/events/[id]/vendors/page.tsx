@@ -1,19 +1,42 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Star, MapPin } from 'lucide-react'
+import {
+  Star, MapPin, ChevronRight, RefreshCw, Sparkles, Plus, X, Zap, FileText,
+  Leaf, Shield, ArrowUpDown, ExternalLink, Phone, Globe, UserPlus, CheckCircle2,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+
+type LocalBusiness = {
+  place_id: string
+  name: string
+  address: string
+  rating: number | null
+  total_ratings: number
+  phone: string | null
+  website: string | null
+  photo_url: string | null
+  photo_urls: string[]
+  maps_url: string
+  description: string | null
+  business_hours: Record<string, string> | null
+  is_claimed: boolean
+  external_vendor_id: string | null
+  invited: boolean
+  quote_requested: boolean
+}
 
 type Match = {
   id: string
   score: number
   rank: number
+  distance_miles: number | null
   status: string
+  vendor_type: string
   vendor: {
     id: string
     business_name: string
@@ -23,196 +46,887 @@ type Match = {
     avg_rating: number | null
     profile_photo_url: string | null
     photos: { url: string }[]
-    menu_packages: { name: string; price_per_head: number; currency: string }[]
+    menu_packages: { name: string; price_per_head: number; currency: string; is_halal: boolean; is_vegetarian: boolean }[]
     description: string | null
   }
 }
 
-const VENDOR_TYPE_LABELS: Record<string, string> = {
-  CATERER: 'Caterer',
-  DECORATOR: 'Decorator',
-  PHOTOGRAPHER: 'Photographer',
-  VIDEOGRAPHER: 'Videographer',
-  DJ: 'DJ',
-  FLORIST: 'Florist',
-  MEHENDI_ARTIST: 'Mehendi Artist',
-  MAKEUP_HAIR: 'Makeup & Hair',
-  DHOL_PLAYER: 'Dhol Player',
-  LIVE_BAND: 'Live Band',
-}
+const ALL_SERVICE_TYPES = [
+  { type: 'CATERER',           emoji: '🍽',  label: 'Catering' },
+  { type: 'DECORATOR',         emoji: '🌸',  label: 'Decoration' },
+  { type: 'PHOTOGRAPHER',      emoji: '📷',  label: 'Photography' },
+  { type: 'VIDEOGRAPHER',      emoji: '🎬',  label: 'Videography' },
+  { type: 'DJ',                emoji: '🎵',  label: 'DJ' },
+  { type: 'FLORIST',           emoji: '💐',  label: 'Florist' },
+  { type: 'MEHENDI_ARTIST',    emoji: '🌿',  label: 'Mehendi Artist' },
+  { type: 'MAKEUP_HAIR',       emoji: '💄',  label: 'Makeup & Hair' },
+  { type: 'DHOL_PLAYER',       emoji: '🥁',  label: 'Dhol Player' },
+  { type: 'LIVE_BAND',         emoji: '🎸',  label: 'Live Band' },
+  { type: 'CHOREOGRAPHER',     emoji: '💃',  label: 'Choreographer' },
+  { type: 'PANDIT_OFFICIANT',  emoji: '🙏',  label: 'Pandit / Officiant' },
+  { type: 'DESSERT_VENDOR',    emoji: '🎂',  label: 'Cake & Desserts' },
+  { type: 'BARTENDER',         emoji: '🍹',  label: 'Bar & Bartender' },
+  { type: 'CHAI_STATION',      emoji: '☕',  label: 'Chai / Coffee Station' },
+  { type: 'LIGHTING',          emoji: '✨',  label: 'Lighting' },
+  { type: 'MC_HOST',           emoji: '🎤',  label: 'MC / Host' },
+  { type: 'TRANSPORT',         emoji: '🚗',  label: 'Transport' },
+  { type: 'SECURITY',          emoji: '🛡️', label: 'Security' },
+  { type: 'INVITATION_DESIGNER', emoji: '✉️', label: 'Invitations' },
+]
+
+const VENDOR_TYPE_EMOJIS: Record<string, string> = Object.fromEntries(
+  ALL_SERVICE_TYPES.map(s => [s.type, s.emoji])
+)
+const VENDOR_TYPE_LABELS: Record<string, string> = Object.fromEntries(
+  ALL_SERVICE_TYPES.map(s => [s.type, s.label])
+)
+
+const AVAILABLE_TYPES = new Set([
+  'CATERER', 'DECORATOR', 'PHOTOGRAPHER', 'DJ',
+  'MEHENDI_ARTIST', 'MAKEUP_HAIR', 'FLORIST',
+])
+
+type SortOption = 'score' | 'price_asc' | 'price_desc'
 
 export default function VendorDiscoveryPage() {
   const { id: eventId } = useParams<{ id: string }>()
-  const [vendorType, setVendorType] = useState<string>('CATERER')
-  const [matches, setMatches] = useState<Match[]>([])
-  const [eventRequestId, setEventRequestId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [requested, setRequested] = useState(false)
+  const [grouped, setGrouped] = useState<Record<string, Match[]>>({})
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [activeType, setActiveType] = useState<string | null>(null)
+  const [showAddService, setShowAddService] = useState(false)
+  const [addingType, setAddingType] = useState<string | null>(null)
+  const [subEvents, setSubEvents] = useState<{ id: string; name: string }[]>([])
+  const [activeSubEventId, setActiveSubEventId] = useState<string | null>(null)
+  const [estimating, setEstimating] = useState<string | null>(null)
+  const [estimatedMatchIds, setEstimatedMatchIds] = useState<Set<string>>(new Set())
+  // Filters
+  const [sortBy, setSortBy] = useState<SortOption>('score')
+  const [vegOnly, setVegOnly] = useState(false)
+  const [halalOnly, setHalalOnly] = useState(false)
+  // Local businesses (Google Places)
+  const [localBusinesses, setLocalBusinesses] = useState<LocalBusiness[]>([])
+  const [localLoading, setLocalLoading] = useState(false)
+  const [localSource, setLocalSource] = useState<string>('')
+  const [invitingId, setInvitingId] = useState<string | null>(null)
+  const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set())
+  const [requestingQuoteId, setRequestingQuoteId] = useState<string | null>(null)
+  const [quoteRequestedIds, setQuoteRequestedIds] = useState<Set<string>>(new Set())
+  const [expandedBizId, setExpandedBizId] = useState<string | null>(null)
+  const [eventCity, setEventCity] = useState<string>('')
+  // Confirmed event vendors
+  const [eventVendors, setEventVendors] = useState<any[]>([])
+  const [eventVendorTotal, setEventVendorTotal] = useState(0)
 
-  async function requestMatches() {
-    setLoading(true)
-    setRequested(false)
-    setMatches([])
+  useEffect(() => {
+    fetch(`/api/events/${eventId}/vendors`)
+      .then(r => r.ok ? r.json() : { vendors: [], total_spend: 0 })
+      .then(data => {
+        setEventVendors(data.vendors ?? [])
+        setEventVendorTotal(data.total_spend ?? 0)
+      })
+    fetch(`/api/events/${eventId}/sub-events`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setSubEvents)
+    // Fetch event city for local businesses
+    fetch(`/api/events/${eventId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setEventCity(data.metro_city ?? data.city ?? '') })
+    loadMatches()
+  }, [eventId])
 
+  useEffect(() => {
+    if (activeType && eventCity) loadLocalBusinesses(activeType)
+  }, [activeType, eventCity])
+
+  async function loadLocalBusinesses(vendorType: string) {
+    setLocalLoading(true)
+    const res = await fetch(`/api/local-vendors?city=${encodeURIComponent(eventCity)}&vendorType=${vendorType}&eventId=${eventId}`)
+    if (res.ok) {
+      const data = await res.json()
+      setLocalBusinesses(data.businesses ?? [])
+      setLocalSource(data.source ?? '')
+      // Track already-invited and quote-requested
+      const alreadyInvited = new Set<string>(
+        (data.businesses ?? []).filter((b: LocalBusiness) => b.invited).map((b: LocalBusiness) => b.place_id)
+      )
+      setInvitedIds(alreadyInvited)
+      const alreadyRequested = new Set<string>(
+        (data.businesses ?? []).filter((b: LocalBusiness) => b.quote_requested).map((b: LocalBusiness) => b.place_id)
+      )
+      setQuoteRequestedIds(alreadyRequested)
+    }
+    setLocalLoading(false)
+  }
+
+  async function inviteBusiness(business: LocalBusiness) {
+    setInvitingId(business.place_id)
+    const res = await fetch('/api/local-vendors/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        place_id: business.place_id,
+        business_name: business.name,
+        address: business.address,
+        phone: business.phone,
+        website: business.website,
+        rating: business.rating,
+        vendor_type: activeType,
+        city: eventCity,
+        event_id: eventId,
+      }),
+    })
+    if (res.ok) {
+      setInvitedIds(prev => new Set([...prev, business.place_id]))
+      setLocalBusinesses(prev => prev.map(b => b.place_id === business.place_id ? { ...b, invited: true } : b))
+    }
+    setInvitingId(null)
+  }
+
+  async function requestQuote(business: LocalBusiness) {
+    setRequestingQuoteId(business.place_id)
+    const res = await fetch('/api/local-vendors/request-quote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        place_id: business.place_id,
+        business_name: business.name,
+        phone: business.phone,
+        email: null, // TODO: collect email from user if not available
+        vendor_type: activeType,
+        event_id: eventId,
+      }),
+    })
+    if (res.ok || res.status === 409) {
+      setQuoteRequestedIds(prev => new Set([...prev, business.place_id]))
+      setLocalBusinesses(prev => prev.map(b =>
+        b.place_id === business.place_id ? { ...b, quote_requested: true } : b
+      ))
+    }
+    setRequestingQuoteId(null)
+  }
+
+  async function loadMatches(refresh = false) {
+    if (refresh) setRefreshing(true)
+    else setLoading(true)
+
+    const url = activeSubEventId
+      ? `/api/matches?eventId=${eventId}&subEventId=${activeSubEventId}`
+      : `/api/matches?eventId=${eventId}`
+    const res = await fetch(url)
+    if (res.ok) {
+      const data = await res.json()
+      const incoming = data.grouped ?? {}
+      setGrouped(incoming)
+      const types = Object.keys(incoming)
+      if (types.length > 0) setActiveType(prev => prev ?? types[0])
+    }
+
+    if (refresh) setRefreshing(false)
+    else setLoading(false)
+  }
+
+  async function requestAutoEstimate(matchId: string) {
+    setEstimating(matchId)
+    const res = await fetch(`/api/matches/${matchId}/auto-quote`, { method: 'POST' })
+    if (res.ok) {
+      setEstimatedMatchIds(prev => new Set([...prev, matchId]))
+      await loadMatches(true)
+    }
+    setEstimating(null)
+  }
+
+  async function addService(vendorType: string) {
+    setAddingType(vendorType)
     const res = await fetch('/api/event-requests', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event_id: eventId, vendor_type: vendorType }),
     })
-
-    if (!res.ok) {
-      const err = await res.json()
-      // If already exists, fetch existing matches
-      if (res.status === 409 && err.existingId) {
-        setEventRequestId(err.existingId)
-        await pollMatches(err.existingId)
-        return
-      }
-      setLoading(false)
-      return
+    if (res.ok || res.status === 409) {
+      setShowAddService(false)
+      setActiveType(vendorType)
+      await loadMatches(true)
     }
-
-    const data = await res.json()
-    setEventRequestId(data.id)
-    setRequested(true)
-    await pollMatches(data.id)
+    setAddingType(null)
   }
 
-  async function pollMatches(reqId: string) {
-    for (let i = 0; i < 10; i++) {
-      await new Promise(r => setTimeout(r, 2000))
-      const res = await fetch(`/api/matches?eventRequestId=${reqId}`)
-      if (res.ok) {
-        const data = await res.json()
-        if (data.length > 0) {
-          setMatches(data)
-          setLoading(false)
-          return
-        }
-      }
-    }
-    setLoading(false)
-  }
+  const vendorTypes = Object.keys(grouped)
+  const availableToAdd = ALL_SERVICE_TYPES.filter(
+    s => !vendorTypes.includes(s.type) && AVAILABLE_TYPES.has(s.type)
+  )
 
   const coverUrl = (vendor: Match['vendor']) =>
     vendor.photos[0]?.url ?? vendor.profile_photo_url ?? null
 
+  const lowestPrice = (vendor: Match['vendor']) => {
+    const pkgs = vendor.menu_packages
+    if (!pkgs.length) return null
+    const filtered = vegOnly ? pkgs.filter(p => p.is_vegetarian) : pkgs
+    const hFiltered = halalOnly ? filtered.filter(p => p.is_halal) : filtered
+    const source = hFiltered.length > 0 ? hFiltered : pkgs
+    return Math.min(...source.map(p => Number(p.price_per_head)))
+  }
+
+  const fmtPrice = (n: number, vendor: Match['vendor']) => {
+    const currency = vendor.menu_packages[0]?.currency ?? 'GBP'
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n)
+  }
+
+  function applyFiltersAndSort(matches: Match[]): Match[] {
+    let list = [...matches]
+
+    if (vegOnly) {
+      list = list.filter(m => m.vendor.menu_packages.some(p => p.is_vegetarian))
+    }
+    if (halalOnly) {
+      list = list.filter(m => m.vendor.menu_packages.some(p => p.is_halal))
+    }
+
+    if (sortBy === 'price_asc') {
+      list.sort((a, b) => {
+        const pa = lowestPrice(a.vendor) ?? Infinity
+        const pb = lowestPrice(b.vendor) ?? Infinity
+        return pa - pb
+      })
+    } else if (sortBy === 'price_desc') {
+      list.sort((a, b) => {
+        const pa = lowestPrice(a.vendor) ?? 0
+        const pb = lowestPrice(b.vendor) ?? 0
+        return pb - pa
+      })
+    }
+    // default 'score' keeps rank order from API
+
+    return list
+  }
+
+  const activeMatches = applyFiltersAndSort(activeType ? (grouped[activeType] ?? []) : [])
+  const hasActiveFilters = vegOnly || halalOnly || sortBy !== 'score'
+
   return (
-    <div>
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
-          <Link href="/dashboard" className="hover:text-orange-600">My Events</Link>
-          <span>/</span>
-          <Link href={`/events/${eventId}`} className="hover:text-orange-600">Event</Link>
-          <span>/</span>
-          <span>Find Vendors</span>
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900">Find Vendors</h1>
-        <p className="text-gray-500 mt-1">We'll match you with the best vendors for your event.</p>
+    <div className="max-w-5xl">
+      {/* Header */}
+      <div className="flex items-center gap-1.5 text-sm text-text-4 mb-4">
+        <Link href="/dashboard" className="hover:text-brand">My Events</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <Link href={`/events/${eventId}`} className="hover:text-brand">Event</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <span className="text-text-2">Vendor Matches</span>
       </div>
 
-      <div className="flex items-center gap-4 mb-8">
-        <Select value={vendorType} onValueChange={(v: string | null) => setVendorType(v ?? 'CATERER')}>
-          <SelectTrigger className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(VENDOR_TYPE_LABELS).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v}</SelectItem>
+      {/* Confirmed vendors summary */}
+      {eventVendors.length > 0 && (
+        <div className="bg-white dark:bg-cream-2 rounded-xl border shadow-sm p-5 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-text-1 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              Confirmed Vendors ({eventVendors.length})
+            </h2>
+            <span className="text-sm font-semibold text-text-1">
+              Total: ${eventVendorTotal.toLocaleString()}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {eventVendors.map((ev: any) => (
+              <div key={ev.id} className="flex items-center gap-3 p-3 rounded-xl bg-green-50 border border-green-100">
+                {ev.vendor.profile_photo_url ? (
+                  <Image src={ev.vendor.profile_photo_url} alt="" width={36} height={36} className="rounded-full object-cover" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-green-200 flex items-center justify-center text-green-700 text-sm font-bold">
+                    {ev.vendor.business_name.charAt(0)}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-text-1 truncate">{ev.vendor.business_name}</div>
+                  <div className="text-xs text-text-3">
+                    {VENDOR_TYPE_LABELS[ev.vendor.vendor_type] ?? ev.vendor.vendor_type}
+                    {ev.quote && ` · $${Number(ev.quote.total_estimate).toLocaleString()}`}
+                  </div>
+                </div>
+              </div>
             ))}
-          </SelectContent>
-        </Select>
-        <button
-          onClick={requestMatches}
-          disabled={loading}
-          className={cn(buttonVariants(), 'bg-orange-600 hover:bg-orange-700 disabled:opacity-50')}
-        >
-          {loading ? 'Finding matches…' : 'Find Matches'}
-        </button>
-      </div>
-
-      {matches.length > 0 && (
-        <div className="space-y-4">
-          <p className="text-sm text-gray-500">Showing top {matches.length} matched vendors</p>
-          {matches.map(match => (
-            <div key={match.id} className="bg-white rounded-xl border p-5 flex gap-5">
-              <div className="w-32 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                {coverUrl(match.vendor) && (
-                  <Image
-                    src={coverUrl(match.vendor)!}
-                    alt={match.vendor.business_name}
-                    width={128} height={96}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">{match.vendor.business_name}</h3>
-                      {match.vendor.tier !== 'FREE' && (
-                        <Badge className="bg-orange-600 text-white text-xs">{match.vendor.tier}</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3.5 w-3.5" /> {match.vendor.city}
-                      </span>
-                      {match.vendor.avg_rating && (
-                        <span className="flex items-center gap-1">
-                          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                          {match.vendor.avg_rating.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-orange-600">{match.score}</div>
-                    <div className="text-xs text-gray-400">match score</div>
-                    <div className="text-xs text-gray-400">#{match.rank} match</div>
-                  </div>
-                </div>
-
-                {match.vendor.description && (
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">{match.vendor.description}</p>
-                )}
-
-                {match.vendor.menu_packages.length > 0 && (
-                  <div className="flex gap-2 mt-3 flex-wrap">
-                    {match.vendor.menu_packages.slice(0, 3).map((pkg, i) => (
-                      <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                        {pkg.name} — £{Number(pkg.price_per_head).toFixed(0)}/head
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex gap-3 mt-4">
-                  <Link
-                    href={`/vendors/${match.vendor.id}`}
-                    target="_blank"
-                    className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-                  >
-                    View Profile
-                  </Link>
-                  <Link
-                    href={`/quotes/new?matchId=${match.id}`}
-                    className={cn(buttonVariants({ size: 'sm' }), 'bg-orange-600 hover:bg-orange-700')}
-                  >
-                    Request Quote
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))}
+          </div>
         </div>
       )}
 
-      {requested && matches.length === 0 && !loading && (
-        <div className="text-center py-12 text-gray-400">
-          <p>No matches found yet. Check back in a moment, or try a different vendor type.</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <Sparkles className="h-5 w-5 text-brand" />
+            <h1 className="text-2xl sm:text-3xl font-black text-text-1">Your Vendor Matches</h1>
+          </div>
+          <p className="text-sm text-text-3">
+            {loading ? 'Finding the best vendors for your event…' :
+              vendorTypes.length === 0 ? 'No matches yet — this usually takes a moment.' :
+              `Vendors across ${vendorTypes.length} categories matched for your event.`}
+          </p>
+        </div>
+        <button
+          onClick={() => loadMatches(true)}
+          disabled={loading || refreshing}
+          className="flex items-center gap-1.5 text-sm text-text-3 hover:text-text-1 disabled:opacity-40 transition-colors"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-24 bg-white dark:bg-cream-2 rounded-xl border animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="flex gap-6">
+          {/* Left: vendor type list + add service */}
+          <div className="w-52 flex-shrink-0 space-y-2">
+            {subEvents.length > 1 && (
+              <div className="mb-4 flex gap-1.5 flex-wrap">
+                <button
+                  onClick={() => { setActiveSubEventId(null); loadMatches() }}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                    activeSubEventId === null
+                      ? 'border-brand bg-cream text-brand font-medium'
+                      : 'border-brand-border text-text-3 hover:border-brand-border'
+                  }`}>
+                  All
+                </button>
+                {subEvents.map(se => (
+                  <button key={se.id}
+                    onClick={() => { setActiveSubEventId(se.id); loadMatches() }}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                      activeSubEventId === se.id
+                        ? 'border-brand bg-cream text-brand font-medium'
+                        : 'border-brand-border text-text-3 hover:border-brand-border'
+                    }`}>
+                    {se.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="bg-white dark:bg-cream-2 rounded-xl border overflow-hidden">
+              {vendorTypes.length === 0 ? (
+                <div className="px-4 py-6 text-center text-sm text-text-4">
+                  No matches yet
+                </div>
+              ) : (
+                vendorTypes.map(type => {
+                  const count = grouped[type]?.length ?? 0
+                  const isActive = activeType === type
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => { setActiveType(type); setShowAddService(false) }}
+                      className={`w-full flex items-center justify-between px-4 py-3 text-sm text-left transition-colors border-b last:border-0 ${
+                        isActive
+                          ? 'bg-cream text-brand font-medium'
+                          : 'text-text-2 hover:bg-cream'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2 truncate">
+                        <span>{VENDOR_TYPE_EMOJIS[type] ?? '🏢'}</span>
+                        <span className="truncate">{VENDOR_TYPE_LABELS[type] ?? type}</span>
+                      </span>
+                      <span className={`text-xs rounded-full px-1.5 py-0.5 font-medium flex-shrink-0 ml-1 ${
+                        isActive ? 'bg-cream-2 text-brand' : 'bg-cream-2 text-text-3'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  )
+                })
+              )}
+            </div>
+
+            {availableToAdd.length > 0 && (
+              <button
+                onClick={() => { setShowAddService(s => !s); setActiveType(null) }}
+                className={`w-full flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed text-sm transition-colors ${
+                  showAddService
+                    ? 'border-brand bg-cream text-brand font-medium'
+                    : 'border-brand-border text-text-3 hover:border-brand-border hover:text-brand'
+                }`}
+              >
+                <Plus className="h-4 w-4" />
+                Add a service
+              </button>
+            )}
+          </div>
+
+          {/* Right: vendor cards or add-service picker */}
+          <div className="flex-1 min-w-0">
+            {showAddService ? (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-semibold text-text-1">Add a service</h2>
+                  <button onClick={() => setShowAddService(false)} className="p-1 text-text-4 hover:text-text-3">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <p className="text-sm text-text-3 mb-4">
+                  Select a service to find matched vendors for your event.
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {availableToAdd.map(({ type, emoji, label }) => (
+                    <button
+                      key={type}
+                      onClick={() => addService(type)}
+                      disabled={addingType === type}
+                      className="flex items-center gap-3 p-3 bg-white dark:bg-cream-2 rounded-xl border hover:border-brand hover:bg-cream transition-all text-left disabled:opacity-50"
+                    >
+                      <span className="text-2xl">{emoji}</span>
+                      <div>
+                        <p className="text-sm font-medium text-text-1">{label}</p>
+                        {addingType === type && (
+                          <p className="text-xs text-brand">Finding matches…</p>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {ALL_SERVICE_TYPES.filter(s => !vendorTypes.includes(s.type) && !AVAILABLE_TYPES.has(s.type)).length > 0 && (
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-xs font-medium text-text-4 mb-2">Coming soon</p>
+                    <div className="flex flex-wrap gap-2">
+                      {ALL_SERVICE_TYPES
+                        .filter(s => !vendorTypes.includes(s.type) && !AVAILABLE_TYPES.has(s.type))
+                        .map(({ type, emoji, label }) => (
+                          <span key={type} className="flex items-center gap-1.5 text-xs text-text-4 bg-cream border border-dashed border-brand-border px-3 py-1.5 rounded-full">
+                            {emoji} {label}
+                          </span>
+                        ))
+                      }
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : activeType ? (
+              <>
+                {/* Filter bar */}
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                  <h2 className="text-base font-bold text-text-1 mr-1">
+                    {VENDOR_TYPE_EMOJIS[activeType]} {VENDOR_TYPE_LABELS[activeType] ?? activeType}
+                  </h2>
+                  <div className="flex items-center gap-1.5 ml-auto flex-wrap">
+                    {/* Sort */}
+                    <div className="relative">
+                      <select
+                        value={sortBy}
+                        onChange={e => setSortBy(e.target.value as SortOption)}
+                        className="text-xs pl-7 pr-6 py-1.5 rounded-xl border border-brand-border bg-white dark:bg-cream-2 text-text-2 appearance-none cursor-pointer hover:border-brand-border focus:outline-none focus:border-brand"
+                      >
+                        <option value="score">Best Match</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                      </select>
+                      <ArrowUpDown className="h-3 w-3 text-text-4 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                    {/* Veg filter */}
+                    <button
+                      onClick={() => setVegOnly(v => !v)}
+                      className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl border transition-colors ${
+                        vegOnly ? 'border-green-400 bg-green-50 text-green-700 font-medium' : 'border-brand-border text-text-3 hover:border-green-300'
+                      }`}
+                    >
+                      <Leaf className="h-3 w-3" /> Veg
+                    </button>
+                    {/* Halal filter */}
+                    <button
+                      onClick={() => setHalalOnly(h => !h)}
+                      className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl border transition-colors ${
+                        halalOnly ? 'border-emerald-400 bg-emerald-50 text-emerald-700 font-medium' : 'border-brand-border text-text-3 hover:border-emerald-300'
+                      }`}
+                    >
+                      Halal
+                    </button>
+                    {hasActiveFilters && (
+                      <button
+                        onClick={() => { setSortBy('score'); setVegOnly(false); setHalalOnly(false) }}
+                        className="text-xs text-text-4 hover:text-text-3 flex items-center gap-0.5"
+                      >
+                        <X className="h-3 w-3" /> Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {activeMatches.length === 0 ? (
+                  <div className="bg-white dark:bg-cream-2 rounded-xl border p-8 text-center text-text-4">
+                    {hasActiveFilters ? (
+                      <>
+                        <p>No vendors match your current filters.</p>
+                        <button
+                          onClick={() => { setSortBy('score'); setVegOnly(false); setHalalOnly(false) }}
+                          className="mt-3 text-sm text-brand hover:underline"
+                        >
+                          Clear filters
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <p>No matches found for this service yet.</p>
+                        <button onClick={() => loadMatches(true)} className="mt-3 text-sm text-brand hover:underline">
+                          Refresh
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {activeMatches.map(match => {
+                      const price = lowestPrice(match.vendor)
+                      const isQuoted = match.status === 'QUOTED'
+                      const hasVeg = match.vendor.menu_packages.some(p => p.is_vegetarian)
+                      const hasHalal = match.vendor.menu_packages.some(p => p.is_halal)
+
+                      return (
+                        <div key={match.id} className="bg-white dark:bg-cream-2 rounded-xl border hover:shadow-sm transition-shadow overflow-hidden">
+                          <div className="flex gap-4 p-4">
+                            {/* Photo */}
+                            <Link
+                              href={`/events/${eventId}/vendors/${match.vendor.id}?matchId=${match.id}`}
+                              className="w-28 h-20 rounded-xl overflow-hidden bg-cream-2 flex-shrink-0 block"
+                            >
+                              {coverUrl(match.vendor) ? (
+                                <Image
+                                  src={coverUrl(match.vendor)!}
+                                  alt={match.vendor.business_name}
+                                  width={112} height={80}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-2xl bg-cream">
+                                  {VENDOR_TYPE_EMOJIS[activeType] ?? '🏢'}
+                                </div>
+                              )}
+                            </Link>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <Link
+                                      href={`/events/${eventId}/vendors/${match.vendor.id}?matchId=${match.id}`}
+                                      className="font-semibold text-text-1 hover:text-brand transition-colors"
+                                    >
+                                      {match.vendor.business_name}
+                                    </Link>
+                                    {match.vendor.tier !== 'FREE' && (
+                                      <Badge className="bg-brand text-white text-xs">{match.vendor.tier}</Badge>
+                                    )}
+                                    {match.rank === 1 && (
+                                      <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium border border-amber-200">
+                                        ⭐ Best match
+                                      </span>
+                                    )}
+                                    {match.vendor.is_verified && (
+                                      <span className="flex items-center gap-0.5 text-xs text-blue-600">
+                                        <Shield className="h-3 w-3" /> Verified
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-3 text-xs text-text-3 mt-1 flex-wrap">
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />{match.vendor.city}
+                                      {match.distance_miles !== null && (
+                                        <span className="text-text-4">
+                                          · {match.distance_miles < 10
+                                            ? '< 10 mi'
+                                            : `${Math.round(match.distance_miles)} mi away`}
+                                        </span>
+                                      )}
+                                    </span>
+                                    {match.vendor.avg_rating && (
+                                      <span className="flex items-center gap-1">
+                                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                        {match.vendor.avg_rating.toFixed(1)}
+                                      </span>
+                                    )}
+                                    {hasVeg && (
+                                      <span className="flex items-center gap-0.5 text-green-600">
+                                        <Leaf className="h-3 w-3" /> Veg
+                                      </span>
+                                    )}
+                                    {hasHalal && (
+                                      <span className="text-green-700 font-medium">Halal</span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Price + score */}
+                                <div className="text-right flex-shrink-0">
+                                  {price !== null ? (
+                                    <>
+                                      <div className="text-lg font-black text-brand">
+                                        {fmtPrice(price, match.vendor)}
+                                      </div>
+                                      <div className="text-xs text-text-4">per head</div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="text-xl font-bold text-brand">{match.score}</div>
+                                      <div className="text-xs text-text-4">match score</div>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+
+                              {match.vendor.description && (
+                                <p className="text-xs text-text-3 mt-1.5 line-clamp-1">{match.vendor.description}</p>
+                              )}
+
+                              {/* Package pills */}
+                              {match.vendor.menu_packages.length > 0 && (
+                                <div className="flex gap-1.5 mt-2 flex-wrap">
+                                  {match.vendor.menu_packages.slice(0, 3).map((pkg, i) => (
+                                    <span key={i} className="text-xs bg-cream-2 text-text-3 px-2 py-0.5 rounded-full">
+                                      {pkg.name} — {fmtPrice(Number(pkg.price_per_head), match.vendor)}/head
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Action bar */}
+                          <div className="flex items-center gap-2 px-4 py-3 border-t bg-cream flex-wrap">
+                            <Link
+                              href={`/events/${eventId}/vendors/${match.vendor.id}?matchId=${match.id}`}
+                              className="text-xs text-brand font-medium hover:underline mr-auto"
+                            >
+                              View full profile →
+                            </Link>
+                            {isQuoted ? (
+                              <Link
+                                href={`/events/${eventId}/quotes`}
+                                className={cn(buttonVariants({ size: 'sm' }), 'bg-green-600 hover:bg-green-700')}
+                              >
+                                ✓ View Quote
+                              </Link>
+                            ) : (
+                              <>
+                                <Link
+                                  href={`/quotes/new?matchId=${match.id}`}
+                                  className={cn(buttonVariants({ size: 'sm', variant: 'outline' }))}
+                                >
+                                  Request Quote
+                                </Link>
+                                <button
+                                  onClick={() => requestAutoEstimate(match.id)}
+                                  disabled={estimating === match.id}
+                                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50"
+                                >
+                                  <Zap className="h-3.5 w-3.5" />
+                                  {estimating === match.id ? 'Estimating…' : 'Get AI Estimate'}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Local businesses section */}
+                {eventCity && (
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="text-sm font-semibold text-text-2">
+                          Local businesses near {eventCity}
+                        </h3>
+                        <p className="text-xs text-text-4 mt-0.5">
+                          Not on OneSeva yet — request a quote or invite them to join
+                        </p>
+                      </div>
+                    </div>
+
+                    {localLoading ? (
+                      <div className="space-y-2">
+                        {[1,2,3].map(i => <div key={i} className="h-20 bg-white dark:bg-cream-2 rounded-xl border animate-pulse" />)}
+                      </div>
+                    ) : localBusinesses.length === 0 ? (
+                      <div className="bg-cream rounded-xl border border-dashed p-6 text-center text-sm text-text-4">
+                        No local businesses found for this category.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {localBusinesses.map(biz => {
+                          const isInvited = invitedIds.has(biz.place_id) || biz.invited
+                          const isQuoteRequested = quoteRequestedIds.has(biz.place_id) || biz.quote_requested
+                          const isExpanded = expandedBizId === biz.place_id
+                          const hasPhotos = biz.photo_urls.length > 0
+                          const hasDetails = biz.description || biz.business_hours || hasPhotos
+
+                          return (
+                            <div key={biz.place_id} className="bg-white dark:bg-cream-2 rounded-xl border hover:shadow-sm transition-shadow overflow-hidden">
+                              <div className="flex gap-3 p-4">
+                                {/* Photo */}
+                                <div className="w-16 h-16 rounded-xl overflow-hidden bg-cream-2 flex-shrink-0">
+                                  {(biz.photo_urls[0] || biz.photo_url) ? (
+                                    <img src={biz.photo_urls[0] || biz.photo_url!} alt={biz.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-2xl bg-cream">
+                                      {VENDOR_TYPE_EMOJIS[activeType] ?? '🏢'}
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <button
+                                      onClick={() => hasDetails && setExpandedBizId(isExpanded ? null : biz.place_id)}
+                                      className={`font-semibold text-sm text-text-1 truncate ${hasDetails ? 'hover:text-brand cursor-pointer' : ''}`}
+                                    >
+                                      {biz.name}
+                                    </button>
+                                    {biz.is_claimed && (
+                                      <span className="flex items-center gap-0.5 text-xs text-blue-600">
+                                        <Shield className="h-3 w-3" /> Claimed
+                                      </span>
+                                    )}
+                                    {biz.rating && (
+                                      <span className="flex items-center gap-0.5 text-xs text-text-3 flex-shrink-0">
+                                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                        {biz.rating}
+                                        <span className="text-text-4">({biz.total_ratings})</span>
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-text-4 mt-0.5 truncate flex items-center gap-1">
+                                    <MapPin className="h-3 w-3 flex-shrink-0" />{biz.address}
+                                  </p>
+                                  {biz.description && (
+                                    <p className="text-xs text-text-3 mt-1 line-clamp-2">{biz.description}</p>
+                                  )}
+                                </div>
+
+                                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <a href={biz.maps_url} target="_blank" rel="noopener noreferrer"
+                                      className="p-1.5 rounded-xl border border-brand-border text-text-4 hover:text-brand hover:border-brand transition-colors"
+                                      title="View on Google Maps"
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5" />
+                                    </a>
+                                    {biz.phone && (
+                                      <a href={`tel:${biz.phone}`}
+                                        className="p-1.5 rounded-xl border border-brand-border text-text-4 hover:text-green-600 hover:border-green-300 transition-colors"
+                                        title={biz.phone}
+                                      >
+                                        <Phone className="h-3.5 w-3.5" />
+                                      </a>
+                                    )}
+                                    {biz.website && (
+                                      <a href={biz.website} target="_blank" rel="noopener noreferrer"
+                                        className="p-1.5 rounded-xl border border-brand-border text-text-4 hover:text-blue-600 hover:border-blue-300 transition-colors"
+                                        title="Visit website"
+                                      >
+                                        <Globe className="h-3.5 w-3.5" />
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Expanded detail panel */}
+                              {isExpanded && hasDetails && (
+                                <div className="px-4 pb-3 border-t bg-cream/50">
+                                  {/* Photo gallery */}
+                                  {hasPhotos && (
+                                    <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+                                      {biz.photo_urls.slice(0, 5).map((url, i) => (
+                                        <img key={i} src={url} alt={`${biz.name} photo ${i + 1}`}
+                                          className="w-24 h-20 rounded-lg object-cover flex-shrink-0 border"
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                  {/* Business hours */}
+                                  {biz.business_hours && (
+                                    <div className="mt-3">
+                                      <p className="text-xs font-medium text-text-2 mb-1">Business Hours</p>
+                                      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                                        {Object.entries(biz.business_hours).map(([day, hours]) => (
+                                          <div key={day} className="flex justify-between text-xs">
+                                            <span className="text-text-3 capitalize">{day}</span>
+                                            <span className="text-text-2">{hours}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Action bar */}
+                              <div className="flex items-center gap-2 px-4 py-2.5 border-t bg-cream/30">
+                                {hasDetails && (
+                                  <button
+                                    onClick={() => setExpandedBizId(isExpanded ? null : biz.place_id)}
+                                    className="text-xs text-text-4 hover:text-text-2 mr-auto"
+                                  >
+                                    {isExpanded ? 'Show less' : 'Show details'}
+                                  </button>
+                                )}
+                                {!hasDetails && <div className="mr-auto" />}
+
+                                <button
+                                  onClick={() => !isInvited && inviteBusiness(biz)}
+                                  disabled={isInvited || invitingId === biz.place_id}
+                                  className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-xl border transition-colors ${
+                                    isInvited
+                                      ? 'bg-green-50 border-green-200 text-green-600 cursor-default'
+                                      : invitingId === biz.place_id
+                                      ? 'opacity-50 cursor-wait border-brand-border text-text-4'
+                                      : 'border-brand-border text-text-3 hover:border-brand hover:text-brand'
+                                  }`}
+                                >
+                                  {isInvited ? (
+                                    <><CheckCircle2 className="h-3.5 w-3.5" /> Invited</>
+                                  ) : (
+                                    <><UserPlus className="h-3.5 w-3.5" /> Invite</>
+                                  )}
+                                </button>
+
+                                <button
+                                  onClick={() => !isQuoteRequested && requestQuote(biz)}
+                                  disabled={isQuoteRequested || requestingQuoteId === biz.place_id}
+                                  className={`flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-colors ${
+                                    isQuoteRequested
+                                      ? 'bg-amber-50 border-amber-200 text-amber-600 cursor-default'
+                                      : requestingQuoteId === biz.place_id
+                                      ? 'opacity-50 cursor-wait border-brand text-brand'
+                                      : 'border-brand bg-brand text-white hover:bg-brand/90'
+                                  }`}
+                                >
+                                  {isQuoteRequested ? (
+                                    <><CheckCircle2 className="h-3.5 w-3.5" /> Quote Requested</>
+                                  ) : requestingQuoteId === biz.place_id ? (
+                                    'Requesting...'
+                                  ) : (
+                                    <><FileText className="h-3.5 w-3.5" /> Request Quote</>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="bg-white dark:bg-cream-2 rounded-xl border p-12 text-center text-text-4">
+                <Sparkles className="h-8 w-8 mx-auto mb-3 text-brand" />
+                <p>Select a service category from the left to see matched vendors.</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

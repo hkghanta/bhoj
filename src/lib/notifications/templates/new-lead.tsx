@@ -22,7 +22,7 @@ export function NewLeadEmail({ vendorName, eventName, guestCount, eventDate, cit
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 20px' }}>
           <Section style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e5e7eb' }}>
             <Heading style={{ color: '#ea580c', fontSize: '24px', marginBottom: '8px' }}>
-              Bhoj
+              OneSeva
             </Heading>
             <Text style={{ color: '#374151', fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
               You have a new lead!
@@ -65,7 +65,7 @@ export function NewLeadEmail({ vendorName, eventName, guestCount, eventDate, cit
 
           <Hr style={{ borderColor: '#e5e7eb', margin: '24px 0' }} />
           <Text style={{ color: '#9ca3af', fontSize: '12px', textAlign: 'center' }}>
-            Bhoj · Indian Event Services
+            OneSeva · Indian Event Services
           </Text>
         </Container>
       </Body>

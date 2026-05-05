@@ -35,12 +35,12 @@ export function OnboardingWizard() {
       {/* Progress */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-500">Step {step + 1} of {STEPS.length}</span>
-          <span className="text-sm font-medium text-orange-600">{STEPS[step].label}</span>
+          <span className="text-sm text-text-4">Step {step + 1} of {STEPS.length}</span>
+          <span className="text-sm font-medium text-brand">{STEPS[step].label}</span>
         </div>
-        <div className="h-2 bg-gray-100 rounded-full">
+        <div className="h-2 bg-cream rounded-full">
           <div
-            className="h-2 bg-orange-500 rounded-full transition-all"
+            className="h-2 bg-brand rounded-full transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -48,7 +48,7 @@ export function OnboardingWizard() {
           {STEPS.map((s, i) => (
             <span
               key={i}
-              className={`text-xs ${i === step ? 'text-orange-600 font-medium' : i < step ? 'text-green-600' : 'text-gray-300'}`}
+              className={`text-xs ${i === step ? 'text-brand font-medium' : i < step ? 'text-green-600' : 'text-text-4'}`}
             >
               {s.label}
             </span>
@@ -57,20 +57,20 @@ export function OnboardingWizard() {
       </div>
 
       {/* Step content */}
-      <div className="bg-white rounded-xl border p-8">
+      <div className="bg-white rounded-2xl border border-brand-border p-8">
         {step === 0 && <Step1BusinessInfo onNext={next} />}
         {step === 1 && <Step2Services onNext={next} onBack={back} />}
         {step === 2 && <Step3ComplianceDocs onNext={next} onBack={back} />}
         {step >= 3 && (
-          <div className="text-center py-8">
-            <p className="text-gray-500 mb-4">
+          <div className="text-center py-16">
+            <p className="text-base text-text-4 mb-6">
               Continue to <strong>{STEPS[step].label}</strong> from your dashboard.
             </p>
             <div className="flex gap-3 justify-center">
-              <button onClick={back} className="text-sm text-gray-500 hover:text-gray-700">← Back</button>
+              <button onClick={back} className="text-sm text-text-4 hover:text-text-2">← Back</button>
               <button
                 onClick={next}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700"
+                className="px-4 py-2 bg-brand text-white rounded-xl text-sm font-bold hover:bg-brand-hover"
               >
                 {step === STEPS.length - 1 ? 'Go to Dashboard' : 'Continue →'}
               </button>

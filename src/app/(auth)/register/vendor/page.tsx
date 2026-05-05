@@ -1,12 +1,9 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
+import { CityInput } from '@/components/ui/CityInput'
 
 const VENDOR_TYPES = [
   { value: 'CATERER', label: 'Caterer' },
@@ -41,7 +38,7 @@ export default function VendorRegisterPage() {
   const router = useRouter()
   const [form, setForm] = useState({
     business_name: '', email: '', password: '',
-    vendor_type: '', city: '', country: 'GB', phone_business: '',
+    vendor_type: '', city: '', country: 'US', phone_business: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -51,7 +48,7 @@ export default function VendorRegisterPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.vendor_type) { setError('Please select a vendor type'); return }
+    if (!form.vendor_type) { setError('Please select a business type'); return }
     setLoading(true)
     setError('')
     const res = await fetch('/api/auth/register/vendor', {
@@ -60,7 +57,13 @@ export default function VendorRegisterPage() {
       body: JSON.stringify(form),
     })
     if (res.ok) {
-      router.push('/login?registered=1')
+      await signIn('credentials', {
+        email: form.email,
+        password: form.password,
+        role: 'vendor',
+        redirect: false,
+      })
+      router.push('/verify')
     } else {
       const data = await res.json()
       setError(data.error ?? 'Registration failed')
@@ -69,61 +72,150 @@ export default function VendorRegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">List your business</CardTitle>
-          <CardDescription>Join Bhoj and start receiving quality leads</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-md">{error}</p>}
-            <div className="space-y-1">
-              <Label>Business name</Label>
-              <Input value={form.business_name} onChange={update('business_name')} required />
+    <div className="min-h-screen bg-cream bg-dot-grid flex flex-col">
+      {/* Nav */}
+      <nav className="bg-white border-b border-brand-border flex items-center justify-between px-8 py-0 h-[62px]">
+        <Link href="/" className="text-xl font-black tracking-tight text-text-1">
+          One<span className="text-brand">Seva</span>
+        </Link>
+        <p className="text-sm text-text-4">
+          Already registered?{' '}
+          <Link href="/login" className="text-brand font-semibold hover:underline">Sign in</Link>
+        </p>
+      </nav>
+
+      {/* Card */}
+      <div className="flex-1 flex items-center justify-center p-6 py-10">
+        <div className="w-full max-w-md bg-white border border-brand-border rounded-2xl shadow-md p-8 flex flex-col gap-5">
+          <div className="text-center">
+            <h1 className="text-2xl font-black text-text-1">List your business</h1>
+            <p className="text-sm text-text-4 mt-1">Join OneSeva and start receiving quality leads for Indian events</p>
+          </div>
+
+          {/* Benefits */}
+          <div className="rounded-xl border border-brand-border bg-cream p-3.5 flex flex-col gap-1.5">
+            <p className="text-xs font-semibold text-text-3 mb-0.5">Why vendors love OneSeva</p>
+            <p className="text-xs text-text-4 flex items-center gap-1.5"><span className="text-brand font-bold">✓</span> Receive direct quote requests from event planners</p>
+            <p className="text-xs text-text-4 flex items-center gap-1.5"><span className="text-brand font-bold">✓</span> No monthly fees — only pay when it makes sense</p>
+            <p className="text-xs text-text-4 flex items-center gap-1.5"><span className="text-brand font-bold">✓</span> Build your profile with reviews and portfolio</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {error && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+            )}
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="business_name" className="text-sm font-semibold text-text-2">Business name</label>
+              <input
+                id="business_name"
+                type="text"
+                value={form.business_name}
+                onChange={update('business_name')}
+                required
+                placeholder="Spice Route Catering"
+                className="border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-4"
+              />
             </div>
-            <div className="space-y-1">
-              <Label>Business type</Label>
-              <Select onValueChange={(v: string | null) => setForm(f => ({ ...f, vendor_type: v ?? '' }))}>
-                <SelectTrigger><SelectValue placeholder="Select type…" /></SelectTrigger>
-                <SelectContent>
-                  {VENDOR_TYPES.map(t => (
-                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="vendor_type" className="text-sm font-semibold text-text-2">Business type</label>
+              <select
+                id="vendor_type"
+                value={form.vendor_type}
+                onChange={e => setForm(f => ({ ...f, vendor_type: e.target.value }))}
+                required
+                className="border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 appearance-none"
+              >
+                <option value="" disabled>Select business type…</option>
+                {VENDOR_TYPES.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
             </div>
+
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>City</Label>
-                <Input value={form.city} onChange={update('city')} placeholder="London" required />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-text-2">City</label>
+                <CityInput
+                  value={form.city}
+                  onChange={city => setForm(f => ({ ...f, city }))}
+                  placeholder="London…"
+                  required
+                />
               </div>
-              <div className="space-y-1">
-                <Label>Country code</Label>
-                <Input value={form.country} onChange={update('country')} placeholder="GB" required maxLength={2} />
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="country" className="text-sm font-semibold text-text-2">Country code</label>
+                <input
+                  id="country"
+                  type="text"
+                  value={form.country}
+                  onChange={update('country')}
+                  placeholder="GB"
+                  required
+                  maxLength={2}
+                  className="border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-4 uppercase"
+                />
               </div>
             </div>
-            <div className="space-y-1">
-              <Label>Business phone</Label>
-              <Input value={form.phone_business} onChange={update('phone_business')} type="tel" />
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="phone_business" className="text-sm font-semibold text-text-2">
+                Business phone <span className="text-text-4 font-normal">(optional)</span>
+              </label>
+              <input
+                id="phone_business"
+                type="tel"
+                value={form.phone_business}
+                onChange={update('phone_business')}
+                placeholder="+44 20 1234 5678"
+                className="border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-4"
+              />
             </div>
-            <div className="space-y-1">
-              <Label>Email</Label>
-              <Input type="email" value={form.email} onChange={update('email')} required />
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className="text-sm font-semibold text-text-2">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={form.email}
+                onChange={update('email')}
+                required
+                placeholder="you@yourbusiness.com"
+                className="border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-4"
+              />
             </div>
-            <div className="space-y-1">
-              <Label>Password</Label>
-              <Input type="password" value={form.password} onChange={update('password')} required minLength={8} />
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="password" className="text-sm font-semibold text-text-2">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={form.password}
+                onChange={update('password')}
+                required
+                minLength={8}
+                placeholder="At least 8 characters"
+                className="border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-4"
+              />
             </div>
-            <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700" disabled={loading}>
-              {loading ? 'Creating account…' : 'Create vendor account'}
-            </Button>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-brand hover:bg-brand-hover text-white text-sm font-black py-3.5 rounded-xl transition-colors disabled:opacity-60"
+              style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}
+            >
+              {loading ? 'Creating account…' : 'Create vendor account →'}
+            </button>
           </form>
-          <p className="mt-4 text-center text-sm text-gray-500">
-            Already registered? <Link href="/login" className="text-orange-600 hover:underline">Sign in</Link>
+
+          <p className="text-center text-xs text-text-4">
+            Looking to plan an event?{' '}
+            <Link href="/register/customer" className="text-brand hover:underline font-semibold">Sign up as customer →</Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

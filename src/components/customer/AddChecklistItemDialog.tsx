@@ -44,7 +44,7 @@ export function AddChecklistItemDialog({ eventId }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        className="inline-flex items-center gap-1 px-3 py-1.5 border rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+        className="inline-flex items-center gap-1 px-3 py-1.5 border rounded-md text-sm font-medium text-text-2 hover:bg-cream"
       >
         <Plus className="h-4 w-4" /> Add item
       </DialogTrigger>
@@ -52,14 +52,14 @@ export function AddChecklistItemDialog({ eventId }: Props) {
         <DialogHeader>
           <DialogTitle>Add checklist item</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="flex rounded-lg border overflow-hidden">
+        <div className="space-y-5">
+          <div className="flex rounded-xl border overflow-hidden">
             <button
-              className={`flex-1 py-2 text-sm font-medium ${mode === 'external' ? 'bg-orange-600 text-white' : 'text-gray-600'}`}
+              className={`flex-1 py-2 text-sm font-medium ${mode === 'external' ? 'bg-brand text-white' : 'text-text-3'}`}
               onClick={() => setMode('external')}
             >External Vendor</button>
             <button
-              className={`flex-1 py-2 text-sm font-medium ${mode === 'custom' ? 'bg-orange-600 text-white' : 'text-gray-600'}`}
+              className={`flex-1 py-2 text-sm font-medium ${mode === 'custom' ? 'bg-brand text-white' : 'text-text-3'}`}
               onClick={() => setMode('custom')}
             >Custom Item</button>
           </div>
@@ -85,7 +85,7 @@ export function AddChecklistItemDialog({ eventId }: Props) {
                 <Label>Vendor name</Label>
                 <Input value={form.external_vendor_name} onChange={e => setForm(f => ({ ...f, external_vendor_name: e.target.value }))} placeholder="ABC Catering Ltd" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-1">
                   <Label>Phone</Label>
                   <Input value={form.external_vendor_phone} onChange={e => setForm(f => ({ ...f, external_vendor_phone: e.target.value }))} />
@@ -98,7 +98,7 @@ export function AddChecklistItemDialog({ eventId }: Props) {
             </>
           )}
 
-          <Button onClick={handleAdd} disabled={saving} className="w-full bg-orange-600 hover:bg-orange-700">
+          <Button onClick={handleAdd} disabled={saving} className="w-full bg-brand hover:bg-brand-hover">
             {saving ? 'Adding…' : 'Add to checklist'}
           </Button>
         </div>

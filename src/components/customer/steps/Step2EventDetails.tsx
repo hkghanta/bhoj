@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CityInput } from '@/components/ui/CityInput'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { format } from 'date-fns'
 
@@ -10,10 +11,34 @@ type EventDetails = {
   event_name: string
   event_date: string
   city: string
+  state: string
   venue: string
   guest_count: number
   total_budget: number
   currency: string
+  country: string
+}
+
+const CURRENCY_TO_COUNTRY: Record<string, string> = {
+  USD: 'US', GBP: 'GB', CAD: 'CA', AUD: 'AU', INR: 'IN',
+}
+
+// Photon API returns full country names; map to our codes
+const COUNTRY_CODE_MAP: Record<string, string> = {
+  'United States': 'US', 'United States of America': 'US', US: 'US', USA: 'US',
+  'United Kingdom': 'GB', UK: 'GB', GB: 'GB',
+  Canada: 'CA', CA: 'CA',
+  Australia: 'AU', AU: 'AU',
+  India: 'IN', IN: 'IN',
+  'United Arab Emirates': 'AE', AE: 'AE',
+  Singapore: 'SG', SG: 'SG',
+  'New Zealand': 'NZ', NZ: 'NZ',
+  'South Africa': 'ZA', ZA: 'ZA',
+  Malaysia: 'MY', MY: 'MY',
+}
+
+const COUNTRY_CURRENCY: Record<string, string> = {
+  US: 'USD', GB: 'GBP', CA: 'CAD', AU: 'AUD', IN: 'INR',
 }
 
 type Props = {
@@ -27,10 +52,12 @@ export function Step2EventDetails({ eventType, onNext, onBack }: Props) {
     event_name: '',
     event_date: '',
     city: '',
+    state: '',
     venue: '',
     guest_count: 100,
     total_budget: 5000,
-    currency: 'GBP',
+    currency: 'USD',
+    country: 'US',
   })
   const [error, setError] = useState('')
 
@@ -53,8 +80,8 @@ export function Step2EventDetails({ eventType, onNext, onBack }: Props) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">Event details</h2>
-        <p className="text-gray-500 text-sm mt-1 capitalize">Planning a {eventType}</p>
+        <h2 className="text-xl font-semibold text-text-1">Event details</h2>
+        <p className="text-text-4 text-sm mt-1 capitalize">Planning a {eventType}</p>
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -67,7 +94,7 @@ export function Step2EventDetails({ eventType, onNext, onBack }: Props) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-5">
         <div className="space-y-1">
           <Label>Date *</Label>
           <Input
@@ -79,16 +106,24 @@ export function Step2EventDetails({ eventType, onNext, onBack }: Props) {
         </div>
         <div className="space-y-1">
           <Label>City *</Label>
-          <Input
+          <CityInput
             value={form.city}
-            onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-            placeholder="London"
+            onChange={(city, meta) => {
+              setForm(f => ({
+                ...f,
+                city,
+                ...(meta?.state ? { state: meta.state } : {}),
+                ...(meta?.country && COUNTRY_CODE_MAP[meta.country] ? { country: COUNTRY_CODE_MAP[meta.country], currency: COUNTRY_CURRENCY[COUNTRY_CODE_MAP[meta.country]] ?? 'USD' } : {}),
+              }))
+            }}
+            placeholder="Search city…"
+            required
           />
         </div>
       </div>
 
       <div className="space-y-1">
-        <Label>Venue name <span className="text-gray-400">(optional)</span></Label>
+        <Label>Venue name <span className="text-text-4">(optional)</span></Label>
         <Input
           value={form.venue}
           onChange={e => setForm(f => ({ ...f, venue: e.target.value }))}
@@ -96,7 +131,7 @@ export function Step2EventDetails({ eventType, onNext, onBack }: Props) {
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-5">
         <div className="space-y-1">
           <Label>Guests *</Label>
           <Input
@@ -117,11 +152,14 @@ export function Step2EventDetails({ eventType, onNext, onBack }: Props) {
         </div>
         <div className="space-y-1">
           <Label>Currency</Label>
-          <Select value={form.currency} onValueChange={(v: string | null) => setForm(f => ({ ...f, currency: v ?? 'GBP' }))}>
+          <Select value={form.currency} onValueChange={(v: string | null) => {
+            const cur = v ?? 'USD'
+            setForm(f => ({ ...f, currency: cur, country: CURRENCY_TO_COUNTRY[cur] ?? 'US' }))
+          }}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="GBP">GBP £</SelectItem>
               <SelectItem value="USD">USD $</SelectItem>
+              <SelectItem value="GBP">GBP £</SelectItem>
               <SelectItem value="CAD">CAD $</SelectItem>
               <SelectItem value="AUD">AUD $</SelectItem>
               <SelectItem value="INR">INR ₹</SelectItem>
@@ -132,7 +170,7 @@ export function Step2EventDetails({ eventType, onNext, onBack }: Props) {
 
       <div className="flex gap-3 pt-2">
         <Button variant="outline" onClick={onBack}>← Back</Button>
-        <Button onClick={handleNext} className="flex-1 bg-orange-600 hover:bg-orange-700">
+        <Button onClick={handleNext} className="flex-1 bg-brand hover:bg-brand-hover">
           Review & Create →
         </Button>
       </div>

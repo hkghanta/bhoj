@@ -94,30 +94,25 @@ Services split into two categories based on who typically provides them:
 
 This distinction drives two different fallback strategies when no OneSeva vendors are available.
 
-### Layout — Business services (CATERER, FLORIST, DECORATOR, TRANSPORT…)
+### Layout — All service types
+
+The service page has the same three-section structure regardless of service class:
 
 **Top — Requirements panel** (collapsible once saved)
 Service-specific form. Visible by default; collapsed to a summary bar once saved with an "Edit" button.
 
-**Below — Vendor results, two sections:**
+**Middle — OneSeva vendors/professionals**
+Ranked by relevance (location + requirements fit + rating).
+- Business services: card shows business logo, company name, city, tier badge, rating, pricing, "Request Quote" button.
+- Individual services: card shows portrait photo, first + last name, skill tags, portfolio strip, rating, starting price, "Request Quote" button.
 
-1. **OneSeva vendors** — ranked by relevance (location + requirements fit + rating). Each card: photo, business name, city, tier badge, rating, pricing, "Request Quote" button.
+If no OneSeva vendors exist for this service type + city, this section is hidden.
 
-2. **Other local businesses** — Google Places results. Card shows: name, Google rating, review count, phone number, address. Customer calls directly. Labelled "Not on OneSeva yet — call to enquire".
+**Bottom — Public request board panel** (shown for ALL service types once requirements are saved)
+A panel labelled "Your request is live — anyone can respond." Shows the public request URL, response count, and status (Open / Filled). Anyone — registered vendors, freelancers, or members of the public — can find this request and respond. This is the platform's growth engine: every event request is a job posting, naturally building a supply-side community.
 
-If no OneSeva vendors exist, section 1 is hidden. Google Places fills the full page. No dead ends.
-
-### Layout — Individual services (PHOTOGRAPHER, DJ, MEHENDI_ARTIST, MAKEUP_HAIR…)
-
-**Top — Requirements panel** (same collapsible pattern)
-
-**Below — Vendor results, two sections:**
-
-1. **OneSeva professionals** — ranked by relevance. Card shows: profile photo, name (person's name, not business), city, portfolio photo strip, rating, starting price, "Request Quote" button.
-
-2. **Open request board** — when no OneSeva professionals are available (or always shown below the list as a fallback): a panel showing the customer's posted requirement, labelled "Your request is live — professionals in your area will see this and can respond." Professionals browsing the open request board can choose to respond, which initiates the quote flow.
-
-This reverse model (customer posts, professional responds) suits freelancers naturally — they are not discoverable via Google Places but they can browse open event requests and reach out.
+**Additionally for Business services only:**
+A fourth section: **Other local businesses** — Google Places results below the request board panel. Card shows: name, Google rating, review count, phone number, address. Labelled "Not on OneSeva yet — call to enquire".
 
 ### Open request board — public, SEO-indexed
 
@@ -157,11 +152,13 @@ Submitting the form creates a `RequestResponse` record linked to the `EventReque
 
 **Host dashboard:**
 Customer sees all responses on `/events/[id]/services/[type]` — name, pitch, price, portfolio link. They can:
-- **Accept** → contact details exchanged with that responder, request status stays Open for others
+- **Ask for full quote** → sends responder a magic link (email + WhatsApp if available) to submit a structured quote — no account required
 - **Mark as filled** → request page shows "This request has been filled", no new responses accepted
 - **Ignore** → no action needed
 
-Accepted responders who are not yet on OneSeva get a nudge: "Create your OneSeva profile to manage bookings and get more leads."
+All responses and quotes — from both the public board and OneSeva vendors — appear in one unified view (see Section 3a — Unified Quotes).
+
+Responders who submit a full quote via magic link see a nudge after submission: "Want to manage bookings and get more leads? Create your OneSeva profile free →". Registration is optional, never a gate.
 
 **SEO value:**
 Each public request page is indexable. A photographer Googling "wedding photography jobs London June 2026" can find it. Customer can share the link on WhatsApp: "Anyone know a good DJ? Here's my request."
@@ -257,6 +254,100 @@ This is the billable event for future pay-per-lead monetisation. The Match recor
 - `src/app/(customer)/events/[id]/services/[type]/page.tsx` — new page
 - `src/app/api/events/[id]/services/[type]/route.ts` — GET (fetch saved requirements + vendors), POST (save requirements)
 - `src/app/api/events/[id]/services/[type]/request-quote/route.ts` — POST (create EventRequest + Match + notify)
+
+---
+
+## Section 3a — Unified Quotes & Responses
+
+### Concept
+
+Every quote and every public board response for an event appears in one place: the global quotes page at `/events/[id]/quotes`. Customers never need to check two separate pages. The page groups entries by service type and shows a summary table with an expandable detail panel.
+
+### Two entry types
+
+| | OneSeva vendor quote | Public board response |
+|---|---|---|
+| Source | Registered vendor used the quote builder | Anyone responded via `/requests/...` |
+| Initial data | Structured (per-head/tray, menu, line items, discount) | Unstructured (name, pitch, rough price note) |
+| Full quote | Already submitted | Triggered by "Ask for full quote" → magic link |
+| Display | Rich detail: menu, dietary, tray lines | Pitch text + what's included + service details |
+| Actions | Accept · Negotiate · Reject | Ask for full quote · Accept · Decline |
+
+### Page layout
+
+```
+My Quotes                              [Filter: All ▾  or  by service type]
+
+─── Catering (3) ──────────────────────────────────────────────────────────
+ Name              Price       Type          Status     Action
+ Royal Caterers    £28/head    Full quote    Sent       [View]
+ Ahmed's Kitchen   ~£25/head   Pitch only    Replied    [Ask for full quote]
+ Spice Garden      £32/head    Full quote    Sent       [View]
+
+─── Photography (1) ────────────────────────────────────────────────────────
+ Priya Sharma      £600/day    Pitch only    Replied    [Ask for full quote]
+```
+
+Clicking any row expands an inline detail panel:
+- **Full quote rows:** show the full quote breakdown (menu, tray lines, discount, totals) — same content as the existing quote detail page.
+- **Pitch-only rows:** show the responder's pitch, price note, portfolio link, and phone (if already accepted).
+- **Full quote via magic link rows:** show the structured what's included + service details form they filled in.
+
+### Schema additions to RequestResponse
+
+To support the two-stage pitch → full quote flow, add to `RequestResponse`:
+
+```prisma
+email              String?      // for magic link delivery
+quote_token        String?  @unique @default(cuid())  // magic link token
+quoted_price       Decimal?
+price_unit         String?      // "per_head" | "per_event" | "per_hour" | "per_day"
+what_includes      String?      // free text: what is covered
+service_details    String?      // dietary, equipment, style, hours — JSON or free text
+availability_note  String?      // "Available on your date" / "Need to confirm"
+quote_submitted_at DateTime?
+```
+
+`quote_token` is always generated. The magic link is `/quote-request/[quote_token]`. Accessible without login.
+
+### Magic link flow
+
+```
+Customer clicks "Ask for full quote" on a pitch-only response
+  → PATCH /api/requests/[token] { action: "request_full_quote", response_id }
+  → System sends email + WhatsApp (if phone available) to responder:
+    "Hi [Name], [Customer's event type] in [City] wants a full quote from you.
+     Fill in the details here → oneseva.com/quote-request/[quote_token]"
+  → RequestResponse.status updated to "QUOTE_REQUESTED"
+
+Responder opens /quote-request/[quote_token]
+  → Sees: event type, city, guest count, budget band, requirements
+  → Fills: price + unit, what's included, service details, availability note
+  → Submits → RequestResponse updated with structured fields + quote_submitted_at
+  → Confirmation page: "Quote sent! Create your OneSeva profile to get more leads →"
+  → Customer notified: "[Name] sent you a full quote"
+```
+
+### Lightweight quote form fields
+
+At `/quote-request/[quote_token]` (no login required):
+
+- **Price** (number) + **Unit** (per person / per event / per hour / per day)
+- **What's included** (textarea — e.g. "Setup, service staff, cleanup, crockery")
+- **Service details** — service-type-specific questions:
+  - Catering: dietary options covered, cuisine, service style
+  - Photography: hours covered, deliverables (gallery, album, drone)
+  - DJ: hours, equipment provided (yes/no), genres
+  - Other types: free text "Tell them what you offer"
+- **Availability** (radio: "I'm available on this date" / "I need to confirm availability" / "I'm not available — suggesting alternative")
+- **Any other notes** (optional textarea)
+
+### Files to create/change
+
+- `src/app/(customer)/events/[id]/quotes/page.tsx` — rewrite as unified table grouped by service type
+- `src/app/(public)/quote-request/[token]/page.tsx` — lightweight quote form (no auth)
+- `src/app/api/quote-request/[token]/route.ts` — GET (prefill event details), POST (save structured quote)
+- `prisma/schema.prisma` — add fields to `RequestResponse`
 
 ---
 
@@ -408,11 +499,24 @@ No authentication required. No event context — pure discovery.
 
 ## Section 7 — Monetisation Foundation
 
-No payment implemented now. Architecture tracks the billable event:
+No payment implemented now. Everything is free to use.
 
+**Two future monetisation levers — no implementation required yet, but architecture must not block them:**
+
+**1. Pay-per-lead (vendor side)**
 - A **lead** = a `Match` record created when customer clicks "Request Quote" on a vendor
-- `Match` records store `created_at` — sufficient for future pay-per-lead billing
-- No vendor-facing changes needed to switch to paid model later — just add a payment gate before the lead notification is sent to the vendor
+- `Match` records store `created_at` — sufficient for future billing
+- Gate: add a payment check before the lead notification is sent to the vendor
+
+**2. Response credits (public request board)**
+- Responding to public requests will eventually cost credits
+- Free tier: 3–5 responses/month per person/account (exact number TBD)
+- Beyond free tier: purchase a credit pack
+- Architecture requirement: `RequestResponse.email` (added in Section 3a) is also the identifier for credit tracking per person
+- For now all responses are free
+- When credits are introduced: add `credits_used Boolean @default(false)` to `RequestResponse` and a `ResponderCredit` table — no other schema changes needed
+
+**Posting events is always free.** We never charge customers to post. Revenue comes from the supply side (vendors paying for leads and response credits).
 
 ---
 
@@ -440,12 +544,16 @@ Anyone finds the public request (Google, shared link, vendor leads feed)
   → Clicks "I can help" → fills name, phone, pitch, price
   → RequestResponse record created → host notified
 
-Host reviews responses on their dashboard
-  → Accepts one → contact details exchanged → quote/booking flow
-  → Marks as filled → request page shows "Filled"
+Host reviews responses on their dashboard (unified quotes page, grouped by service)
+  → Clicks "Ask for full quote" on a pitch-only response
+  → System sends magic link via email + WhatsApp to responder
+  → Responder fills lightweight quote form at /quote-request/[token] (no login)
+  → Quote appears in unified table alongside OneSeva vendor quotes
+  → Host compares all, accepts or negotiates
 
 Vendor (business) receives lead
-  → Builds quote → Sends to customer
+  → Builds quote via quote builder → Sends to customer
+  → Quote appears in same unified table
 
 Vendor profile viewed publicly (/vendors/[id])
   → No auth required

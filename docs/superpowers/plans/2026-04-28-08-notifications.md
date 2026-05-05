@@ -48,7 +48,7 @@ src/
 - [ ] **Step 1: Install dependencies**
 
 ```bash
-cd /home/hareesh/projects/bhoj
+cd /home/hareesh/projects/oneseva
 pnpm add resend expo-server-sdk twilio
 pnpm add -D @types/twilio
 ```
@@ -112,7 +112,7 @@ git push
 - [ ] **Step 1: Install React Email**
 
 ```bash
-cd /home/hareesh/projects/bhoj
+cd /home/hareesh/projects/oneseva
 pnpm add @react-email/components @react-email/render
 ```
 
@@ -144,7 +144,7 @@ export function NewLeadEmail({ vendorName, eventName, guestCount, eventDate, cit
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 20px' }}>
           <Section style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e5e7eb' }}>
             <Heading style={{ color: '#ea580c', fontSize: '24px', marginBottom: '8px' }}>
-              Bhoj
+              OneSeva
             </Heading>
             <Text style={{ color: '#374151', fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
               You have a new lead!
@@ -187,7 +187,7 @@ export function NewLeadEmail({ vendorName, eventName, guestCount, eventDate, cit
 
           <Hr style={{ borderColor: '#e5e7eb', margin: '24px 0' }} />
           <Text style={{ color: '#9ca3af', fontSize: '12px', textAlign: 'center' }}>
-            Bhoj · Indian Event Services · <a href="{unsubscribeUrl}" style={{ color: '#9ca3af' }}>Unsubscribe</a>
+            OneSeva · Indian Event Services · <a href="{unsubscribeUrl}" style={{ color: '#9ca3af' }}>Unsubscribe</a>
           </Text>
         </Container>
       </Body>
@@ -220,7 +220,7 @@ export function QuoteReceivedEmail({ customerName, vendorName, eventName, totalE
       <Body style={{ backgroundColor: '#f9fafb', fontFamily: 'Arial, sans-serif' }}>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 20px' }}>
           <Section style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e5e7eb' }}>
-            <Heading style={{ color: '#ea580c', fontSize: '24px', marginBottom: '8px' }}>Bhoj</Heading>
+            <Heading style={{ color: '#ea580c', fontSize: '24px', marginBottom: '8px' }}>OneSeva</Heading>
             <Text style={{ color: '#374151', fontSize: '16px', fontWeight: 'bold' }}>
               You received a quote!
             </Text>
@@ -256,7 +256,7 @@ export function QuoteReceivedEmail({ customerName, vendorName, eventName, totalE
           </Section>
 
           <Text style={{ color: '#9ca3af', fontSize: '12px', textAlign: 'center', marginTop: '24px' }}>
-            Bhoj · Indian Event Services
+            OneSeva · Indian Event Services
           </Text>
         </Container>
       </Body>
@@ -287,7 +287,7 @@ export function NewMessageEmail({ recipientName, senderName, eventName, bodyPrev
       <Body style={{ backgroundColor: '#f9fafb', fontFamily: 'Arial, sans-serif' }}>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 20px' }}>
           <Section style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e5e7eb' }}>
-            <Text style={{ color: '#ea580c', fontSize: '20px', fontWeight: 'bold' }}>Bhoj</Text>
+            <Text style={{ color: '#ea580c', fontSize: '20px', fontWeight: 'bold' }}>OneSeva</Text>
             <Text style={{ color: '#374151', fontSize: '15px' }}>
               Hi {recipientName}, you have a new message from <strong>{senderName}</strong> about <strong>{eventName}</strong>.
             </Text>
@@ -328,7 +328,7 @@ export function ReviewPostedEmail({ vendorName, reviewerName, rating, eventType,
       <Body style={{ backgroundColor: '#f9fafb', fontFamily: 'Arial, sans-serif' }}>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 20px' }}>
           <Section style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e5e7eb' }}>
-            <Text style={{ color: '#ea580c', fontSize: '20px', fontWeight: 'bold' }}>Bhoj</Text>
+            <Text style={{ color: '#ea580c', fontSize: '20px', fontWeight: 'bold' }}>OneSeva</Text>
             <Text style={{ color: '#374151', fontSize: '15px' }}>
               Hi {vendorName}, <strong>{reviewerName}</strong> left you a review for a {eventType} event.
             </Text>
@@ -359,8 +359,8 @@ import type { NotificationJob } from '../types'
 import { NOTIFICATION_EVENTS } from '../types'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.RESEND_FROM_EMAIL ?? 'hello@bhoj.app'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://bhoj.app'
+const FROM = process.env.RESEND_FROM_EMAIL ?? 'hello@oneseva.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://oneseva.app'
 
 export async function sendEmail(job: NotificationJob, recipientEmail: string): Promise<void> {
   const { eventType, context } = job
@@ -492,7 +492,7 @@ function buildPushMessage(job: NotificationJob, pushToken: string): ExpoPushMess
     },
   }
 
-  const msg = messages[eventType] ?? { title: 'Bhoj', body: 'You have a new notification' }
+  const msg = messages[eventType] ?? { title: 'OneSeva', body: 'You have a new notification' }
 
   return {
     to: pushToken,
@@ -623,7 +623,7 @@ function getWhatsAppMessage(job: NotificationJob): string {
 
   switch (eventType) {
     case NOTIFICATION_EVENTS.NEW_LEAD:
-      return `🎉 *New Lead on Bhoj!*\n\n` +
+      return `🎉 *New Lead on OneSeva!*\n\n` +
         `*Event:* ${context.eventName}\n` +
         `*Location:* ${context.city}\n` +
         `*Guests:* ${context.guestCount}\n` +
@@ -632,7 +632,7 @@ function getWhatsAppMessage(job: NotificationJob): string {
         `Log in to view and submit your quote: ${process.env.NEXT_PUBLIC_APP_URL}/vendor/leads`
 
     case NOTIFICATION_EVENTS.QUOTE_RECEIVED:
-      return `✅ *Quote Received on Bhoj!*\n\n` +
+      return `✅ *Quote Received on OneSeva!*\n\n` +
         `*From:* ${context.vendorName}\n` +
         `*Event:* ${context.eventName}\n` +
         `*Total estimate:* ${context.currency} ${Number(context.totalEstimate).toLocaleString()}\n\n` +
@@ -644,7 +644,7 @@ function getWhatsAppMessage(job: NotificationJob): string {
         `Reply: ${process.env.NEXT_PUBLIC_APP_URL}/messages/${context.conversationId}`
 
     default:
-      return `You have a new notification on Bhoj: ${process.env.NEXT_PUBLIC_APP_URL}`
+      return `You have a new notification on OneSeva: ${process.env.NEXT_PUBLIC_APP_URL}`
   }
 }
 
@@ -673,7 +673,7 @@ export async function sendWhatsApp(job: NotificationJob, phoneNumber: string): P
 - [ ] **Step 2: Add WHATSAPP_ENABLED to .env.example**
 
 ```bash
-cat >> /home/hareesh/projects/bhoj/.env.example << 'EOF'
+cat >> /home/hareesh/projects/oneseva/.env.example << 'EOF'
 
 # Feature Flags
 WHATSAPP_ENABLED="false"

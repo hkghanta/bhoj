@@ -9,6 +9,7 @@ import { NOTIFICATION_EVENTS } from '@/lib/notifications/types'
 import { format } from 'date-fns'
 import type { VendorForScoring, EventRequestForScoring } from '@/lib/matching/types'
 import { VendorType } from '@prisma/client'
+import { geocodeCity } from '@/lib/geocode'
 
 const MAX_MATCHES = 5
 
@@ -32,6 +33,9 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
 
   const weights = await getWeights()
 
+  // Geocode the event city once for radius filtering
+  const eventGeo = await geocodeCity(request.event.city)
+
   const existingMatchVendorIds = (
     await prisma.match.findMany({
       where: { event_request_id: eventRequestId },
@@ -43,6 +47,7 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
     where: {
       vendor_type: request.vendor_type as VendorType,
       is_active: true,
+      country: request.event.country,
       id: { notIn: existingMatchVendorIds },
     },
     include: {
@@ -80,7 +85,9 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
     vendor_type: request.vendor_type as VendorType,
     event: {
       city: request.event.city,
-      country: 'GB', // Event model doesn't store country yet — default to GB
+      country: request.event.country,
+      lat: eventGeo?.lat ?? null,
+      lng: eventGeo?.lng ?? null,
       event_date: request.event.event_date,
       guest_count: request.event.guest_count,
       total_budget: Number(request.event.total_budget),
@@ -97,7 +104,7 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
       : null,
   }
 
-  type ScoredVendor = { vendorId: string; score: number; rank: number }
+  type ScoredVendor = { vendorId: string; score: number; rank: number; distance_miles: number | null }
   const scored: ScoredVendor[] = []
 
   for (const vendor of vendors) {
@@ -110,6 +117,9 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
       id: vendor.id,
       city: vendor.city,
       country: vendor.country,
+      lat: vendor.lat ?? null,
+      lng: vendor.lng ?? null,
+      travel_radius_miles: vendor.travel_radius_miles,
       vendor_type: vendor.vendor_type,
       tier: vendor.tier,
       is_verified: vendor.is_verified,
@@ -134,7 +144,7 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
     const unavailable = unavailabilityMap.get(vendor.id) ?? new Set<string>()
     const breakdown = scoreVendor(vendorForScoring, requestForScoring, weights, unavailable)
     if (breakdown !== null) {
-      scored.push({ vendorId: vendor.id, score: breakdown.total, rank: 0 })
+      scored.push({ vendorId: vendor.id, score: breakdown.total, rank: 0, distance_miles: breakdown.distance_miles })
     }
   }
 
@@ -160,6 +170,7 @@ export async function runMatchJob(data: MatchJobData): Promise<void> {
         vendor_type: request.vendor_type as VendorType,
         score: s.score,
         rank: s.rank,
+        distance_miles: s.distance_miles,
         status: 'PENDING',
       })),
     }),

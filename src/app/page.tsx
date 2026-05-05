@@ -281,7 +281,7 @@ export default function HomePage() {
                   <div className="text-xs text-text-4 mb-3">{meta}</div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-text-2">{stars}</span>
-                    <span className="text-[10px] font-black text-brand bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">{match}</span>
+                    <span className="text-[10px] font-black text-brand bg-cream border border-brand-border px-2 py-0.5 rounded-full">{match}</span>
                   </div>
                 </div>
               </div>

@@ -102,18 +102,18 @@ export function MessageThread({ conversationId, currentUserRole }: Props) {
           return (
             <div key={msg.id}>
               {showDate && (
-                <div className="text-center text-xs text-gray-400 my-3">
+                <div className="text-center text-xs text-text-4 my-3">
                   {format(new Date(msg.created_at), 'EEEE, d MMMM yyyy')}
                 </div>
               )}
               <div className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
                   isMine
-                    ? 'bg-orange-600 text-white rounded-br-sm'
-                    : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+                    ? 'bg-brand text-white rounded-br-sm'
+                    : 'bg-cream text-text-1 rounded-bl-sm'
                 }`}>
                   <p className="whitespace-pre-wrap break-words">{msg.body}</p>
-                  <p className={`text-xs mt-1 ${isMine ? 'text-orange-200' : 'text-gray-400'}`}>
+                  <p className={`text-xs mt-1 ${isMine ? 'text-brand' : 'text-text-4'}`}>
                     {format(new Date(msg.created_at), 'HH:mm')}
                     {isMine && msg.is_read && <span className="ml-1">✓✓</span>}
                   </p>
@@ -137,7 +137,7 @@ export function MessageThread({ conversationId, currentUserRole }: Props) {
         <button
           onClick={sendMessage}
           disabled={sending || !input.trim()}
-          className={cn(buttonVariants(), 'bg-orange-600 hover:bg-orange-700 flex-shrink-0 disabled:opacity-50')}
+          className={cn(buttonVariants(), 'bg-brand hover:bg-brand-hover flex-shrink-0 disabled:opacity-50')}
         >
           <Send className="h-4 w-4" />
         </button>

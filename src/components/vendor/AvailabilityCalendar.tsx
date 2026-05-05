@@ -73,20 +73,20 @@ export function AvailabilityCalendar() {
   }
 
   return (
-    <div className="bg-white rounded-xl border p-6">
+    <div className="bg-white rounded-2xl border border-brand-border p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={prevMonth}><ChevronLeft className="h-4 w-4" /></Button>
-          <h2 className="text-lg font-semibold">{MONTH_NAMES[month]} {year}</h2>
+          <h2 className="text-xl font-black">{MONTH_NAMES[month]} {year}</h2>
           <Button variant="ghost" size="icon" onClick={nextMonth}><ChevronRight className="h-4 w-4" /></Button>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-5">
+          <div className="flex items-center gap-2 text-sm text-text-4">
             <span className="h-3 w-3 rounded-full bg-green-100 border border-green-300 inline-block" /> Available
             <span className="h-3 w-3 rounded-full bg-red-100 border border-red-300 inline-block ml-2" /> Blocked
           </div>
           {Object.keys(pendingChanges).length > 0 && (
-            <Button size="sm" onClick={saveChanges} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
+            <Button size="sm" onClick={saveChanges} disabled={saving} className="bg-brand hover:bg-brand-hover">
               {saving ? 'Saving…' : `Save ${Object.keys(pendingChanges).length} changes`}
             </Button>
           )}
@@ -95,7 +95,7 @@ export function AvailabilityCalendar() {
 
       <div className="grid grid-cols-7 gap-1 mb-2">
         {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
-          <div key={d} className="text-center text-xs font-medium text-gray-400 py-2">{d}</div>
+          <div key={d} className="text-center text-sm font-medium text-text-4 py-2">{d}</div>
         ))}
       </div>
 
@@ -113,12 +113,12 @@ export function AvailabilityCalendar() {
               disabled={isPast}
               onClick={() => !isPast && toggleDay(dateStr)}
               className={cn(
-                'aspect-square rounded-lg text-sm font-medium transition-colors',
+                'aspect-square rounded-xl text-sm font-medium transition-colors',
                 isPast ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer',
                 isAvailable
                   ? 'bg-green-50 text-green-800 hover:bg-green-100 border border-green-200'
                   : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200',
-                isPending && 'ring-2 ring-orange-400'
+                isPending && 'ring-2 ring-brand'
               )}
             >
               {day}

@@ -1,19 +1,24 @@
 'use client'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { CheckCircle2, Send, ArrowRight, Sparkles } from 'lucide-react'
+import Link from 'next/link'
+import { CheckCircle2, Send, ArrowRight, Lock, AlertTriangle } from 'lucide-react'
+
+type VendorInfo = {
+  name: string
+  businessName: string
+  phone: string | null
+  emailVerified: boolean
+  phoneVerified: boolean
+}
 
 type Props = {
   token: string
   serviceName: string
   city: string
+  vendor: VendorInfo | null
 }
 
-export function ResponseForm({ token, serviceName, city }: Props) {
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
+export function ResponseForm({ token, serviceName, city, vendor }: Props) {
   const [pitch, setPitch] = useState('')
   const [priceNote, setPriceNote] = useState('')
   const [portfolioUrl, setPortfolioUrl] = useState('')
@@ -22,11 +27,10 @@ export function ResponseForm({ token, serviceName, city }: Props) {
   const [error, setError] = useState('')
 
   const pitchMax = 500
-  const pitchLeft = pitchMax - pitch.length
-  const canSubmit = name.trim().length >= 2 && pitch.trim().length >= 10
+  const canSubmit = pitch.trim().length >= 10
 
   async function submit() {
-    if (!canSubmit) return
+    if (!canSubmit || !vendor) return
     setSubmitting(true)
     setError('')
     try {
@@ -34,8 +38,8 @@ export function ResponseForm({ token, serviceName, city }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          phone: phone || undefined,
+          name: vendor.name,
+          phone: vendor.phone ?? undefined,
           pitch,
           price_note: priceNote || undefined,
           portfolio_url: portfolioUrl || undefined,
@@ -48,65 +52,94 @@ export function ResponseForm({ token, serviceName, city }: Props) {
         setError(data.error ?? 'Failed to submit. Please try again.')
       }
     } catch {
-      setError('Network error. Please check your connection and try again.')
+      setError('Network error. Please check your connection.')
     }
     setSubmitting(false)
   }
 
+  // ── Success state ──────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <div className="relative overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-lg">
-        {/* Decorative gradient bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500" />
+      <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="h-1 w-full bg-brand" />
         <div className="p-8 text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-50 ring-8 ring-green-50/60">
-              <CheckCircle2 className="w-8 h-8 text-green-500" />
+            <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
+              <CheckCircle2 className="w-7 h-7 text-green-500" />
             </div>
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Response sent!</h3>
-          <p className="text-gray-500 text-sm leading-relaxed mb-6">
+          <h3 className="text-lg font-black text-text-1 mb-2">Response sent!</h3>
+          <p className="text-sm text-text-3 leading-relaxed">
             The event host will review your response and reach out if you&apos;re a good fit.
-            Make sure your contact details are reachable.
           </p>
-          <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 text-left">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 shrink-0 mt-0.5">
-                <Sparkles className="w-4 h-4 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-orange-900 mb-1">
-                  Get more leads like this
-                </p>
-                <p className="text-xs text-orange-700 leading-relaxed">
-                  Join OneSeva to receive direct {serviceName} enquiries in {city} — no middlemen, no fees on bookings.
-                </p>
-                <a
-                  href="/register"
-                  className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-orange-600 hover:text-orange-700 transition-colors"
-                >
-                  Create your free profile <ArrowRight className="w-3 h-3" />
-                </a>
-              </div>
-            </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Not logged in ──────────────────────────────────────────────────────────
+  if (!vendor) {
+    return (
+      <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-7 flex flex-col gap-5">
+          <div>
+            <h3 className="text-base font-black text-text-1 mb-1">Want to respond?</h3>
+            <p className="text-sm text-text-3 leading-relaxed">
+              Sign in or create a free vendor account — takes 2 minutes, respond immediately.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Link
+              href={`/register/vendor?next=/requests/${encodeURIComponent(token)}`}
+              className="w-full flex items-center justify-center gap-2 bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-hover transition-colors text-sm"
+            >
+              Create free vendor account <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href={`/login?role=vendor&next=/requests/${encodeURIComponent(token)}`}
+              className="w-full flex items-center justify-center py-3 text-sm font-semibold text-text-3 hover:text-text-1 transition-colors"
+            >
+              Already have an account? Sign in
+            </Link>
           </div>
         </div>
       </div>
     )
   }
 
-  return (
-    <div className="relative overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-lg">
-      {/* Decorative gradient bar */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500" />
-
-      <div className="p-6 md:p-8">
-        <div className="mb-6">
-          <h3 className="text-lg font-bold text-gray-900">I can help with this</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Introduce yourself and tell the host why you&apos;re the right fit.
-          </p>
+  // ── Unverified vendor ──────────────────────────────────────────────────────
+  if (!vendor.emailVerified || !vendor.phoneVerified) {
+    return (
+      <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="h-1 w-full bg-amber-400" />
+        <div className="p-7 flex flex-col items-center text-center gap-5">
+          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5 text-amber-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-text-1 mb-1">Verify your account first</h3>
+            <p className="text-sm text-text-3 leading-relaxed">
+              You need to verify your {!vendor.emailVerified ? 'email' : 'phone number'} before responding to requests.
+            </p>
+          </div>
+          <Link
+            href="/verify"
+            className="w-full flex items-center justify-center gap-2 bg-amber-500 text-white font-bold py-3 rounded-xl hover:bg-amber-600 transition-colors text-sm"
+          >
+            Verify my account <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
+      </div>
+    )
+  }
+
+  // ── Verified vendor — show form ────────────────────────────────────────────
+  return (
+    <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden shadow-sm">
+      <div className="h-1 w-full bg-brand" />
+      <div className="p-6">
+        <h3 className="text-base font-black text-text-1 mb-1">I can help with this</h3>
+        <p className="text-xs text-text-3 mb-5">Responding as <span className="font-semibold text-text-2">{vendor.businessName}</span></p>
 
         {error && (
           <div className="mb-4 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-700">
@@ -114,99 +147,67 @@ export function ResponseForm({ token, serviceName, city }: Props) {
           </div>
         )}
 
-        <div className="space-y-5">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="resp-name">
-              Your name <span className="text-red-400">*</span>
-            </label>
-            <Input
-              id="resp-name"
-              type="text"
-              placeholder="e.g. Ravi Sharma"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="h-10"
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="resp-phone">
-              Phone number
-              <span className="ml-1.5 text-xs font-normal text-gray-400">(optional, for WhatsApp contact)</span>
-            </label>
-            <Input
-              id="resp-phone"
-              type="tel"
-              placeholder="+44 7700 900000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="h-10"
-            />
-          </div>
-
+        <div className="space-y-4">
           {/* Pitch */}
           <div>
             <div className="flex items-baseline justify-between mb-1.5">
-              <label className="block text-sm font-medium text-gray-700" htmlFor="resp-pitch">
-                Why you&apos;re a great fit <span className="text-red-400">*</span>
+              <label className="text-sm font-semibold text-text-2" htmlFor="resp-pitch">
+                Why you're the right fit <span className="text-red-400">*</span>
               </label>
-              <span className={`text-xs tabular-nums ${pitchLeft < 50 ? 'text-orange-500 font-medium' : 'text-gray-400'}`}>
+              <span className={`text-xs tabular-nums ${pitch.length > 450 ? 'text-brand font-medium' : 'text-text-4'}`}>
                 {pitch.length}/{pitchMax}
               </span>
             </div>
-            <Textarea
+            <textarea
               id="resp-pitch"
-              placeholder="Tell the host about your experience, style, and what makes your service special for this event…"
+              placeholder={`Tell the host about your experience with ${serviceName.toLowerCase()} in ${city}, your style, and what makes you the right choice…`}
               value={pitch}
-              onChange={(e) => setPitch(e.target.value)}
+              onChange={e => setPitch(e.target.value)}
               maxLength={pitchMax}
-              className="min-h-28 resize-none"
+              rows={5}
+              className="w-full border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 resize-none focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand placeholder:text-text-4"
             />
-            <p className="mt-1 text-xs text-gray-400">Minimum 10 characters. Be specific — mention relevant experience.</p>
+            <p className="mt-1 text-xs text-text-4">Be specific — mention relevant experience, past events, team size.</p>
           </div>
 
           {/* Price note */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="resp-price">
-              Pricing indication
-              <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>
+            <label className="text-sm font-semibold text-text-2 mb-1.5 block" htmlFor="resp-price">
+              Pricing indication <span className="text-text-4 font-normal text-xs">(optional)</span>
             </label>
-            <Input
+            <input
               id="resp-price"
               type="text"
-              placeholder="e.g. From £800 for 50 guests, or let's discuss"
+              placeholder="e.g. From $2,000 for 150 guests, or happy to discuss"
               value={priceNote}
-              onChange={(e) => setPriceNote(e.target.value)}
-              className="h-10"
+              onChange={e => setPriceNote(e.target.value)}
+              className="w-full border border-brand-border rounded-xl px-4 py-2.5 text-sm text-text-1 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand placeholder:text-text-4"
             />
           </div>
 
           {/* Portfolio */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="resp-portfolio">
-              Portfolio link
-              <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>
+            <label className="text-sm font-semibold text-text-2 mb-1.5 block" htmlFor="resp-portfolio">
+              Portfolio / website <span className="text-text-4 font-normal text-xs">(optional)</span>
             </label>
-            <Input
+            <input
               id="resp-portfolio"
               type="url"
               placeholder="Instagram, website, or portfolio link"
               value={portfolioUrl}
-              onChange={(e) => setPortfolioUrl(e.target.value)}
-              className="h-10"
+              onChange={e => setPortfolioUrl(e.target.value)}
+              className="w-full border border-brand-border rounded-xl px-4 py-2.5 text-sm text-text-1 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand placeholder:text-text-4"
             />
           </div>
 
-          <Button
+          <button
             onClick={submit}
             disabled={submitting || !canSubmit}
-            className="w-full h-11 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl gap-2 text-sm"
+            className="w-full flex items-center justify-center gap-2 bg-brand hover:bg-brand-hover text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             {submitting ? (
               <>
-                <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Sending…
               </>
             ) : (
@@ -215,9 +216,9 @@ export function ResponseForm({ token, serviceName, city }: Props) {
                 Send my response
               </>
             )}
-          </Button>
+          </button>
 
-          <p className="text-xs text-center text-gray-400">
+          <p className="text-xs text-center text-text-4">
             By responding you agree to be contacted by the event host.
           </p>
         </div>

@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   const timestamp = Math.round(Date.now() / 1000)
-  const folder = `bhoj/vendors/${(session.user!.id as string)}`
+  const folder = `oneseva/vendors/${(session.user!.id as string)}`
   const signature = cloudinary.utils.api_sign_request(
     { timestamp, folder, transformation: 'c_limit,w_1600,q_auto' },
     process.env.CLOUDINARY_API_SECRET!

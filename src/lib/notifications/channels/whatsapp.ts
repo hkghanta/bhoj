@@ -9,7 +9,7 @@ function getWhatsAppMessage(job: NotificationJob): string {
 
   switch (eventType) {
     case NOTIFICATION_EVENTS.NEW_LEAD:
-      return `🎉 *New Lead on Bhoj!*\n\n` +
+      return `🎉 *New Lead on OneSeva!*\n\n` +
         `*Event:* ${context.eventName}\n` +
         `*Location:* ${context.city}\n` +
         `*Guests:* ${context.guestCount}\n` +
@@ -18,7 +18,7 @@ function getWhatsAppMessage(job: NotificationJob): string {
         `Log in to view and submit your quote: ${process.env.NEXT_PUBLIC_APP_URL}/vendor/leads`
 
     case NOTIFICATION_EVENTS.QUOTE_RECEIVED:
-      return `✅ *Quote Received on Bhoj!*\n\n` +
+      return `✅ *Quote Received on OneSeva!*\n\n` +
         `*From:* ${context.vendorName}\n` +
         `*Event:* ${context.eventName}\n` +
         `*Total estimate:* ${context.currency} ${Number(context.totalEstimate).toLocaleString()}\n\n` +
@@ -30,7 +30,7 @@ function getWhatsAppMessage(job: NotificationJob): string {
         `Reply: ${process.env.NEXT_PUBLIC_APP_URL}/messages/${context.conversationId}`
 
     default:
-      return `You have a new notification on Bhoj: ${process.env.NEXT_PUBLIC_APP_URL}`
+      return `You have a new notification on OneSeva: ${process.env.NEXT_PUBLIC_APP_URL}`
   }
 }
 

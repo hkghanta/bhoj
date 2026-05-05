@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { getChecklistTemplate } from '@/lib/checklist-templates'
+import { resolveMetro } from '@/lib/geo/resolve-metro'
 
 const createSchema = z.object({
   event_name: z.string().min(2),
   event_type: z.string().min(2),
   event_date: z.string().datetime(),
   city: z.string().min(2),
+  state: z.string().optional(),
+  country: z.string().length(2).default('US'),
   venue: z.string().optional(),
   guest_count: z.number().int().positive(),
   total_budget: z.number().positive(),
@@ -47,20 +49,16 @@ export async function POST(req: NextRequest) {
 
   const { event_date, ...rest } = parsed.data
   const customerId = session.user!.id as string
-  const template = getChecklistTemplate(parsed.data.event_type)
+
+  const metro = await resolveMetro(rest.city, rest.state, rest.country)
 
   const event = await prisma.event.create({
     data: {
       ...rest,
       event_date: new Date(event_date),
       customer_id: customerId,
-      checklist_items: {
-        create: template.map(item => ({
-          category: item.category,
-          item_name: item.item_name,
-          status: 'PENDING',
-        })),
-      },
+      metro_city: metro?.metro_city ?? null,
+      metro_state: metro?.metro_state ?? null,
     },
     include: { checklist_items: true },
   })

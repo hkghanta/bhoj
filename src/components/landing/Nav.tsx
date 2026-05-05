@@ -1,5 +1,6 @@
 // src/components/landing/Nav.tsx
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface NavProps {
   /** Highlight "For vendors" link when on the vendor page */
@@ -8,7 +9,7 @@ interface NavProps {
 
 export default function Nav({ vendorPage = false }: NavProps) {
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-brand-border flex items-center justify-between px-12 py-0 h-[62px]">
+    <nav className="sticky top-0 z-50 bg-white dark:bg-cream-2 border-b border-brand-border flex items-center justify-between px-4 sm:px-12 py-0 h-[62px]">
       {/* Logo */}
       <Link href="/" className="text-xl font-black tracking-tight text-text-1">
         One<span className="text-brand">Seva</span>
@@ -22,7 +23,10 @@ export default function Nav({ vendorPage = false }: NavProps) {
         >
           How it works
         </Link>
-        <Link href="/vendors/catering/london" className="text-sm font-semibold text-text-3 hover:text-text-1 transition-colors">
+        <Link href="/board" className="text-sm font-semibold text-text-3 hover:text-text-1 transition-colors">
+          Open requests
+        </Link>
+        <Link href="/vendors" className="text-sm font-semibold text-text-3 hover:text-text-1 transition-colors">
           Browse vendors
         </Link>
         <Link
@@ -45,6 +49,7 @@ export default function Nav({ vendorPage = false }: NavProps) {
 
       {/* Right actions */}
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         <Link
           href="/login"
           className="text-sm font-semibold text-text-2 border border-brand-border rounded-lg px-4 py-2 hover:bg-cream transition-colors"
@@ -53,8 +58,7 @@ export default function Nav({ vendorPage = false }: NavProps) {
         </Link>
         <Link
           href={vendorPage ? "/register/vendor" : "/register/customer"}
-          className="text-sm font-bold text-white rounded-lg px-4 py-2 transition-colors"
-          style={{ background: vendorPage ? "#e85510" : "#1a0904" }}
+          className="text-sm font-bold text-white rounded-lg px-4 py-2 transition-colors bg-brand hover:bg-brand-hover"
         >
           {vendorPage ? "List my business →" : "Plan My Event →"}
         </Link>

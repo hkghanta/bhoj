@@ -1,4 +1,4 @@
-# Bhoj — Indian Event Services Marketplace
+# OneSeva — Indian Event Services Marketplace
 ## Design Specification
 **Date:** 2026-04-28  
 **Status:** Approved for implementation planning
@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-Bhoj is an international Indian event services marketplace and planning platform. Customers discover, compare, and track vendors for Indian events (weddings, corporate, social, festivals). Vendors list their services, receive algorithmically matched leads, and submit quotes.
+OneSeva is an international Indian event services marketplace and planning platform. Customers discover, compare, and track vendors for Indian events (weddings, corporate, social, festivals). Vendors list their services, receive algorithmically matched leads, and submit quotes.
 
 **Core differentiator:** Concierge-style algorithmic matching in a completely unserved global niche — Indian diaspora events in US, UK, Canada, Australia.
 
@@ -82,7 +82,7 @@ Bhoj is an international Indian event services marketplace and planning platform
 
 ### 5.1 Vendor (base entity)
 
-All service providers on Bhoj share this base entity.
+All service providers on OneSeva share this base entity.
 
 ```
 Vendor
@@ -99,7 +99,7 @@ Vendor
   food_safety_cert · food_safety_cert_expiry                    // food vendors only
   business_registration_number
   insurance_provider · insurance_expiry
-  verified_by_bhoj · verification_date · verification_notes
+  verified_by_oneseva · verification_date · verification_notes
 
   // Capabilities
   service_areas[] · min_guests · max_guests
@@ -164,7 +164,7 @@ PastEvent
   cuisine_served[] · service_style · duration_hours
   description · photos[]
   client_name (optional)
-  verified_by_bhoj · created_at
+  verified_by_oneseva · created_at
 ```
 
 ### 5.6 Customer
@@ -211,7 +211,7 @@ EventChecklistItem
   is_custom (bool)
 
   // Vendor — one of:
-  bhoj_vendor_id (nullable — FK to Vendor)
+  oneseva_vendor_id (nullable — FK to Vendor)
   external_vendor_name · external_vendor_phone · external_vendor_email
 
   // Pricing
@@ -226,7 +226,7 @@ EventChecklistItem
 
 ### 5.10 EventRequest
 
-Triggered when customer requests Bhoj matches for a checklist item.
+Triggered when customer requests OneSeva matches for a checklist item.
 
 ```
 EventRequest
@@ -567,7 +567,7 @@ NotificationPreference
 - Service area does not cover event city → excluded
 - Not available on event date (VendorAvailability) → excluded
 - Guest count outside min/max capacity → excluded
-- Not verified by Bhoj → excluded
+- Not verified by OneSeva → excluded
 
 ### Step 2 — Weighted Scoring (0–100)
 
@@ -624,7 +624,7 @@ NotificationPreference
 Customers can delete items, add custom tasks (free text, no vendor), and add external vendors.
 
 ### Checklist item tracking
-Each item tracks: status · vendor (Bhoj or external) · quoted price · finalized price · deposit paid · balance due + date · notes · due date
+Each item tracks: status · vendor (OneSeva or external) · quoted price · finalized price · deposit paid · balance due + date · notes · due date
 
 ### Budget dashboard
 Event-level: total budget · committed · remaining (auto-calculated) · % checklist done
@@ -685,7 +685,7 @@ WhatsApp notifications require opt-in. Event Pass customers get WhatsApp include
 
 ## 13. Admin Panel
 
-Internal Bhoj dashboard for platform operations:
+Internal OneSeva dashboard for platform operations:
 
 - **Vendor management:** Review applications, approve/reject compliance docs, grant/revoke Verified badge, suspend vendors
 - **Subscription management:** View active subscriptions, handle refunds, override tiers
@@ -734,7 +734,7 @@ Internal Bhoj dashboard for platform operations:
 - Quote submission and comparison
 - In-platform messaging
 - Vendor availability calendar
-- Event checklist tracker (Bhoj + external vendors + custom tasks)
+- Event checklist tracker (OneSeva + external vendors + custom tasks)
 - Budget dashboard
 - Stripe subscriptions (vendor tiers)
 - Stripe Event Pass (customer)
@@ -755,7 +755,140 @@ Internal Bhoj dashboard for platform operations:
 
 ---
 
-## 16. Screenshots Reference
+## 16. Global Dish Library
+
+A shared, platform-managed library of dish definitions that all vendors can draw from when building menus and packages. Reduces duplication, ensures consistent naming, and improves search/filter quality.
+
+### How it works
+
+1. **Admin maintains the canonical library** — admins can create, edit, and publish dishes directly from the admin panel.
+2. **Vendors use library items** — when building a menu, vendors can search the global library and add items to their own dish list without re-entering details.
+3. **Vendors can suggest new dishes** — if a vendor needs a dish not in the global library, they create it locally; an "Add to global library" option submits it for admin review.
+4. **Admin review queue** — pending suggestions appear in admin panel with edit capability before publish.
+
+### Data model additions
+
+```
+MenuItem (updated)
+  is_global      Boolean @default(false)  // published to shared library
+  pending_review Boolean @default(false)  // submitted by vendor, awaiting admin approval
+  suggested_by_vendor_id String?          // who suggested it (null for admin-created)
+```
+
+### Rules
+
+- `is_global=true, pending_review=false` → visible to all vendors in library search
+- `is_global=false, pending_review=true` → in admin review queue; only visible to submitting vendor and admin
+- `is_global=false, pending_review=false` → private to the vendor; never appears in global library
+- Vendors can use both their private dishes and global library dishes in packages/quotes
+
+### Dish description requirement
+
+All dishes must have a description (1–2 sentences). Required on create for both admin and vendor submissions.
+
+### Dish detail fields
+
+Each dish in the global library has a full detail page accessible at `/dishes/[id]`:
+
+```
+MenuItem (extended)
+  description        String         // 1–2 sentence description (required)
+  ingredients        String[]       // list of ingredients (e.g. "cottage cheese", "yoghurt", "coriander")
+  serves_description String?        // "per person", "per 100g" etc.
+  calories_per_serving Int?
+  protein_g         Decimal?
+  carbs_g           Decimal?
+  fat_g             Decimal?
+  prep_notes        String?         // cooking method, serving suggestions
+```
+
+Allergens already captured via boolean flags (`contains_nuts`, `contains_gluten`, `contains_dairy`, `contains_eggs`, `contains_soy`, `contains_shellfish`).
+
+Dish detail page shows: description, ingredient list, dietary badges (V / Vegan / Jain / Halal / Kosher), allergen badges, spice level, nutrition summary (if populated).
+
+---
+
+## 17. Business Operating Schedule
+
+Vendors can define their regular weekly operating schedule and mark special closure days. This information:
+- Is shown on the vendor public profile
+- Is used as a soft signal in matching (events on closed days ranked lower but not hard-excluded, as vendors may accept special bookings)
+- Helps customers understand vendor availability before messaging
+
+### Data model
+
+```
+VendorOperatingSchedule
+  id · vendor_id
+  day_of_week: MON | TUE | WED | THU | FRI | SAT | SUN
+  is_open Boolean
+  opens_at  String?  // "09:00" (null if closed)
+  closes_at String?  // "22:00" (null if closed)
+  notes     String?  // "Closed for Friday prayers 13:00–14:30" etc.
+
+VendorSpecialDay
+  id · vendor_id
+  date       DateTime @db.Date
+  is_open    Boolean  // false = closed that day, true = open despite schedule
+  opens_at   String?
+  closes_at  String?
+  reason     String?  // "Eid al-Fitr", "Christmas", "Private booking day" etc.
+  created_at DateTime
+```
+
+### UI
+
+- Vendor profile settings tab: 7-day grid with open/close toggle + time pickers
+- "Add special day" — pick a date, override schedule, add reason
+- Public profile: "Typically open Mon–Sat 10:00–22:00. Closed Sundays."
+
+---
+
+## 19. Customer Dish Library Browse
+
+Customers can browse the global dish library independently of any specific vendor. Use cases:
+- Researching traditional dishes before shortlisting a caterer
+- Verifying dietary/allergen info for a dish they've heard about
+- Building a shortlist of dishes to request when filling their catering brief
+
+**Access:** `/dishes` — public page, no auth required. Filter by category, dietary flags (vegetarian, vegan, halal, jain, nut-free). Search by name.
+
+**Does not show:** vendor names, prices, or availability — this is a reference library only. Customers discover vendors through the matching flow.
+
+---
+
+## 20. Event Coordination Service (Concierge)
+
+Some customers — typically for large or complex events — want end-to-end event management. They hand over the planning to a OneSeva-certified Event Coordinator who sources, books, and manages all vendors on their behalf.
+
+### How it works
+
+1. Customer selects "I need a coordinator" when creating an event (or from the event dashboard).
+2. Platform notifies available Coordinators (a new vendor type: `EVENT_COORDINATOR`).
+3. Coordinator accepts and becomes the event's primary planner.
+4. Coordinator manages the checklist, sources vendors via OneSeva, and communicates progress to the customer.
+5. Customer retains approval authority on each vendor shortlist and final budget.
+
+### Data model
+
+```
+EventCoordinatorAssignment
+  id · event_id · coordinator_vendor_id
+  status: REQUESTED | ACCEPTED | ACTIVE | COMPLETED | CANCELLED
+  coordinator_fee · fee_type: flat | percentage
+  notes
+  created_at · accepted_at · completed_at
+```
+
+### Rules
+- Only vendors with `vendor_type = EVENT_COORDINATOR` can receive coordination assignments.
+- Coordinator has read/write access to the customer's event checklist.
+- Customer receives notifications on all major updates (vendor shortlisted, quote received, finalized).
+- Coordination fee is agreed off-platform; OneSeva does not process this payment.
+
+---
+
+## 18. Screenshots Reference
 
 All design visuals saved to `docs/screenshots/`:
 

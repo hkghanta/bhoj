@@ -43,8 +43,8 @@ export function Step2Services({ onNext, onBack }: Props) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-gray-900">What services do you offer?</h2>
-      <p className="text-gray-500 text-sm">Select all that apply. You can edit these later.</p>
+      <h2 className="text-2xl font-black text-text-1">What services do you offer?</h2>
+      <p className="text-text-4 text-sm">Select all that apply. You can edit these later.</p>
 
       <div className="flex flex-wrap gap-2">
         {SUGGESTED_SERVICES.map(s => (
@@ -53,8 +53,8 @@ export function Step2Services({ onNext, onBack }: Props) {
             onClick={() => toggleSuggested(s)}
             className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
               services.includes(s)
-                ? 'bg-orange-600 text-white border-orange-600'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-orange-400'
+                ? 'bg-brand text-white border-brand'
+                : 'bg-white text-text-2 border-brand-border hover:border-brand'
             }`}
           >
             {s}
@@ -87,7 +87,7 @@ export function Step2Services({ onNext, onBack }: Props) {
 
       <div className="flex gap-3 pt-2">
         <Button variant="outline" onClick={onBack}>← Back</Button>
-        <Button onClick={handleSave} disabled={saving} className="flex-1 bg-orange-600 hover:bg-orange-700">
+        <Button onClick={handleSave} disabled={saving} className="flex-1 bg-brand hover:bg-brand-hover rounded-xl font-bold">
           {saving ? 'Saving…' : 'Save & Continue →'}
         </Button>
       </div>

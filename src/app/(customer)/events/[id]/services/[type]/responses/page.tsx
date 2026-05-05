@@ -68,7 +68,7 @@ function displayName(r: Response): string {
 
 function avatarColorClass(name: string): string {
   const classes = [
-    'bg-orange-100 text-orange-700',
+    'bg-cream-2 text-brand',
     'bg-amber-100 text-amber-700',
     'bg-rose-100 text-rose-700',
     'bg-purple-100 text-purple-700',
@@ -105,7 +105,7 @@ function LoadingSkeleton() {
       </div>
       <div className="h-10 bg-cream-2 rounded-2xl w-64" />
       {[1, 2, 3].map(i => (
-        <div key={i} className="bg-white border border-brand-border rounded-2xl p-5 space-y-3">
+        <div key={i} className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 space-y-4">
           <div className="flex items-start gap-3">
             <div className="w-12 h-12 rounded-xl bg-cream-2 flex-shrink-0" />
             <div className="flex-1 space-y-2">
@@ -114,10 +114,10 @@ function LoadingSkeleton() {
             </div>
             <div className="h-6 w-20 bg-cream-2 rounded-full" />
           </div>
-          <div className="h-14 bg-cream-2 rounded-lg" />
+          <div className="h-14 bg-cream-2 rounded-xl" />
           <div className="flex gap-2">
-            <div className="h-8 w-20 bg-cream-2 rounded-lg" />
-            <div className="h-8 w-20 bg-cream-2 rounded-lg" />
+            <div className="h-8 w-20 bg-cream-2 rounded-xl" />
+            <div className="h-8 w-20 bg-cream-2 rounded-xl" />
           </div>
         </div>
       ))}
@@ -147,10 +147,10 @@ function ResponseCard({
 
   // Card border/bg based on status
   const cardClass = isAccepted
-    ? 'bg-white border border-green-200 shadow-[0_0_0_1px_rgba(34,197,94,0.15),0_4px_16px_rgba(34,197,94,0.08)]'
+    ? 'bg-white dark:bg-cream-2 border border-green-200 shadow-[0_0_0_1px_rgba(34,197,94,0.15),0_4px_16px_rgba(34,197,94,0.08)]'
     : isDeclined
-      ? 'bg-gray-50 border border-gray-200 opacity-60'
-      : 'bg-white border border-brand-border hover:border-brand/40 hover:shadow-[0_4px_16px_rgba(26,9,4,0.06)] transition-all duration-200'
+      ? 'bg-cream border border-brand-border opacity-60'
+      : 'bg-white dark:bg-cream-2 border border-brand-border hover:border-brand/40 hover:shadow-[0_4px_16px_rgba(26,9,4,0.06)] transition-all duration-200'
 
   return (
     <div className={`relative rounded-2xl overflow-hidden ${cardClass}`}>
@@ -210,8 +210,8 @@ function ResponseCard({
               </span>
             )}
             {isDeclined && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-gray-100 text-gray-500
-                               border border-gray-200 rounded-full px-2 py-1 font-semibold">
+              <span className="inline-flex items-center gap-1 text-[10px] bg-cream-2 text-text-4
+                               border border-brand-border rounded-full px-2 py-1 font-semibold">
                 <XCircle className="h-2.5 w-2.5" />
                 Declined
               </span>
@@ -224,7 +224,7 @@ function ResponseCard({
 
         {/* ── Price note ── */}
         {resp.price_note && (
-          <div className="mt-3 inline-flex items-center gap-1.5 bg-brand/8 border border-brand/20 rounded-lg px-3 py-1.5">
+          <div className="mt-3 inline-flex items-center gap-1.5 bg-brand/8 border border-brand/20 rounded-xl px-3 py-1.5">
             <span className="text-xs font-bold text-brand">{resp.price_note}</span>
           </div>
         )}
@@ -322,7 +322,7 @@ function ResponseCard({
 
 function EmptyState({ publicToken, slug }: { publicToken: string; slug: string }) {
   return (
-    <div className="bg-white border border-brand-border rounded-2xl p-10 text-center">
+    <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-10 text-center">
       <div className="w-16 h-16 rounded-2xl bg-cream-2 flex items-center justify-center mx-auto mb-4">
         <Globe className="h-7 w-7 text-text-4" />
       </div>
@@ -472,16 +472,16 @@ export default function ResponsesPage() {
       {/* ── Stats row ── */}
       {responses.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white border border-brand-border rounded-xl px-4 py-3 text-center">
+          <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl px-4 py-3 text-center">
             <p className="text-2xl font-black text-amber-600">{pendingCount}</p>
             <p className="text-xs text-text-4 font-medium mt-0.5">Pending</p>
           </div>
-          <div className="bg-white border border-brand-border rounded-xl px-4 py-3 text-center">
+          <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl px-4 py-3 text-center">
             <p className="text-2xl font-black text-green-600">{acceptedCount}</p>
             <p className="text-xs text-text-4 font-medium mt-0.5">Accepted</p>
           </div>
-          <div className="bg-white border border-brand-border rounded-xl px-4 py-3 text-center">
-            <p className="text-2xl font-black text-gray-400">{declinedCount}</p>
+          <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl px-4 py-3 text-center">
+            <p className="text-2xl font-black text-text-4">{declinedCount}</p>
             <p className="text-xs text-text-4 font-medium mt-0.5">Declined</p>
           </div>
         </div>
@@ -503,7 +503,7 @@ export default function ResponsesPage() {
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand
-                     bg-white border border-brand/20 rounded-lg px-3 py-1.5
+                     bg-white dark:bg-cream-2 border border-brand/20 rounded-xl px-3 py-1.5
                      hover:bg-cream hover:border-brand/40 transition-all"
         >
           <Globe className="h-3 w-3" />
@@ -534,8 +534,8 @@ export default function ResponsesPage() {
             )}
           </Button>
         ) : (
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-500
-                           bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5">
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-text-3
+                           bg-cream-2 border border-brand-border rounded-xl px-2.5 py-1.5">
             <CheckCircle2 className="h-3 w-3" />
             Filled
           </span>
@@ -544,9 +544,9 @@ export default function ResponsesPage() {
 
       {/* ── Filled banner ── */}
       {!isOpen && (
-        <div className="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
-          <CheckCircle2 className="h-4 w-4 text-gray-500 flex-shrink-0" />
-          <p className="text-sm text-gray-600">
+        <div className="flex items-center gap-2.5 bg-cream border border-brand-border rounded-xl px-4 py-3">
+          <CheckCircle2 className="h-4 w-4 text-text-4 flex-shrink-0" />
+          <p className="text-sm text-text-3">
             This request is marked as <strong>filled</strong> — it's no longer accepting new
             responses.
           </p>
@@ -557,7 +557,7 @@ export default function ResponsesPage() {
       {responses.length === 0 ? (
         <EmptyState publicToken={publicToken} slug={slug} />
       ) : (
-        <div className="space-y-3.5">
+        <div className="space-y-4.5">
           {/* Pending first, then accepted, then declined */}
           {[
             ...responses.filter(r => r.status === 'PENDING'),

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         price_data: {
           currency: 'gbp',
           product_data: {
-            name: 'Bhoj Event Pass',
+            name: 'OneSeva Event Pass',
             description: `Unlimited quotes + collaborators + PDF export for "${event.event_name}"`,
           },
           unit_amount: 999,

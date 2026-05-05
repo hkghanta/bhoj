@@ -83,6 +83,19 @@ export async function GET(
         take: 1,
         select: { avg_rating: true },
       },
+      badges: {
+        where: { OR: [{ expires_at: null }, { expires_at: { gte: new Date() } }] },
+        select: { badge_type: true, earned_at: true },
+      },
+      sustainability_tags: true,
+      stations: {
+        where: { is_active: true },
+        include: { station_template: { select: { name: true, icon: true } } },
+        orderBy: { created_at: 'desc' },
+      },
+      cancellation_policies: {
+        orderBy: { hours_before_event: 'desc' },
+      },
     },
   })
 
