@@ -3,8 +3,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   CalendarDays, Store, FileText, MessageSquare,
-  Users2, ListChecks, CalendarPlus, ChevronLeft,
-  LayoutDashboard, LogOut, User,
+  ListChecks, CalendarPlus, ChevronLeft,
+  LayoutDashboard, LogOut, User, Mail,
+  Clock, Globe, LayoutGrid, CreditCard, Gift, Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,26 +26,53 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
     { href: '/profile', label: 'Profile', icon: User },
   ]
 
-  const planningNav = eventId ? [
-    { href: `/events/${eventId}`,         label: 'Overview',        icon: CalendarDays },
-    { href: `/events/${eventId}/vendors`, label: 'Browse Vendors',  icon: Store },
-    { href: `/events/${eventId}/quotes`,  label: 'Quotes',          icon: FileText },
+  // ── Event-specific navigation ──
+  const eventNav = eventId ? [
+    { href: `/events/${eventId}`,             label: 'Overview',       icon: CalendarDays },
   ] : []
 
-  const managementNav = eventId ? [
-    { href: `/events/${eventId}/guests`,     label: 'Guests',     icon: Users2 },
-    { href: `/events/${eventId}/sub-events`, label: 'Sub-Events', icon: CalendarPlus },
-    { href: `/events/${eventId}#checklist`,  label: 'Checklist',  icon: ListChecks },
+  const vendorNav = eventId ? [
+    { href: `/events/${eventId}/services`,    label: 'Services',       icon: Store },
+    { href: `/events/${eventId}/vendors`,     label: 'Find Vendors',   icon: Search },
+    { href: `/events/${eventId}/quotes`,      label: 'Quotes',         icon: FileText },
+  ] : []
+
+  const guestNav = eventId ? [
+    { href: `/events/${eventId}/guests`,      label: 'Invitations & Guests', icon: Mail },
+    { href: `/events/${eventId}/sub-events`,  label: 'Sub-Events',    icon: CalendarPlus },
+  ] : []
+
+  const planningNav = eventId ? [
+    { href: `/events/${eventId}/timeline`,         label: 'Timeline',       icon: Clock },
+    { href: `/events/${eventId}/website`,          label: 'Event Website',  icon: Globe },
+    { href: `/events/${eventId}/seating`,          label: 'Seating',        icon: LayoutGrid },
+    { href: `/events/${eventId}/payment-schedule`, label: 'Payments',       icon: CreditCard },
+    { href: `/events/${eventId}/registry`,         label: 'Gift Registry',  icon: Gift },
   ] : []
 
   const isActive = (href: string) => {
     if (href.includes('#')) return false
     if (href === `/events/${eventId}`) return pathname === href || pathname === href + '/'
-    return pathname.startsWith(href + '/')
+    return pathname.startsWith(href + '/') || pathname === href
   }
 
+  const navLink = (href: string, label: string, Icon: React.ComponentType<{ className?: string }>, active: boolean) => (
+    <Link key={href} href={href}
+      className={cn(
+        'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
+        active
+          ? 'bg-brand text-white'
+          : 'text-text-3 hover:bg-cream hover:text-text-1'
+      )}
+    >
+      <Icon className="h-4 w-4 flex-shrink-0" />
+      {label}
+    </Link>
+  )
+
   return (
-    <aside className="w-56 min-h-screen bg-white border-r border-brand-border flex flex-col flex-shrink-0">
+    <>
+    <aside className="hidden md:flex w-56 min-h-screen bg-white dark:bg-cream-2 border-r border-brand-border flex-col flex-shrink-0">
       {/* Logo */}
       <div className="px-5 py-4 border-b border-brand-border">
         <Link href="/dashboard" className="text-xl font-black tracking-tight text-text-1">
@@ -58,7 +86,7 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
         {topNav.map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href}
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
               pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
                 ? 'bg-cream text-brand'
                 : 'text-text-3 hover:bg-cream hover:text-text-1'
@@ -82,41 +110,42 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
             <p className="text-xs font-black text-text-2 uppercase tracking-wide truncate">This Event</p>
           </div>
 
-          {/* Planning group */}
+          {/* Overview */}
           <nav className="px-3 pb-1 space-y-0.5">
-            {planningNav.map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                  isActive(href)
-                    ? 'bg-brand text-white'
-                    : 'text-text-3 hover:bg-cream hover:text-text-1'
-                )}
-              >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                {label}
-              </Link>
-            ))}
+            {eventNav.map(({ href, label, icon: Icon }) =>
+              navLink(href, label, Icon, isActive(href))
+            )}
           </nav>
 
-          {/* Visual separator between planning and management groups */}
-          <div className="mx-4 my-1.5 border-t border-brand-border/50" />
+          {/* Vendors & Quotes */}
+          <div className="px-5 mt-3 mb-1">
+            <p className="text-[10px] font-bold text-text-4 uppercase tracking-wider">Vendors</p>
+          </div>
+          <nav className="px-3 pb-1 space-y-0.5">
+            {vendorNav.map(({ href, label, icon: Icon }) =>
+              navLink(href, label, Icon, isActive(href))
+            )}
+          </nav>
 
-          {/* Management group */}
-          <nav className="px-3 pb-2 space-y-0.5">
-            {managementNav.map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                  isActive(href)
-                    ? 'bg-brand text-white'
-                    : 'text-text-3 hover:bg-cream hover:text-text-1'
-                )}
-              >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                {label}
-              </Link>
-            ))}
+          {/* Guests & Events */}
+          <div className="px-5 mt-3 mb-1">
+            <p className="text-[10px] font-bold text-text-4 uppercase tracking-wider">Guests</p>
+          </div>
+          <nav className="px-3 pb-1 space-y-0.5">
+            {guestNav.map(({ href, label, icon: Icon }) =>
+              navLink(href, label, Icon, isActive(href))
+            )}
+          </nav>
+
+          {/* Planning */}
+          <div className="px-5 mt-3 mb-1">
+            <p className="text-[10px] font-bold text-text-4 uppercase tracking-wider">Planning</p>
+          </div>
+          <nav className="px-3 pb-1 space-y-0.5">
+            {planningNav.map(({ href, label, icon: Icon }) =>
+              navLink(href, label, Icon, isActive(href))
+            )}
+            {navLink(`/events/${eventId}/checklist`, 'Checklist', ListChecks, isActive(`/events/${eventId}/checklist`))}
           </nav>
         </>
       )}
@@ -134,5 +163,29 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
         </a>
       </div>
     </aside>
+
+    {/* Mobile bottom nav */}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-cream-2 border-t border-brand-border flex items-center justify-around px-2 py-2 safe-bottom">
+      {[
+        { href: '/dashboard', label: 'Events', icon: LayoutDashboard },
+        { href: '/messages', label: 'Messages', icon: MessageSquare },
+        ...(eventId ? [{ href: `/events/${eventId}`, label: 'Event', icon: CalendarDays }] : []),
+        ...(eventId ? [{ href: `/events/${eventId}/quotes`, label: 'Quotes', icon: FileText }] : []),
+        { href: '/profile', label: 'Profile', icon: User },
+      ].map(({ href, label, icon: Icon }) => (
+        <Link key={href} href={href}
+          className={cn(
+            'flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-[10px] font-medium transition-colors min-w-[56px]',
+            (pathname === href || pathname.startsWith(href + '/'))
+              ? 'text-brand'
+              : 'text-text-4'
+          )}
+        >
+          <Icon className="h-5 w-5" />
+          {label}
+        </Link>
+      ))}
+    </nav>
+    </>
   )
 }

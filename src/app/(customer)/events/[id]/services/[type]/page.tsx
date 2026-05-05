@@ -7,6 +7,7 @@ import {
   ChevronRight, ChevronDown, ChevronUp, ExternalLink, Plus,
   CheckCircle2, Globe, AlertCircle, Send, X,
 } from 'lucide-react'
+import { SERVICE_FORMS } from './ServiceForms'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -49,6 +50,7 @@ type BoardResponse = {
 type PageData = {
   service_config: ServiceConfig
   event_request: EventRequest | null
+  event_city_slug: string
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -72,7 +74,7 @@ function PillToggle({
     }
   }
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2.5">
       {options.map(o => {
         const on = selected.includes(o.value)
         return (
@@ -80,15 +82,17 @@ function PillToggle({
             key={o.value}
             type="button"
             onClick={() => toggle(o.value)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border-2 transition-all ${
               on
-                ? 'bg-brand text-white border-brand shadow-[0_2px_8px_rgba(232,85,16,0.25)]'
-                : 'bg-white text-text-2 border-brand-border hover:border-brand/50 hover:bg-cream'
+                ? 'bg-brand/10 text-brand border-brand shadow-sm'
+                : 'bg-white dark:bg-cream-2 text-text-3 border-brand-border hover:border-brand/40 hover:text-text-1'
             }`}
           >
-            {o.emoji && <span>{o.emoji}</span>}
+            {o.emoji && <span className="text-base">{o.emoji}</span>}
             {o.label}
-            {on && <X className="h-3 w-3 ml-0.5 opacity-70" />}
+            {on && (
+              <svg viewBox="0 0 10 10" className="w-3 h-3 text-brand" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+            )}
           </button>
         )
       })}
@@ -105,14 +109,24 @@ type CateringState = {
   letCatererDecideMenu: boolean
   startersCount: string
   mainsCount: string
-  breadRiceCount: string
+  breadCount: string
+  riceCount: string
   dessertsCount: string
   selectedDishes: string[]
+  // Maps custom dish name → category key (e.g. 'APPETIZER') for display grouping
+  customDishCategories: Record<string, string>
   dishSearch: string
+  proteinPreference: string
   dietary: string[]
   cuisines: string[]
   letCatererDecideCuisine: boolean
   notes: string
+  // Logistics
+  deliveryRequired: boolean
+  setupRequired: boolean
+  servingStaffRequired: boolean
+  equipmentRequired: boolean
+  labelsRequired: boolean
 }
 
 const DEFAULT_CATERING: CateringState = {
@@ -122,14 +136,22 @@ const DEFAULT_CATERING: CateringState = {
   letCatererDecideMenu: true,
   startersCount: '',
   mainsCount: '',
-  breadRiceCount: '',
+  breadCount: '',
+  riceCount: '',
   dessertsCount: '',
   selectedDishes: [],
+  customDishCategories: {},
   dishSearch: '',
+  proteinPreference: '',
   dietary: [],
   cuisines: [],
   letCatererDecideCuisine: true,
   notes: '',
+  deliveryRequired: false,
+  setupRequired: false,
+  servingStaffRequired: false,
+  equipmentRequired: false,
+  labelsRequired: false,
 }
 
 const SERVICE_STYLE_OPTIONS = [
@@ -154,8 +176,14 @@ const LIVE_STATION_OPTIONS = [
   { value: 'jalebi', label: 'Jalebi / Sweets', emoji: '🍬' },
 ]
 
+const PROTEIN_OPTIONS = [
+  { value: 'veg-only', label: 'Vegetarian Only', emoji: '🌿', desc: 'No meat, poultry, or seafood' },
+  { value: 'non-veg', label: 'Non-Vegetarian', emoji: '🍗', desc: 'Includes meat, poultry, and/or seafood' },
+  { value: 'mixed', label: 'Mixed Menu', emoji: '🍽️', desc: 'Both vegetarian and non-vegetarian options' },
+  { value: 'eggetarian', label: 'Eggetarian', emoji: '🥚', desc: 'Vegetarian plus eggs' },
+]
+
 const DIETARY_OPTIONS = [
-  { value: 'vegetarian', label: 'Vegetarian', emoji: '🌿' },
   { value: 'vegan', label: 'Vegan', emoji: '🥦' },
   { value: 'halal', label: 'Halal', emoji: '☪️' },
   { value: 'jain', label: 'Jain', emoji: '✋' },
@@ -163,7 +191,6 @@ const DIETARY_OPTIONS = [
   { value: 'nut-free', label: 'Nut-free', emoji: '🚫' },
   { value: 'gluten-free', label: 'Gluten-free', emoji: '🌾' },
   { value: 'dairy-free', label: 'Dairy-free', emoji: '🥛' },
-  { value: 'egg-free', label: 'Egg-free', emoji: '🥚' },
 ]
 
 const CUISINE_OPTIONS = [
@@ -231,10 +258,15 @@ function buildSummary(f: CateringState): string {
     const counts: string[] = []
     if (f.startersCount) counts.push(`${f.startersCount} starter${Number(f.startersCount) !== 1 ? 's' : ''}`)
     if (f.mainsCount) counts.push(`${f.mainsCount} main${Number(f.mainsCount) !== 1 ? 's' : ''}`)
-    if (f.breadRiceCount) counts.push(`${f.breadRiceCount} bread/rice`)
+    if (f.breadCount) counts.push(`${f.breadCount} bread`)
+    if (f.riceCount) counts.push(`${f.riceCount} rice/biryani`)
     if (f.dessertsCount) counts.push(`${f.dessertsCount} dessert${Number(f.dessertsCount) !== 1 ? 's' : ''}`)
     if (counts.length > 0) parts.push(counts.join(', '))
     if (f.selectedDishes.length > 0) parts.push(`Dishes: ${f.selectedDishes.join(', ')}`)
+  }
+  if (f.proteinPreference) {
+    const pLabel = PROTEIN_OPTIONS.find(o => o.value === f.proteinPreference)?.label ?? f.proteinPreference
+    parts.push(pLabel)
   }
   if (f.dietary.length > 0)
     parts.push(f.dietary.map(d => DIETARY_OPTIONS.find(o => o.value === d)?.label ?? d).join(', '))
@@ -247,16 +279,19 @@ function buildSummary(f: CateringState): string {
 function buildCateringPrefs(f: CateringState) {
   const allStations = [...f.liveStations, ...(f.customStation.trim() ? [f.customStation.trim()] : [])]
   return {
-    menu_mode: f.letCatererDecideMenu ? 'CATERER_PROPOSES' : 'CUSTOMER_SPECIFIES',
+    menu_mode: f.letCatererDecideMenu ? 'CATERER_PROPOSES' : 'CUSTOMER_SPECIFIED',
     service_styles: f.serviceStyles,
     cuisines: f.letCatererDecideCuisine ? [] : f.cuisines,
     customer_tray_requests: allStations,
     selected_dishes: f.letCatererDecideMenu ? [] : f.selectedDishes,
+    custom_dish_categories: f.letCatererDecideMenu ? {} : f.customDishCategories,
     appetizer_count: f.startersCount ? parseInt(f.startersCount) : null,
     main_count: f.mainsCount ? parseInt(f.mainsCount) : null,
-    bread_count: f.breadRiceCount ? parseInt(f.breadRiceCount) : null,
+    bread_count: f.breadCount ? parseInt(f.breadCount) : null,
+    rice_biryani_count: f.riceCount ? parseInt(f.riceCount) : null,
     dessert_count: f.dessertsCount ? parseInt(f.dessertsCount) : null,
-    is_vegetarian: f.dietary.includes('vegetarian') || f.dietary.includes('vegan'),
+    protein_preference: f.proteinPreference || null,
+    is_vegetarian: f.proteinPreference === 'veg-only' || f.proteinPreference === 'eggetarian',
     is_vegan: f.dietary.includes('vegan'),
     is_halal: f.dietary.includes('halal'),
     is_jain: f.dietary.includes('jain'),
@@ -264,186 +299,333 @@ function buildCateringPrefs(f: CateringState) {
     nut_free: f.dietary.includes('nut-free'),
     gluten_free: f.dietary.includes('gluten-free'),
     dairy_free: f.dietary.includes('dairy-free'),
-    egg_free: f.dietary.includes('egg-free'),
     special_notes: f.notes.trim() || null,
     pricing_preference: 'NO_PREFERENCE',
+    delivery_required: f.deliveryRequired,
+    setup_required: f.setupRequired,
+    serving_staff_required: f.servingStaffRequired,
+    equipment_required: f.equipmentRequired,
+    labels_required: f.labelsRequired,
   }
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm font-black text-text-1 mb-2.5">{children}</p>
+function CollapsibleSection({ title, defaultOpen = true, children }: {
+  title: React.ReactNode
+  defaultOpen?: boolean
+  children: React.ReactNode
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div className="border-t-2 border-brand-border/60">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between py-5 text-left group hover:bg-cream/30 -mx-1 px-1 rounded-lg transition-colors"
+        aria-expanded={open}
+      >
+        <span className="text-lg font-black text-text-1">{title}</span>
+        <span className={`flex items-center justify-center w-7 h-7 rounded-full border-2 border-brand-border transition-all ${open ? 'bg-cream-2 rotate-180' : ''}`}>
+          <svg
+            className="h-4 w-4 text-text-3"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </span>
+      </button>
+      {open && <div className="pb-6">{children}</div>}
+    </div>
+  )
 }
 
-function DishPicker({
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return <p className="text-lg font-black text-text-1 mb-4">{children}</p>
+}
+
+function SectionDivider() {
+  return <div className="border-t border-brand-border" />
+}
+
+// ── Course count input (stepper) ──────────────────────────────────────────────
+
+function CourseCountInput({
+  label, emoji, value, onChange,
+}: { label: string; emoji: string; value: string; onChange: (v: string) => void }) {
+  const n = parseInt(value) || 0
+  return (
+    <div className={`flex flex-col items-center gap-2 p-3.5 rounded-xl border-2 transition-colors ${
+      n > 0 ? 'border-blue-300 bg-blue-50' : 'border-brand-border bg-white dark:bg-cream-2'
+    }`}>
+      <span className="text-2xl leading-none">{emoji}</span>
+      <span className="text-xs text-text-2 font-bold text-center leading-tight">{label}</span>
+      <div className="flex items-center gap-2.5 mt-0.5">
+        <button
+          type="button"
+          onClick={() => onChange(String(Math.max(0, n - 1)))}
+          className="w-7 h-7 rounded-full border-2 border-brand-border flex items-center justify-center text-text-3 hover:bg-cream-2 text-sm font-bold"
+        >−</button>
+        <span className="text-base font-black text-text-1 w-5 text-center tabular-nums">
+          {n > 0 ? n : '—'}
+        </span>
+        <button
+          type="button"
+          onClick={() => onChange(String(Math.min(20, n + 1)))}
+          className="w-7 h-7 rounded-full border-2 border-brand-border flex items-center justify-center text-text-3 hover:bg-cream-2 text-sm font-bold"
+        >+</button>
+      </div>
+    </div>
+  )
+}
+
+function toTitleCase(str: string): string {
+  return str.trim().replace(/\b\w/g, c => c.toUpperCase())
+}
+
+// ── Build your own — unified search + category grouping ──────────────────────
+
+function DishBuildSection({
   categories,
   selected,
-  searchQuery,
+  customDishCategories,
   onToggle,
-  onSearchChange,
   onAddCustom,
   onRemove,
 }: {
   categories: DishCategory[]
   selected: string[]
-  searchQuery: string
+  customDishCategories: Record<string, string>
   onToggle: (dish: string) => void
-  onSearchChange: (v: string) => void
-  onAddCustom: (dish: string) => void
+  onAddCustom: (dish: string, categoryKey?: string) => void
   onRemove: (dish: string) => void
 }) {
-  const [activeTab, setActiveTab] = useState(0)
-  const allLibraryDishes = categories.flatMap(c => c.dishes)
-  const customDishes = selected.filter(d => !allLibraryDishes.includes(d))
-  const isSearching = searchQuery.trim().length > 0
+  const [search, setSearch] = useState('')
+  const [activeCategoryKey, setActiveCategoryKey] = useState<string | null>(null)
+  const [dropdownVisible, setDropdownVisible] = useState(false)
+  // Pending custom dish waiting for category assignment
+  const [pendingCustom, setPendingCustom] = useState<string | null>(null)
 
-  // Search results across all categories
-  const searchResults = isSearching
-    ? categories.flatMap(c =>
-        c.dishes
-          .filter(d => d.toLowerCase().includes(searchQuery.toLowerCase()))
-          .map(d => ({ dish: d, category: c.label, emoji: c.emoji }))
-      )
+  const allLibraryDishes = categories.flatMap(c => c.dishes)
+
+  const getCategoryForDish = (dish: string): DishCategory | undefined =>
+    categories.find(c => c.dishes.includes(dish))
+
+  const activeCat = categories.find(c => c.key === activeCategoryKey)
+  const searchPool = activeCat ? activeCat.dishes : allLibraryDishes
+  const suggestions = search.trim()
+    ? searchPool
+        .filter(d => d.toLowerCase().includes(search.toLowerCase()) && !selected.includes(d))
+        .slice(0, 8)
     : []
 
-  const exactMatch = allLibraryDishes.some(d => d.toLowerCase() === searchQuery.toLowerCase().trim())
-  const alreadySelected = selected.some(d => d.toLowerCase() === searchQuery.toLowerCase().trim())
-  const canAddCustom = isSearching && searchQuery.trim() && !alreadySelected && !exactMatch
+  const exactInLibrary = allLibraryDishes.some(
+    d => d.toLowerCase() === search.toLowerCase().trim()
+  )
+  const alreadyAdded = selected.some(
+    d => d.toLowerCase() === search.toLowerCase().trim()
+  )
+  const canAddCustom = search.trim().length > 0 && !exactInLibrary && !alreadyAdded
+  const showDropdown = dropdownVisible && search.trim().length > 0 && (suggestions.length > 0 || canAddCustom)
+
+  // Group selected dishes by category
+  const grouped: { category: DishCategory | null; key: string; dishes: string[] }[] = []
+  for (const cat of categories) {
+    // Library dishes in this category + custom dishes assigned here
+    const catSelected = selected.filter(d =>
+      cat.dishes.includes(d) ||
+      (!allLibraryDishes.includes(d) && customDishCategories[d] === cat.key)
+    )
+    if (catSelected.length > 0) grouped.push({ category: cat, key: cat.key, dishes: catSelected })
+  }
+  // Custom dishes with no category assigned
+  const uncategorisedCustom = selected.filter(
+    d => !allLibraryDishes.includes(d) && !customDishCategories[d]
+  )
+  if (uncategorisedCustom.length > 0) {
+    grouped.push({ category: null, key: 'custom', dishes: uncategorisedCustom })
+  }
+
+  // Course options for the category picker (simplified list)
+  const COURSE_OPTIONS = [
+    { key: 'SOUP_SALAD',   label: 'Soups & Salads', emoji: '🥣' },
+    { key: 'APPETIZER',    label: 'Starters',        emoji: '🥗' },
+    { key: 'MAIN_COURSE',  label: 'Mains',           emoji: '🍛' },
+    { key: 'BREAD',        label: 'Breads',          emoji: '🫓' },
+    { key: 'RICE_BIRYANI', label: 'Rice & Biryani',  emoji: '🍚' },
+    { key: 'DAL',          label: 'Dal',             emoji: '🫕' },
+    { key: 'DESSERT',      label: 'Desserts',        emoji: '🍮' },
+    { key: 'BEVERAGE',     label: 'Drinks',          emoji: '🥤' },
+    { key: 'OTHER',        label: 'Other',           emoji: '🍽️' },
+  ]
 
   return (
-    <div className="space-y-3">
-      {/* Search input */}
+    <div className="space-y-4">
+      {/* Unified search bar */}
       <div className="relative">
         <input
           type="text"
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
+          value={search}
+          onChange={e => { setSearch(e.target.value); setDropdownVisible(true); setPendingCustom(null) }}
+          onFocus={() => setDropdownVisible(true)}
+          onBlur={() => setTimeout(() => setDropdownVisible(false), 150)}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               e.preventDefault()
-              if (searchResults.length === 1) {
-                onToggle(searchResults[0].dish)
-                onSearchChange('')
-              } else if (canAddCustom) {
-                onAddCustom(searchQuery.trim())
-                onSearchChange('')
-              }
+              if (suggestions.length === 1) { onToggle(suggestions[0]); setSearch(''); setDropdownVisible(false) }
+              else if (canAddCustom) { setPendingCustom(toTitleCase(search)); setDropdownVisible(false) }
             }
+            if (e.key === 'Escape') { setSearch(''); setDropdownVisible(false); setPendingCustom(null) }
           }}
-          placeholder="Search dishes or type your own…"
-          className="w-full border border-brand-border rounded-xl px-4 py-2.5 text-sm bg-white text-text-1 placeholder:text-text-4 focus:outline-none focus:ring-2 focus:ring-brand/20 pr-24"
+          placeholder="Search dishes — e.g. Paneer Tikka, Butter Chicken, Gulab Jamun…"
+          className="w-full text-sm border border-brand-border rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/20 pr-9 placeholder:text-text-4"
         />
-        {isSearching && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            {canAddCustom && (
-              <button
-                type="button"
-                onClick={() => { onAddCustom(searchQuery.trim()); onSearchChange('') }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand/10 text-brand text-xs font-semibold border border-brand/20 hover:bg-brand/15 transition-colors"
-              >
-                <Plus className="h-3 w-3" /> Add
-              </button>
-            )}
-            <button type="button" onClick={() => onSearchChange('')} className="text-text-4 hover:text-text-2 p-1">
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
+        {search ? (
+          <button
+            type="button"
+            onClick={() => { setSearch(''); setDropdownVisible(false); setPendingCustom(null) }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-4 hover:text-text-2"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        ) : (
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-4 text-base">🔍</span>
         )}
-      </div>
 
-      {/* Search results */}
-      {isSearching && (
-        <div className="flex flex-wrap gap-2">
-          {searchResults.length === 0 ? (
-            <p className="text-xs text-text-4 italic py-1">No dishes found — press Enter or click Add to add as custom</p>
-          ) : (
-            searchResults.map(({ dish, category, emoji }) => {
-              const on = selected.includes(dish)
+        {/* Typeahead dropdown */}
+        {showDropdown && (
+          <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-cream-2 border border-brand-border rounded-xl shadow-lg overflow-hidden divide-y divide-brand-border">
+            {suggestions.map(dish => {
+              const cat = getCategoryForDish(dish)
               return (
                 <button
                   key={dish}
                   type="button"
-                  onClick={() => { onToggle(dish); onSearchChange('') }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                    on
-                      ? 'bg-brand text-white border-brand'
-                      : 'bg-white text-text-2 border-brand-border hover:border-brand/50 hover:bg-cream'
-                  }`}
+                  onMouseDown={() => { onToggle(dish); setSearch(''); setDropdownVisible(false) }}
+                  className="w-full px-4 py-2.5 text-sm text-left text-text-2 hover:bg-cream transition-colors flex items-center justify-between"
                 >
-                  <span>{emoji}</span> {dish}
-                  <span className="opacity-50 font-normal">· {category}</span>
-                  {on && <X className="h-3 w-3 ml-0.5 opacity-70" />}
+                  <span>{dish}</span>
+                  {cat && (
+                    <span className="text-[11px] text-text-4 bg-cream-2 rounded-full px-2 py-0.5 flex-shrink-0 ml-2">
+                      {cat.emoji} {cat.label}
+                    </span>
+                  )}
                 </button>
               )
-            })
-          )}
+            })}
+            {canAddCustom && (
+              <button
+                type="button"
+                onMouseDown={() => { setPendingCustom(toTitleCase(search)); setDropdownVisible(false) }}
+                className="w-full px-4 py-2.5 text-sm text-left hover:bg-cream flex items-center gap-2 text-text-3"
+              >
+                <Plus className="h-3.5 w-3.5 text-text-4" />
+                Add <span className="font-semibold text-text-1 ml-0.5">"{toTitleCase(search)}"</span>
+                <span className="text-text-4 text-[11px] ml-1">— pick a course</span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Category picker for custom dish */}
+      {pendingCustom && (
+        <div className="border border-brand-border rounded-xl p-3 bg-cream space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-text-2">
+              Adding <span className="text-text-1">"{pendingCustom}"</span> — which course?
+            </p>
+            <button
+              type="button"
+              onClick={() => { onAddCustom(pendingCustom, undefined); setPendingCustom(null); setSearch('') }}
+              className="text-[11px] text-text-4 hover:text-text-2"
+            >
+              Skip
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {COURSE_OPTIONS.map(opt => (
+              <button
+                key={opt.key}
+                type="button"
+                onClick={() => {
+                  onAddCustom(pendingCustom, opt.key)
+                  setPendingCustom(null)
+                  setSearch('')
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-brand-border bg-white dark:bg-cream-2 text-xs font-medium text-text-3 hover:border-text-1 hover:text-text-1 hover:bg-cream transition-all"
+              >
+                <span>{opt.emoji}</span> {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Category tabs — shown when not searching */}
-      {!isSearching && (
-        <>
-          {categories.length === 0 ? (
-            <p className="text-xs text-text-4 italic">Loading dish library…</p>
-          ) : (
-            <>
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-                {categories.map((cat, i) => (
-                  <button
-                    key={cat.key}
-                    type="button"
-                    onClick={() => setActiveTab(i)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all flex-shrink-0 ${
-                      activeTab === i
-                        ? 'bg-brand text-white border-brand'
-                        : 'bg-white text-text-2 border-brand-border hover:border-brand/50'
-                    }`}
-                  >
-                    <span>{cat.emoji}</span> {cat.label}
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(categories[activeTab]?.dishes ?? []).map(dish => {
-                  const on = selected.includes(dish)
-                  return (
-                    <button
-                      key={dish}
-                      type="button"
-                      onClick={() => onToggle(dish)}
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                        on
-                          ? 'bg-brand text-white border-brand shadow-[0_2px_8px_rgba(232,85,16,0.2)]'
-                          : 'bg-white text-text-2 border-brand-border hover:border-brand/50 hover:bg-cream'
-                      }`}
-                    >
-                      {dish}
-                      {on && <X className="h-3 w-3 ml-0.5 opacity-70" />}
-                    </button>
-                  )
-                })}
-              </div>
-            </>
-          )}
-        </>
-      )}
-
-      {/* Custom dishes chips (not in library) */}
-      {customDishes.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          <span className="text-xs text-text-4 self-center mr-1">Custom:</span>
-          {customDishes.map(d => (
-            <span key={d} className="flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full px-2.5 py-1 text-xs font-semibold">
-              {d}
-              <button type="button" onClick={() => onRemove(d)} className="hover:text-amber-900 ml-0.5">
-                <X className="h-3 w-3" />
-              </button>
-            </span>
+      {/* Category filter pills */}
+      {categories.length > 0 && !pendingCustom && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveCategoryKey(null)}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+              activeCategoryKey === null
+                ? 'bg-text-1 text-white border-text-1'
+                : 'bg-white dark:bg-cream-2 text-text-3 border-brand-border hover:text-text-1'
+            }`}
+          >
+            All
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.key}
+              type="button"
+              onClick={() => setActiveCategoryKey(activeCategoryKey === cat.key ? null : cat.key)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                activeCategoryKey === cat.key
+                  ? 'bg-text-1 text-white border-text-1'
+                  : 'bg-white dark:bg-cream-2 text-text-3 border-brand-border hover:text-text-1'
+              }`}
+            >
+              <span>{cat.emoji}</span> {cat.label}
+            </button>
           ))}
         </div>
       )}
 
-      {selected.length > 0 && (
-        <p className="text-xs text-text-4">{selected.length} dish{selected.length !== 1 ? 'es' : ''} selected</p>
+      {/* Selected dishes grouped by category */}
+      {grouped.length > 0 && (
+        <div className="space-y-2">
+          {grouped.map(({ category: cat, key, dishes }) => (
+            <div key={key} className="bg-cream rounded-xl px-3 py-2.5">
+              <p className="text-xs font-bold text-text-3 uppercase tracking-wide mb-2">
+                {cat ? `${cat.emoji} ${cat.label}` : '✏️ Custom'}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {dishes.map(d => (
+                  <span
+                    key={d}
+                    className="flex items-center gap-1.5 bg-brand/10 border border-brand/30 text-brand rounded-full px-3 py-1 text-sm font-semibold"
+                  >
+                    {d}
+                    <button
+                      type="button"
+                      onClick={() => onRemove(d)}
+                      className="text-brand/50 hover:text-brand ml-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+          <p className="text-xs text-text-4 text-right">
+            {selected.length} dish{selected.length !== 1 ? 'es' : ''} selected
+          </p>
+        </div>
+      )}
+
+      {selected.length === 0 && !pendingCustom && (
+        <p className="text-xs text-text-4 italic">Start typing to search dishes from our library</p>
       )}
     </div>
   )
@@ -514,59 +696,57 @@ function CateringForm({
   const canSave = f.serviceStyles.length > 0 || f.dietary.length > 0 || f.cuisines.length > 0 || !f.letCatererDecideMenu
 
   return (
-    <div className="space-y-6">
+    <div>
 
       {/* Service style */}
-      <div>
+      <div className="pb-6">
         <SectionHeading>What type of service do you want?</SectionHeading>
         <PillToggle
           options={SERVICE_STYLE_OPTIONS}
           selected={f.serviceStyles}
           onChange={v => up({ serviceStyles: v })}
         />
+
+        {/* Live stations — conditional */}
+        {wantLiveStations && (
+          <div className="bg-amber-50 rounded-xl p-5 space-y-4 border-2 border-amber-200 mt-5">
+            <p className="text-base font-bold text-text-1">Which live stations?</p>
+            <PillToggle
+              options={LIVE_STATION_OPTIONS}
+              selected={f.liveStations}
+              onChange={v => up({ liveStations: v })}
+            />
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="text"
+                value={f.customStation}
+                onChange={e => up({ customStation: e.target.value })}
+                placeholder="Other station (e.g. Panipuri, Frankie…)"
+                className="flex-1 border border-brand-border rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-cream-2 text-text-1 placeholder:text-text-4 focus:outline-none focus:ring-2 focus:ring-brand/20"
+              />
+              {f.customStation && (
+                <button type="button" onClick={() => up({ customStation: '' })} className="text-text-4 hover:text-text-2">
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Live stations — conditional */}
-      {wantLiveStations && (
-        <div className="bg-cream rounded-xl p-4 space-y-3 border border-brand-border">
-          <SectionHeading>Which live stations are you looking for?</SectionHeading>
-          <PillToggle
-            options={LIVE_STATION_OPTIONS}
-            selected={f.liveStations}
-            onChange={v => up({ liveStations: v })}
-          />
-          {/* Custom station */}
-          <div className="flex items-center gap-2 mt-2">
-            <input
-              type="text"
-              value={f.customStation}
-              onChange={e => up({ customStation: e.target.value })}
-              placeholder="Other station (e.g. Panipuri, Frankie…)"
-              className="flex-1 border border-brand-border rounded-lg px-3 py-2 text-sm bg-white text-text-1 placeholder:text-text-4 focus:outline-none focus:ring-2 focus:ring-brand/20"
-            />
-            {f.customStation && (
-              <button type="button" onClick={() => up({ customStation: '' })} className="text-text-4 hover:text-text-2">
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Cuisine preferences */}
-      <div>
-        <div className="flex items-center justify-between mb-2.5">
-          <SectionHeading>Cuisine preferences</SectionHeading>
+      <CollapsibleSection title="Cuisine Preferences">
+        <div className="flex items-center justify-end mb-3">
           <button
             type="button"
             onClick={() => up({ letCatererDecideCuisine: !f.letCatererDecideCuisine, cuisines: [] })}
-            className="text-xs text-brand font-semibold hover:underline"
+            className="text-sm text-brand font-bold hover:underline"
           >
             {f.letCatererDecideCuisine ? 'Choose specific cuisines' : 'Let caterer decide'}
           </button>
         </div>
         {f.letCatererDecideCuisine ? (
-          <p className="text-sm text-text-4 bg-cream px-3 py-2 rounded-lg">Caterer will suggest appropriate cuisines</p>
+          <p className="text-sm text-text-3 bg-cream px-4 py-3 rounded-xl">Caterer will suggest appropriate cuisines</p>
         ) : (
           <PillToggle
             options={CUISINE_OPTIONS}
@@ -574,108 +754,223 @@ function CateringForm({
             onChange={v => up({ cuisines: v })}
           />
         )}
-      </div>
+      </CollapsibleSection>
+
+      {/* Protein preference */}
+      <CollapsibleSection title="Protein Preference">
+        <div className="grid grid-cols-2 gap-3">
+          {PROTEIN_OPTIONS.map(opt => {
+            const active = f.proteinPreference === opt.value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => up({ proteinPreference: active ? '' : opt.value })}
+                className={`flex items-start gap-3.5 p-4 rounded-xl border-2 text-left transition-all ${
+                  active
+                    ? 'border-emerald-400 bg-emerald-50 shadow-sm'
+                    : 'border-brand-border bg-white dark:bg-cream-2 hover:border-emerald-300'
+                }`}
+              >
+                <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-text-1">{opt.label}</p>
+                  <p className="text-xs text-text-4 mt-0.5">{opt.desc}</p>
+                </div>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
+                  active ? 'bg-emerald-500 border-emerald-500' : 'border-brand-border'
+                }`}>
+                  {active && (
+                    <svg viewBox="0 0 10 10" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+                  )}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </CollapsibleSection>
 
       {/* Dietary requirements */}
-      <div>
-        <SectionHeading>Dietary requirements</SectionHeading>
-        <PillToggle
-          options={DIETARY_OPTIONS}
-          selected={f.dietary}
-          onChange={v => up({ dietary: v })}
-        />
-        {f.dietary.length === 0 && (
-          <p className="text-xs text-text-4 mt-2">None selected — all dietary preferences welcome</p>
-        )}
-      </div>
+      <CollapsibleSection title="Dietary Restrictions & Allergies">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {DIETARY_OPTIONS.map(o => {
+            const on = f.dietary.includes(o.value)
+            return (
+              <button key={o.value} type="button" onClick={() => up({ dietary: on ? f.dietary.filter(v => v !== o.value) : [...f.dietary, o.value] })}
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 text-sm font-bold text-left transition-all ${
+                  on ? 'bg-green-50 text-text-1 border-green-400 shadow-sm' : 'bg-white dark:bg-cream-2 text-text-3 border-brand-border hover:border-green-300'
+                }`}>
+                <span className="text-xl">{o.emoji}</span>
+                <span className="flex-1">{o.label}</span>
+                {on && (
+                  <svg viewBox="0 0 10 10" className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+                )}
+              </button>
+            )
+          })}
+        </div>
+        {f.dietary.length === 0 && <p className="text-sm text-text-4 mt-3">None selected — all dietary preferences welcome</p>}
+      </CollapsibleSection>
 
-      {/* Food requirements */}
-      <div>
-        <SectionHeading>Menu / dishes</SectionHeading>
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-text-3">Let the caterer decide the menu</span>
-          <button
-            type="button"
-            onClick={() => up({ letCatererDecideMenu: !f.letCatererDecideMenu })}
-            className={`relative rounded-full transition-colors flex-shrink-0 ${f.letCatererDecideMenu ? 'bg-brand' : 'bg-gray-200'}`}
-            style={{ height: '22px', width: '40px' }}
-          >
-            <span
-              className={`absolute top-0.5 h-[18px] w-[18px] rounded-full bg-white shadow transition-transform ${f.letCatererDecideMenu ? 'translate-x-[19px]' : 'translate-x-0.5'}`}
-            />
-          </button>
+      {/* Menu / Dishes */}
+      <CollapsibleSection title="Menu / Dishes">
+        {/* Mode selector */}
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          {([
+            {
+              val: true,
+              icon: '👨‍🍳',
+              title: 'Let caterer decide',
+              desc: 'Set counts per course — caterer proposes the dishes',
+            },
+            {
+              val: false,
+              icon: '🍽️',
+              title: 'Build your own',
+              desc: 'Browse our library and pick specific dishes by course',
+            },
+          ] as const).map(opt => {
+            const active = f.letCatererDecideMenu === opt.val
+            return (
+              <button
+                key={String(opt.val)}
+                type="button"
+                onClick={() => up({ letCatererDecideMenu: opt.val })}
+                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  active
+                    ? 'border-blue-400 bg-blue-50 shadow-sm'
+                    : 'border-brand-border bg-white dark:bg-cream-2 hover:border-blue-300 text-text-2'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <span className="text-2xl">{opt.icon}</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                    active ? 'bg-blue-500 border-blue-500' : 'border-brand-border'
+                  }`}>
+                    {active && (
+                      <svg viewBox="0 0 10 10" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+                    )}
+                  </div>
+                </div>
+                <p className="text-sm font-bold leading-snug">{opt.title}</p>
+                <p className="text-xs mt-1 leading-snug text-text-4">{opt.desc}</p>
+              </button>
+            )
+          })}
         </div>
 
-        {!f.letCatererDecideMenu && (
-          <div className="bg-cream/50 border border-brand-border rounded-xl p-4 space-y-4">
-            {/* Course counts */}
-            <div>
-              <p className="text-xs font-semibold text-text-3 mb-2">How many dishes per course? <span className="font-normal text-text-4">(optional)</span></p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {([
-                  { key: 'startersCount', label: 'Starters', emoji: '🥗' },
-                  { key: 'mainsCount', label: 'Mains', emoji: '🍛' },
-                  { key: 'breadRiceCount', label: 'Bread / Rice', emoji: '🫓' },
-                  { key: 'dessertsCount', label: 'Desserts', emoji: '🍮' },
-                ] as const).map(({ key, label, emoji }) => (
-                  <div key={key} className="flex flex-col gap-1">
-                    <label className="text-xs text-text-4">{emoji} {label}</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="20"
-                      value={f[key]}
-                      onChange={e => up({ [key]: e.target.value })}
-                      placeholder="—"
-                      className="w-full border border-brand-border rounded-lg px-3 py-1.5 text-sm text-text-1 bg-white placeholder:text-text-4 focus:outline-none focus:ring-2 focus:ring-brand/20 text-center"
-                    />
-                  </div>
-                ))}
-              </div>
+        {/* Let caterer decide: stepper counts per course */}
+        {f.letCatererDecideMenu && (
+          <div>
+            <p className="text-sm text-text-3 mb-3">
+              How many dishes of each course are you thinking?{' '}
+              <span className="text-text-4">(optional)</span>
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+              {([
+                { key: 'startersCount', label: 'Starters',       emoji: '🥗' },
+                { key: 'mainsCount',    label: 'Mains',          emoji: '🍛' },
+                { key: 'breadCount',    label: 'Breads',         emoji: '🫓' },
+                { key: 'riceCount',     label: 'Rice / Biryani', emoji: '🍚' },
+                { key: 'dessertsCount', label: 'Desserts',       emoji: '🍮' },
+              ] as const).map(({ key, label, emoji }) => (
+                <CourseCountInput
+                  key={key}
+                  label={label}
+                  emoji={emoji}
+                  value={f[key] ?? ''}
+                  onChange={v => up({ [key]: v })}
+                />
+              ))}
             </div>
-            {/* Dish picker */}
-            <div>
-              <p className="text-xs text-text-4 mb-3">Pick from our library or type your own dishes. Caterers will see your full list.</p>
-              <DishPicker
+          </div>
+        )}
+
+        {/* Build your own: unified search + category grouping */}
+        {!f.letCatererDecideMenu && (
+          dishCategories.length === 0 ? (
+            <p className="text-sm text-text-4 italic py-2">Loading dish library…</p>
+          ) : (
+            <DishBuildSection
               categories={dishCategories}
               selected={f.selectedDishes}
-              searchQuery={f.dishSearch}
+              customDishCategories={f.customDishCategories}
               onToggle={dish => up({
                 selectedDishes: f.selectedDishes.includes(dish)
                   ? f.selectedDishes.filter(d => d !== dish)
                   : [...f.selectedDishes, dish],
               })}
-              onSearchChange={v => up({ dishSearch: v })}
-              onAddCustom={dish => {
+              onAddCustom={(dish, categoryKey) => {
                 if (!f.selectedDishes.includes(dish)) {
-                  up({ selectedDishes: [...f.selectedDishes, dish], dishSearch: '' })
+                  up({
+                    selectedDishes: [...f.selectedDishes, dish],
+                    customDishCategories: categoryKey
+                      ? { ...f.customDishCategories, [dish]: categoryKey }
+                      : f.customDishCategories,
+                  })
                 }
               }}
-              onRemove={dish => up({ selectedDishes: f.selectedDishes.filter(d => d !== dish) })}
+              onRemove={dish => up({
+                selectedDishes: f.selectedDishes.filter(d => d !== dish),
+                customDishCategories: Object.fromEntries(
+                  Object.entries(f.customDishCategories).filter(([k]) => k !== dish)
+                ),
+              })}
             />
-            </div>
-          </div>
+          )
         )}
+      </CollapsibleSection>
 
-        {f.letCatererDecideMenu && (
-          <p className="text-sm text-text-4 bg-cream px-3 py-2 rounded-lg">
-            Caterer will propose a suitable menu based on your other requirements
-          </p>
-        )}
-      </div>
+      {/* Setup & logistics */}
+      <CollapsibleSection title={<>Setup &amp; logistics <span className="text-text-4 font-normal text-sm">(optional)</span></>}>
+        <p className="text-sm text-text-3 mb-4">What do you need the caterer to handle on the day?</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {([
+            { key: 'deliveryRequired',      label: 'Delivery to venue',                emoji: '🚚', desc: 'Food delivered to the venue' },
+            { key: 'setupRequired',         label: 'Setup & arrangement',              emoji: '🪑', desc: 'Set up tables, dishes, and presentation' },
+            { key: 'servingStaffRequired',  label: 'Serving staff',                    emoji: '🧑‍🍳', desc: 'Staff to serve guests during the event' },
+            { key: 'equipmentRequired',     label: 'Buffet equipment',                 emoji: '🔥', desc: 'Chaffers, burners, serving stands' },
+            { key: 'labelsRequired',        label: 'Dish labels & menu cards',         emoji: '🏷️', desc: 'Printed labels for each dish or menu' },
+          ] as const).map(({ key, label, emoji, desc }) => {
+            const on = f[key]
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => up({ [key]: !on })}
+                className={`flex items-start gap-3.5 p-4 rounded-xl border-2 text-left transition-all ${
+                  on
+                    ? 'bg-purple-50 border-purple-300 shadow-sm'
+                    : 'bg-white dark:bg-cream-2 border-brand-border hover:border-purple-200'
+                }`}
+              >
+                <span className="text-2xl mt-0.5 flex-shrink-0">{emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-text-1">{label}</p>
+                  <p className="text-xs text-text-4 mt-1 leading-snug">{desc}</p>
+                </div>
+                <div className={`w-5 h-5 rounded flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
+                  on ? 'bg-purple-500 border-purple-500' : 'border-2 border-brand-border'
+                }`}>
+                  {on && <svg viewBox="0 0 10 10" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </CollapsibleSection>
 
       {/* Additional notes */}
-      <div>
-        <SectionHeading>Additional notes <span className="text-text-4 font-normal">(optional)</span></SectionHeading>
+      <CollapsibleSection title={<>Additional notes <span className="text-text-4 font-normal text-sm">(optional)</span></>} defaultOpen={false}>
         <textarea
           value={f.notes}
           onChange={e => up({ notes: e.target.value })}
-          rows={3}
+          rows={4}
           placeholder="Anything else the caterer should know — e.g. venue restrictions, serving time, special requests…"
-          className="w-full border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white resize-none
-                     placeholder:text-text-4 focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all"
+          className="w-full border-2 border-brand-border rounded-xl px-4 py-3.5 text-sm text-text-1 bg-white dark:bg-cream-2 resize-none
+                     placeholder:text-text-4 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40 transition-all"
         />
-      </div>
+      </CollapsibleSection>
 
       {/* Contextual suggestions — other vendor types often booked separately */}
       {(() => {
@@ -687,18 +982,18 @@ function CateringForm({
         })
         if (suggestions.length === 0) return null
         return (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-2">
             <p className="text-xs font-bold text-amber-800 mb-3">💡 Often booked as separate vendors</p>
             {suggestions.map(s => (
               <Link
                 key={s.slug}
                 href={`/events/${eventId}/services/${s.slug}`}
-                className="flex items-center justify-between gap-3 bg-white rounded-lg px-3 py-2.5 border border-amber-100 hover:border-amber-300 transition-colors group"
+                className="flex items-center justify-between gap-3 bg-white dark:bg-cream-2 rounded-xl px-3 py-2.5 border border-amber-100 hover:border-amber-300 transition-colors group"
               >
                 <div className="flex items-center gap-2.5">
                   <span className="text-lg">{s.emoji}</span>
                   <div>
-                    <p className="text-sm font-semibold text-text-1">{s.label}</p>
+                    <p className="text-sm font-bold text-text-1">{s.label}</p>
                     <p className="text-xs text-text-4">{s.tip}</p>
                   </div>
                 </div>
@@ -744,9 +1039,9 @@ function GenericForm({
   useEffect(() => { setNotes(initialNotes) }, [initialNotes])
   const changed = notes !== initialNotes
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-4.5">
       <div>
-        <label htmlFor="service-notes" className="block text-sm font-semibold text-text-2 mb-1.5">
+        <label htmlFor="service-notes" className="block text-sm font-bold text-text-2 mb-1.5">
           Requirements &amp; special notes
         </label>
         <p className="text-xs text-text-4 mb-2.5">
@@ -790,17 +1085,17 @@ function LoadingSkeleton() {
         <div className="h-3.5 bg-cream-2 rounded-full w-28" />
       </div>
       <div className="h-10 bg-cream-2 rounded-2xl w-56" />
-      <div className="bg-white border border-brand-border rounded-2xl overflow-hidden">
+      <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden">
         <div className="px-5 py-4 flex items-center justify-between">
           <div className="h-5 bg-cream-2 rounded w-36" />
           <div className="h-5 w-5 bg-cream-2 rounded-full" />
         </div>
-        <div className="border-t border-brand-border px-5 py-5 space-y-3">
+        <div className="border-t border-brand-border px-5 py-5 space-y-4">
           <div className="h-32 bg-cream-2 rounded-xl" />
         </div>
       </div>
       {[1, 2].map(i => (
-        <div key={i} className="bg-white border border-brand-border rounded-2xl p-4 flex gap-3">
+        <div key={i} className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 flex gap-3">
           <div className="w-9 h-9 rounded-xl bg-cream-2 flex-shrink-0" />
           <div className="flex-1 space-y-2">
             <div className="h-4 bg-cream-2 rounded w-32" />
@@ -814,7 +1109,7 @@ function LoadingSkeleton() {
 
 // ── Public Request Panel ──────────────────────────────────────────────────────
 
-function PublicRequestPanel({ req, slug, responseCount }: { req: EventRequest | null; slug: string; responseCount: number }) {
+function PublicRequestPanel({ req, slug, citySlug, responseCount }: { req: EventRequest | null; slug: string; citySlug: string; responseCount: number }) {
   if (!req) {
     return (
       <div className="relative overflow-hidden rounded-2xl border border-brand-border bg-cream">
@@ -836,12 +1131,12 @@ function PublicRequestPanel({ req, slug, responseCount }: { req: EventRequest | 
   }
   const isOpen = req.public_status === 'OPEN'
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-brand/20 bg-gradient-to-br from-orange-50 via-amber-50/40 to-cream">
+    <div className="relative overflow-hidden rounded-2xl border border-brand/20 bg-gradient-to-br from-cream via-amber-50/40 to-cream">
       <div className="h-0.5 bg-gradient-to-r from-brand via-amber-400 to-brand/30" />
       <div className="p-5">
         <div className="flex items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-brand/10 flex items-center justify-center">
               <Globe className="h-4 w-4 text-brand" />
             </div>
             <div>
@@ -851,13 +1146,13 @@ function PublicRequestPanel({ req, slug, responseCount }: { req: EventRequest | 
               </p>
             </div>
           </div>
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${isOpen ? 'bg-green-100 text-green-700 ring-1 ring-green-200' : 'bg-gray-100 text-gray-600 ring-1 ring-gray-200'}`}>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${isOpen ? 'bg-green-100 text-green-700 ring-1 ring-green-200' : 'bg-cream-2 text-text-3 ring-1 ring-brand-border'}`}>
             {isOpen ? '● Open' : '✓ Filled'}
           </span>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <a href={`/requests/${slug}/${req.public_token}`} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand bg-white border border-brand/20 rounded-lg px-3 py-1.5 hover:bg-cream transition-all">
+          <a href={`/requests/${slug}/${citySlug}/${req.public_token}`} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand bg-white dark:bg-cream-2 border border-brand/20 rounded-xl px-3 py-1.5 hover:bg-cream transition-all">
             View public page <ExternalLink className="h-3 w-3" />
           </a>
           <span className="text-xs text-text-4">· Share to get faster responses</span>
@@ -903,22 +1198,22 @@ function ResponseCard({
   const [open, setOpen] = useState(false)
   const hasQuote = !!resp.quote_submitted_at
   const statusColors: Record<string, string> = {
-    PENDING: 'bg-gray-100 text-gray-600',
+    PENDING: 'bg-cream-2 text-text-3',
     QUOTE_REQUESTED: 'bg-blue-50 text-blue-700',
     QUOTE_SUBMITTED: 'bg-indigo-50 text-indigo-700',
     ACCEPTED_RESPONSE: 'bg-green-50 text-green-700',
-    DECLINED: 'bg-gray-100 text-gray-400',
+    DECLINED: 'bg-cream-2 text-text-4',
   }
   const statusLabel: Record<string, string> = {
     PENDING: 'Pitched', QUOTE_REQUESTED: 'Quote requested',
     QUOTE_SUBMITTED: 'Full quote', ACCEPTED_RESPONSE: 'Accepted', DECLINED: 'Declined',
   }
   return (
-    <div className="bg-white border border-brand-border rounded-2xl overflow-hidden hover:border-brand/30 transition-colors">
+    <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden hover:border-brand/30 transition-colors">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-start gap-3 p-4 text-left"
+        className="w-full flex items-start gap-3 p-5 text-left"
       >
         <div className="w-9 h-9 rounded-xl bg-cream-2 flex items-center justify-center flex-shrink-0 text-sm font-black text-text-3">
           {resp.name.slice(0, 1).toUpperCase()}
@@ -938,7 +1233,7 @@ function ResponseCard({
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[resp.status] ?? 'bg-gray-100 text-gray-500'}`}>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[resp.status] ?? 'bg-cream-2 text-text-3'}`}>
             {statusLabel[resp.status] ?? resp.status}
           </span>
           {open ? <ChevronUp className="h-3.5 w-3.5 text-text-4" /> : <ChevronDown className="h-3.5 w-3.5 text-text-4" />}
@@ -946,17 +1241,17 @@ function ResponseCard({
       </button>
 
       {open && (
-        <div className="border-t border-brand-border px-4 pb-4 pt-3 space-y-3">
+        <div className="border-t border-brand-border px-4 pb-4 pt-3 space-y-4">
           <p className="text-sm text-text-2 italic">"{resp.pitch}"</p>
           {resp.what_includes && (
             <div>
-              <p className="text-xs font-semibold text-text-4 mb-0.5">What's included</p>
+              <p className="text-xs font-bold text-text-4 mb-0.5">What's included</p>
               <p className="text-sm text-text-2">{resp.what_includes}</p>
             </div>
           )}
           {resp.service_details && (
             <div>
-              <p className="text-xs font-semibold text-text-4 mb-0.5">Service details</p>
+              <p className="text-xs font-bold text-text-4 mb-0.5">Service details</p>
               <p className="text-sm text-text-2">{resp.service_details}</p>
             </div>
           )}
@@ -974,7 +1269,7 @@ function ResponseCard({
               type="button"
               disabled={acting === resp.id}
               onClick={() => onAction('request_full_quote', resp.id, eventRequestToken)}
-              className="text-xs font-semibold text-brand border border-brand/30 rounded-lg px-3 py-1.5 hover:bg-cream transition-colors disabled:opacity-50"
+              className="text-xs font-semibold text-brand border border-brand/30 rounded-xl px-3 py-1.5 hover:bg-cream transition-colors disabled:opacity-50"
             >
               {acting === resp.id ? 'Sending…' : 'Ask for formal quote →'}
             </button>
@@ -1013,15 +1308,17 @@ export default function ServicePage() {
         LIVE_STATION_OPTIONS.some(o => o.value === s)),
       customStation: (mp.customer_tray_requests as string[] ?? []).find(s =>
         !LIVE_STATION_OPTIONS.some(o => o.value === s)) ?? '',
-      letCatererDecideMenu: (mp.menu_mode as string) !== 'CUSTOMER_SPECIFIES',
+      letCatererDecideMenu: (mp.menu_mode as string) !== 'CUSTOMER_SPECIFIED',
       startersCount: mp.appetizer_count != null ? String(mp.appetizer_count) : '',
       mainsCount: mp.main_count != null ? String(mp.main_count) : '',
-      breadRiceCount: mp.bread_count != null ? String(mp.bread_count) : '',
+      breadCount: mp.bread_count != null ? String(mp.bread_count) : '',
+      riceCount: mp.rice_biryani_count != null ? String(mp.rice_biryani_count) : '',
       dessertsCount: mp.dessert_count != null ? String(mp.dessert_count) : '',
       selectedDishes: (mp.selected_dishes as string[] ?? []),
+      customDishCategories: (mp.custom_dish_categories as Record<string, string> ?? {}),
       dishSearch: '',
+      proteinPreference: (mp.protein_preference as string) ?? '',
       dietary: [
-        ...(mp.is_vegetarian ? ['vegetarian'] : []),
         ...(mp.is_vegan ? ['vegan'] : []),
         ...(mp.is_halal ? ['halal'] : []),
         ...(mp.is_jain ? ['jain'] : []),
@@ -1029,11 +1326,15 @@ export default function ServicePage() {
         ...(mp.nut_free ? ['nut-free'] : []),
         ...(mp.gluten_free ? ['gluten-free'] : []),
         ...(mp.dairy_free ? ['dairy-free'] : []),
-        ...(mp.egg_free ? ['egg-free'] : []),
       ],
       cuisines: (mp.cuisines as string[] ?? []),
       letCatererDecideCuisine: !(mp.cuisines as string[] ?? []).length,
       notes: (mp.special_notes as string) ?? '',
+      deliveryRequired: (mp.delivery_required as boolean) ?? false,
+      setupRequired: (mp.setup_required as boolean) ?? false,
+      servingStaffRequired: (mp.serving_staff_required as boolean) ?? false,
+      equipmentRequired: (mp.equipment_required as boolean) ?? false,
+      labelsRequired: (mp.labels_required as boolean) ?? false,
     }
   }
 
@@ -1119,163 +1420,200 @@ export default function ServicePage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <AlertCircle className="h-10 w-10 text-text-4 mx-auto mb-4" />
-        <h2 className="text-lg font-bold text-text-1 mb-1">Service unavailable</h2>
+        <h2 className="text-xl font-black text-text-1 mb-1">Service unavailable</h2>
         <p className="text-sm text-text-3 mb-6">This service isn't enabled or could not be loaded.</p>
         <Link href={`/events/${eventId}`} className="text-sm text-brand font-semibold hover:underline">← Back to event</Link>
       </div>
     )
   }
 
-  const { service_config: svc, event_request: req } = data
+  const { service_config: svc, event_request: req, event_city_slug: citySlug } = data
   const hasReq = !!req
   const hasNotes = !!req?.service_notes
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5 py-6 px-4">
+    <div className="max-w-5xl mx-auto py-6 px-4">
+
       {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-sm text-text-4">
+      <div className="flex items-center gap-1.5 text-sm text-text-4 mb-5">
         <Link href={`/events/${eventId}`} className="hover:text-brand transition-colors font-medium">Event</Link>
         <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" />
-        <span className="text-text-2 font-semibold">{svc.icon} {svc.label}</span>
-      </div>
-
-      {/* Heading */}
-      <div>
-        <div className="flex items-center gap-3 mb-0.5">
-          <span className="text-3xl">{svc.icon}</span>
-          <h1 className="text-2xl font-black text-text-1 leading-tight">{svc.label}</h1>
-        </div>
-        <p className="text-sm text-text-3 ml-[calc(2rem+0.75rem)]">
-          {hasReq
-            ? 'Your request is live — vendors pitch to you.'
-            : `Tell us what you need and vendors will pitch to you.`}
-        </p>
+        <span className="text-text-2 font-bold">{svc.icon} {svc.label}</span>
       </div>
 
       {/* Toasts */}
       {successMsg && (
-        <div className="flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800">
+        <div className="flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800 mb-4">
           <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" /> {successMsg}
         </div>
       )}
       {error && (
-        <div className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 mb-4">
           <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" /> {error}
         </div>
       )}
 
-      {/* Requirements panel */}
-      <div className="bg-white border border-brand-border rounded-2xl overflow-hidden shadow-[0_1px_4px_rgba(26,9,4,0.05)]">
-        <button
-          type="button"
-          aria-expanded={formOpen}
-          onClick={() => setFormOpen(o => !o)}
-          className="w-full flex items-center justify-between px-5 py-4 hover:bg-cream/50 transition-colors"
-        >
-          <div className="flex items-center gap-2.5">
-            <span className="font-bold text-text-1 text-sm">Your requirements</span>
-            {hasNotes && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-green-50 text-green-700 border border-green-200 rounded-full px-1.5 py-0.5 font-semibold">
-                <CheckCircle2 className="h-2.5 w-2.5" /> Saved
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {!formOpen && hasNotes && (
-              <span className="text-xs text-text-4 italic line-clamp-1 max-w-[200px] text-right">{req?.service_notes}</span>
-            )}
-            {formOpen ? <ChevronUp className="h-4 w-4 text-text-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 text-text-4 flex-shrink-0" />}
-          </div>
-        </button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${formOpen ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="px-5 pb-6 border-t border-brand-border pt-5">
-            {isCatering ? (
-              <CateringForm
-                initial={deriveCateringState(req)}
-                onSave={saveCatering}
-                saving={saving}
-                eventId={eventId}
-              />
-            ) : (
-              <GenericForm
-                initialNotes={req?.service_notes ?? ''}
-                onSave={saveGeneric}
-                saving={saving}
-              />
-            )}
-          </div>
-        </div>
-      </div>
+        {/* ── Left column: requirements + pitches ───────────────── */}
+        <div className="lg:col-span-2 space-y-5">
 
-      {/* Post-save hub: public board status + responses + browse CTA */}
-      {hasReq && (
-        <>
-          {/* Live request status bar */}
-          <PublicRequestPanel req={req} slug={slug} responseCount={responses.length} />
-
-          {/* Incoming pitches / responses */}
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-black text-text-1">
-                Pitches received
-                {responses.length > 0 && (
-                  <span className="ml-2 text-xs font-semibold text-brand bg-brand/10 rounded-full px-2 py-0.5">{responses.length}</span>
-                )}
-              </h2>
-              <Link
-                href={`/events/${eventId}/quotes`}
-                className="text-xs text-brand font-semibold hover:underline"
-              >
-                View all quotes →
-              </Link>
+          {/* Header */}
+          <div className="flex items-center gap-3">
+            <span className="text-3xl leading-none">{svc.icon}</span>
+            <div>
+              <h1 className="text-2xl font-black text-text-1 leading-tight">{svc.label}</h1>
+              <p className="text-xs text-text-4 mt-0.5">
+                {hasReq ? 'Your request is live — vendors pitch to you.' : 'Tell us what you need and vendors will pitch to you.'}
+              </p>
             </div>
+          </div>
 
-            {responses.length === 0 ? (
-              <div className="bg-white border border-brand-border rounded-2xl p-6 text-center">
-                <p className="text-2xl mb-2">📬</p>
-                <p className="text-sm font-semibold text-text-1 mb-1">No pitches yet</p>
-                <p className="text-xs text-text-3 leading-relaxed max-w-xs mx-auto">
-                  Vendors typically respond within 24 hours. Share your public request link to get faster replies.
-                </p>
-                <a
-                  href={`/requests/${slug}/${req.public_token}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand mt-3 hover:underline"
-                >
-                  Share request link <ExternalLink className="h-3 w-3" />
-                </a>
+          {/* Requirements panel */}
+          <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden shadow-[0_1px_4px_rgba(26,9,4,0.05)]">
+            <button
+              type="button"
+              aria-expanded={formOpen}
+              onClick={() => setFormOpen(o => !o)}
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-cream/50 transition-colors"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="font-bold text-text-1 text-sm">Your requirements</span>
+                {hasNotes && (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-green-50 text-green-700 border border-green-200 rounded-full px-1.5 py-0.5 font-semibold">
+                    <CheckCircle2 className="h-2.5 w-2.5" /> Saved
+                  </span>
+                )}
               </div>
-            ) : (
-              <div className="space-y-2.5">
-                {responses.map(resp => (
-                  <ResponseCard
-                    key={resp.id}
-                    resp={resp}
-                    eventRequestToken={tokenMap[resp.id] ?? null}
-                    onAction={handleAction}
-                    acting={acting}
+              <div className="flex items-center gap-2">
+                {!formOpen && hasNotes && (
+                  <span className="text-xs text-text-4 italic line-clamp-1 max-w-[180px] text-right">{req?.service_notes}</span>
+                )}
+                {formOpen ? <ChevronUp className="h-4 w-4 text-text-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 text-text-4 flex-shrink-0" />}
+              </div>
+            </button>
+
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${formOpen ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className="px-5 pb-6 border-t border-brand-border pt-5">
+                {isCatering ? (
+                  <CateringForm
+                    initial={deriveCateringState(req)}
+                    onSave={saveCatering}
+                    saving={saving}
+                    eventId={eventId}
                   />
-                ))}
+                ) : SERVICE_FORMS[slug] ? (
+                  (() => {
+                    const SpecificForm = SERVICE_FORMS[slug]
+                    return (
+                      <SpecificForm
+                        initialNotes={req?.service_notes ?? ''}
+                        onSave={saveGeneric}
+                        saving={saving}
+                      />
+                    )
+                  })()
+                ) : (
+                  <GenericForm
+                    initialNotes={req?.service_notes ?? ''}
+                    onSave={saveGeneric}
+                    saving={saving}
+                  />
+                )}
               </div>
-            )}
-          </section>
+            </div>
+          </div>
+
+          {/* Pitches */}
+          {hasReq && (
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-black text-text-1 flex items-center gap-2">
+                  Pitches received
+                  {responses.length > 0 && (
+                    <span className="text-xs font-semibold text-brand bg-brand/10 rounded-full px-2 py-0.5">{responses.length}</span>
+                  )}
+                </h2>
+                {responses.length > 0 && (
+                  <Link href={`/events/${eventId}/quotes`} className="text-xs text-brand font-semibold hover:underline">
+                    View all quotes →
+                  </Link>
+                )}
+              </div>
+
+              {responses.length === 0 ? (
+                <div className="bg-white dark:bg-cream-2 border border-brand-border border-dashed rounded-2xl p-8 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-brand/8 flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">📬</span>
+                  </div>
+                  <p className="text-sm font-semibold text-text-1 mb-1">Waiting for pitches</p>
+                  <p className="text-xs text-text-3 leading-relaxed max-w-xs mx-auto mb-4">
+                    Vendors typically respond within 24 hours. Share your request link to get faster replies.
+                  </p>
+                  <a
+                    href={`/requests/${slug}/${citySlug}/${req!.public_token}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-brand hover:bg-brand-hover rounded-xl px-4 py-2 transition-colors"
+                  >
+                    Share request link <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {responses.map(resp => (
+                    <ResponseCard
+                      key={resp.id}
+                      resp={resp}
+                      eventRequestToken={tokenMap[resp.id] ?? null}
+                      onAction={handleAction}
+                      acting={acting}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+        </div>
+
+        {/* ── Right column: status + actions (sticky) ───────────── */}
+        <div className="lg:sticky lg:top-6 space-y-4">
+
+          {/* Live status card */}
+          <PublicRequestPanel req={req} slug={slug} citySlug={data.event_city_slug} responseCount={responses.length} />
 
           {/* Browse vendors CTA */}
-          <div className="bg-cream border border-brand-border rounded-2xl p-5 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-bold text-text-1">Want to invite a specific vendor?</p>
-              <p className="text-xs text-text-3 mt-0.5">Browse {svc.label.toLowerCase()} vendors on OneSeva and request a quote directly.</p>
-            </div>
+          <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-4">
+            <p className="text-base font-bold text-text-1 mb-1">Invite a specific vendor</p>
+            <p className="text-xs text-text-3 mb-3">Browse {svc.label.toLowerCase()} vendors and request a quote directly.</p>
             <Link
               href={`/events/${eventId}/vendors`}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold bg-white border border-brand/30 text-brand rounded-xl px-3 py-2 hover:bg-cream-2 transition-colors whitespace-nowrap"
+              className="flex items-center justify-center gap-1.5 text-xs font-semibold bg-cream hover:bg-cream-2 border border-brand-border text-brand rounded-xl px-3 py-2.5 transition-colors w-full"
             >
               Browse vendors <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-        </>
-      )}
+
+          {/* Tips card — only before first save */}
+          {!hasReq && (
+            <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 space-y-4">
+              <p className="text-xs font-black text-text-1 uppercase tracking-wider">How it works</p>
+              {[
+                { n: '1', t: 'Set your requirements', d: "Fill in what you need — the more detail, the better pitches you'll get." },
+                { n: '2', t: 'Vendors pitch to you', d: 'Your request goes live on our board. Vendors reach out with quotes.' },
+                { n: '3', t: 'Pick the best fit', d: 'Review pitches and connect directly — no commission, no middlemen.' },
+              ].map(s => (
+                <div key={s.n} className="flex gap-3">
+                  <div className="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-black flex items-center justify-center shrink-0 mt-0.5">{s.n}</div>
+                  <div>
+                    <p className="text-xs font-bold text-text-1">{s.t}</p>
+                    <p className="text-xs text-text-4 mt-0.5 leading-relaxed">{s.d}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="pb-6" />
     </div>

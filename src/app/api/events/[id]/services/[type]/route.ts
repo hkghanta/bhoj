@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
 
   const event = await prisma.event.findFirst({
     where: { id: eventId, customer_id: customerId },
-    select: { id: true, city: true },
+    select: { id: true, city: true, metro_city: true, country: true },
   })
   if (!event) return NextResponse.json({ error: 'Event not found' }, { status: 404 })
 
@@ -45,11 +45,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
   })
 
   const rawVendors = await prisma.vendor.findMany({
-    where: { vendor_type: vendorType, is_active: true },
+    where: { vendor_type: vendorType, is_active: true, country: event.country },
     select: {
       id: true,
       business_name: true,
       city: true,
+      country: true,
       vendor_type: true,
       is_verified: true,
       profile_photo_url: true,
@@ -72,6 +73,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
     id: v.id,
     business_name: v.business_name,
     city: v.city,
+    country: v.country,
     vendor_type: v.vendor_type,
     avg_rating: v.metrics[0]?.avg_rating ? Number(v.metrics[0].avg_rating) : null,
     is_verified: v.is_verified,
@@ -82,8 +84,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
     })),
   }))
 
-  const requirements: { city?: string; is_halal?: boolean; is_jain?: boolean; cuisines?: string[] } = {
+  const requirements: { city?: string; country?: string; is_halal?: boolean; is_jain?: boolean; cuisines?: string[] } = {
     city: event.city,
+    country: event.country,
   }
   if (eventRequest?.menu_preference) {
     const mp = eventRequest.menu_preference
@@ -118,8 +121,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
     }
   })
 
+  const citySlug = (event.metro_city ?? event.city).toLowerCase().replace(/\s+/g, '-')
+
   return NextResponse.json({
     service_config: serviceConfig,
+    event_city_slug: citySlug,
     event_request: eventRequest ? {
       id: eventRequest.id,
       service_notes: eventRequest.service_notes,
@@ -195,19 +201,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<Param
 
   if (vendorType === VendorType.CATERER && body.catering_prefs) {
     const cp = body.catering_prefs
-    const prefData = {
+    const prefFields = {
       event_id: eventId,
-      caterer_request_id: eventRequest.id,
       menu_mode: cp.menu_mode ?? 'CATERER_PROPOSES',
       cuisine_preferences: cp.cuisines ?? [],
       service_style: (cp.service_styles ?? []).join(',') || null,
+      protein_preference: cp.protein_preference ?? null,
       special_notes: cp.special_notes ?? null,
       pricing_preference: cp.pricing_preference ?? 'NO_PREFERENCE',
       customer_tray_requests: cp.customer_tray_requests ?? [],
       selected_dishes: cp.selected_dishes ?? [],
+      custom_dish_categories: cp.custom_dish_categories ?? {},
       appetizer_count: cp.appetizer_count ?? null,
       main_count: cp.main_count ?? null,
       bread_count: cp.bread_count ?? null,
+      rice_biryani_count: cp.rice_biryani_count ?? null,
       dessert_count: cp.dessert_count ?? null,
       is_vegetarian: cp.is_vegetarian ?? false,
       is_vegan: cp.is_vegan ?? false,
@@ -218,12 +226,86 @@ export async function POST(req: NextRequest, { params }: { params: Promise<Param
       gluten_free: cp.gluten_free ?? false,
       dairy_free: cp.dairy_free ?? false,
       egg_free: cp.egg_free ?? false,
+      delivery_required: cp.delivery_required ?? false,
+      setup_required: cp.setup_required ?? false,
+      serving_staff_required: cp.serving_staff_required ?? false,
+      equipment_required: cp.equipment_required ?? false,
+      labels_required: cp.labels_required ?? false,
     }
-    const existing = await prisma.eventMenuPreference.findFirst({ where: { event_id: eventId } })
-    if (existing) {
-      await prisma.eventMenuPreference.update({ where: { id: existing.id }, data: prefData })
-    } else {
-      await prisma.eventMenuPreference.create({ data: prefData })
+
+    try {
+      // Check if a preference record already exists so we can diff it
+      const existing = await prisma.eventMenuPreference.findUnique({
+        where: { caterer_request_id: eventRequest.id },
+      })
+
+      let change_summary: string | null = null
+
+      if (existing) {
+        // Build a human-readable diff of what changed
+        const changes: string[] = []
+
+        // Service style
+        const oldStyle = existing.service_style ?? ''
+        const newStyle = prefFields.service_style ?? ''
+        if (oldStyle !== newStyle) {
+          changes.push(`Service style: ${newStyle || 'not specified'}`)
+        }
+
+        // Menu mode
+        if (existing.menu_mode !== prefFields.menu_mode) {
+          changes.push(prefFields.menu_mode === 'CATERER_PROPOSES' ? 'Menu: let caterer decide' : 'Menu: customer specified')
+        }
+
+        // Dietary flags
+        const dietaryKeys = ['is_halal','is_vegetarian','is_vegan','is_jain','is_kosher','nut_free','gluten_free','dairy_free','egg_free'] as const
+        const dietaryLabels: Record<string, string> = {
+          is_halal:'Halal', is_vegetarian:'Vegetarian', is_vegan:'Vegan', is_jain:'Jain',
+          is_kosher:'Kosher', nut_free:'Nut-free', gluten_free:'Gluten-free', dairy_free:'Dairy-free', egg_free:'Egg-free',
+        }
+        const addedDiet = dietaryKeys.filter(k => !existing[k] && prefFields[k]).map(k => dietaryLabels[k])
+        const removedDiet = dietaryKeys.filter(k => existing[k] && !prefFields[k]).map(k => dietaryLabels[k])
+        if (addedDiet.length) changes.push(`Added dietary: ${addedDiet.join(', ')}`)
+        if (removedDiet.length) changes.push(`Removed dietary: ${removedDiet.join(', ')}`)
+
+        // Cuisines
+        const oldCuisines = (existing.cuisine_preferences ?? []).sort().join(',')
+        const newCuisines = (prefFields.cuisine_preferences ?? []).sort().join(',')
+        if (oldCuisines !== newCuisines) {
+          changes.push(newCuisines ? `Cuisines updated` : 'Cuisines: let caterer decide')
+        }
+
+        // Dishes
+        const oldDishes = ((existing.selected_dishes ?? []) as string[]).length
+        const newDishes = (prefFields.selected_dishes ?? []).length
+        if (oldDishes !== newDishes) {
+          changes.push(newDishes > oldDishes ? `Added dishes (${newDishes} total)` : `Removed dishes (${newDishes} total)`)
+        }
+
+        // Logistics
+        const logisticsKeys = ['delivery_required','setup_required','serving_staff_required','equipment_required','labels_required'] as const
+        const logisticsLabels: Record<string, string> = {
+          delivery_required:'Delivery', setup_required:'Setup', serving_staff_required:'Serving staff',
+          equipment_required:'Buffet equipment', labels_required:'Dish labels',
+        }
+        const addedLog = logisticsKeys.filter(k => !existing[k] && prefFields[k]).map(k => logisticsLabels[k])
+        const removedLog = logisticsKeys.filter(k => existing[k] && !prefFields[k]).map(k => logisticsLabels[k])
+        if (addedLog.length) changes.push(`Added: ${addedLog.join(', ')}`)
+        if (removedLog.length) changes.push(`Removed: ${removedLog.join(', ')}`)
+
+        if (changes.length > 0) {
+          change_summary = changes.join(' · ')
+        }
+      }
+
+      await prisma.eventMenuPreference.upsert({
+        where: { caterer_request_id: eventRequest.id },
+        create: { caterer_request_id: eventRequest.id, ...prefFields, change_summary: null },
+        update: { ...prefFields, ...(change_summary !== null ? { change_summary } : {}) },
+      })
+    } catch (e) {
+      console.error('[catering prefs upsert]', e)
+      return NextResponse.json({ error: 'Failed to save catering preferences.' }, { status: 500 })
     }
   }
 
