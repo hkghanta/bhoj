@@ -621,7 +621,7 @@ export default function VendorDiscoveryPage() {
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <Link
                                       href={`/events/${eventId}/vendors/${match.vendor.id}?matchId=${match.id}`}
-                                      className="font-semibold text-text-1 hover:text-brand transition-colors"
+                                      className="font-black text-text-1 hover:text-brand transition-colors"
                                     >
                                       {match.vendor.business_name}
                                     </Link>
@@ -746,7 +746,7 @@ export default function VendorDiscoveryPage() {
                 {eventCity && (
                   <div className="mt-8">
                     <div className="mb-4">
-                      <h3 className="text-base font-semibold text-text-1">
+                      <h3 className="text-lg font-black text-text-1">
                         Local Businesses near {eventCity}
                       </h3>
                       <p className="text-sm text-text-3 mt-0.5">
@@ -775,19 +775,23 @@ export default function VendorDiscoveryPage() {
                             <div key={biz.place_id} className="bg-white dark:bg-cream-2 rounded-xl border overflow-hidden">
                               <div className="flex gap-4 p-4">
                                 {/* Photo */}
-                                <div className="w-14 h-14 rounded-lg overflow-hidden bg-cream-2 flex-shrink-0">
+                                <div className="w-16 h-16 rounded-xl overflow-hidden bg-cream flex-shrink-0">
                                   {(biz.photo_urls[0] || biz.photo_url) ? (
-                                    <img src={biz.photo_urls[0] || biz.photo_url!} alt={biz.name} className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-lg bg-cream text-text-4">
-                                      {VENDOR_TYPE_EMOJIS[activeType] ?? '🏢'}
-                                    </div>
-                                  )}
+                                    <img
+                                      src={biz.photo_urls[0] || biz.photo_url!}
+                                      alt=""
+                                      className="w-full h-full object-cover"
+                                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden') }}
+                                    />
+                                  ) : null}
+                                  <div className={`w-full h-full flex items-center justify-center text-xl bg-cream text-text-4 ${(biz.photo_urls[0] || biz.photo_url) ? 'hidden' : ''}`}>
+                                    {VENDOR_TYPE_EMOJIS[activeType] ?? '🏢'}
+                                  </div>
                                 </div>
 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-sm font-semibold text-text-1 truncate">{biz.name}</span>
+                                    <span className="text-sm font-black text-text-1 truncate">{biz.name}</span>
                                     {biz.rating != null && (
                                       <span className="flex items-center gap-0.5 text-xs text-text-3">
                                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -837,8 +841,9 @@ export default function VendorDiscoveryPage() {
                                   {hasPhotos && (
                                     <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
                                       {biz.photo_urls.slice(0, 5).map((url, i) => (
-                                        <img key={i} src={url} alt={`${biz.name} photo ${i + 1}`}
+                                        <img key={i} src={url} alt=""
                                           className="w-24 h-20 rounded-lg object-cover flex-shrink-0 border"
+                                          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                                         />
                                       ))}
                                     </div>

@@ -26,14 +26,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const body = await req.json()
   const parsed = createSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+  if (!parsed.success) {
+    console.error('[checklist] Validation failed:', parsed.error.format())
+    return NextResponse.json({ error: 'Invalid input', details: parsed.error.format() }, { status: 400 })
+  }
 
-  const createData: Record<string, unknown> = { ...parsed.data, event_id: id, status: 'PENDING' }
-  if (parsed.data.due_date) createData.due_date = new Date(parsed.data.due_date)
+  // Clean null/empty values for Prisma
+  const cleaned: Record<string, unknown> = {
+    event_id: id,
+    status: 'PENDING',
+    item_name: parsed.data.item_name,
+    category: parsed.data.category,
+  }
+  if (parsed.data.external_vendor_name) cleaned.external_vendor_name = parsed.data.external_vendor_name
+  if (parsed.data.external_vendor_phone) cleaned.external_vendor_phone = parsed.data.external_vendor_phone
+  if (parsed.data.external_vendor_email) cleaned.external_vendor_email = parsed.data.external_vendor_email
+  if (parsed.data.linked_plan_item_id) cleaned.linked_plan_item_id = parsed.data.linked_plan_item_id
+  if (parsed.data.due_date) cleaned.due_date = new Date(parsed.data.due_date)
+  if (parsed.data.notes) cleaned.notes = parsed.data.notes
 
-  const item = await prisma.eventChecklistItem.create({
-    data: createData as any,
-  })
-
-  return NextResponse.json(item, { status: 201 })
+  try {
+    const item = await prisma.eventChecklistItem.create({
+      data: cleaned as any,
+    })
+    return NextResponse.json(item, { status: 201 })
+  } catch (err: any) {
+    console.error('[checklist] Create failed:', err.message)
+    return NextResponse.json({ error: 'Failed to create task', detail: err.message }, { status: 500 })
+  }
 }

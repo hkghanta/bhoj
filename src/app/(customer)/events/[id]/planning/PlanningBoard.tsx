@@ -481,10 +481,18 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        console.error('[PlanningBoard] Add task failed:', res.status, err)
+        alert(`Failed to add task: ${err.detail || err.error || res.statusText}`)
+        return
+      }
       setShowTaskForm(false)
       fetchData()
-    } catch { /* ignore */ } finally {
+    } catch (e) {
+      console.error('[PlanningBoard] Add task error:', e)
+      alert('Failed to add task. Check console for details.')
+    } finally {
       setSavingTask(false)
     }
   }
