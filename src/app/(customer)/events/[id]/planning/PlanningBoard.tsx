@@ -825,6 +825,82 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         </table>
       )}
 
+      {/* Print full details (hidden on screen) */}
+      {printMode === 'details' && sorted.length > 0 && (
+        <div className="hidden print:block space-y-0">
+          {sorted.map((item, i) => {
+            const st = SOURCE_STYLES[item.source]
+            const realPlanId = item.source !== 'PLATFORM' ? item.id.replace('pi-', '') : null
+            const linkedTasks = realPlanId ? (subtasksByPlanItem[realPlanId] ?? []) : []
+            return (
+              <div key={item.id} className={`py-3 ${i > 0 ? 'border-t border-gray-300' : ''}`}>
+                {/* Row 1: Title + time + price */}
+                <div className="flex items-baseline justify-between gap-4">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-black">{item.title}</span>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase">{st.label}</span>
+                    {item.role && <span className="text-[10px] text-gray-500">· {item.role}</span>}
+                  </div>
+                  <div className="flex items-baseline gap-3 flex-shrink-0 text-xs">
+                    {item.start_time && (
+                      <span className="font-bold">
+                        {formatTime(item.start_time)}{item.end_time && ` – ${formatTime(item.end_time)}`}
+                      </span>
+                    )}
+                    {item.price && item.currency && (
+                      <span className="font-black">{formatCurrency(item.price, item.currency)}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Row 2: Contact + location details */}
+                {(item.contact_name || item.contact_phone || item.contact_email || item.location) && (
+                  <div className="flex gap-6 mt-1 text-[11px] text-gray-600">
+                    {(item.contact_name || item.contact_phone || item.contact_email) && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-gray-800">Contact:</span>
+                        {[item.contact_name, item.contact_phone, item.contact_email].filter(Boolean).join(' · ')}
+                      </div>
+                    )}
+                    {item.location && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-gray-800">Location:</span> {item.location}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Row 3: Notes */}
+                {item.notes && (
+                  <p className="mt-1 text-[11px] text-gray-500">
+                    <span className="font-bold text-gray-700">Notes:</span> {item.notes}
+                  </p>
+                )}
+
+                {/* Row 4: Sub-tasks */}
+                {linkedTasks.length > 0 && (
+                  <div className="mt-1.5 ml-3 border-l-2 border-gray-200 pl-3">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase mb-0.5">
+                      Tasks ({linkedTasks.filter(t => t.status === 'FINALIZED').length}/{linkedTasks.length} done)
+                    </p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[11px]">
+                      {linkedTasks.map(task => (
+                        <div key={task.id} className="flex items-center gap-1.5">
+                          <span>{task.status === 'FINALIZED' ? '✓' : '☐'}</span>
+                          <span className={task.status === 'FINALIZED' ? 'line-through text-gray-400' : 'text-gray-700'}>
+                            {task.item_name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       {/* ── To-Do List View ──────────────────────────────────────── */}
       {view === 'todo' && (
         <div className={printMode === 'todo' ? '' : 'print:hidden'}>
@@ -1182,7 +1258,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         </div>
       ) : view === 'board' ? (
         /* ── Board View ─────────────────────────────────────────────── */
-        <div className={`space-y-3 ${printMode === 'summary' ? 'print:hidden' : ''}`}>
+        <div className={`space-y-3 ${printMode ? 'print:hidden' : ''}`}>
           {/* Readiness summary bar */}
           {(() => {
             const readinessEntries = Object.values(readiness)
@@ -1424,47 +1500,6 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                   </div>
                 )}
 
-                {/* Print-only: summary (compact) */}
-                {printMode === 'summary' && (
-                  <div className="hidden print:block border-t border-gray-200 px-4 py-1.5 text-xs">
-                    <p className="text-gray-600">
-                      {[
-                        item.contact_name,
-                        item.contact_phone,
-                        item.location && `@ ${item.location}`,
-                      ].filter(Boolean).join(' · ')}
-                      {item.notes && ` — ${item.notes.slice(0, 80)}${item.notes.length > 80 ? '…' : ''}`}
-                    </p>
-                  </div>
-                )}
-                {/* Print-only: full details */}
-                {printMode === 'details' && (
-                  <div className="hidden print:block border-t border-gray-200 px-4 py-3 text-xs">
-                    <div className="grid grid-cols-3 gap-2">
-                      {(item.contact_name || item.contact_phone || item.contact_email) && (
-                        <div>
-                          <p className="font-bold uppercase mb-0.5">Contact</p>
-                          {item.contact_name && <p>{item.contact_name}</p>}
-                          {item.contact_phone && <p>{item.contact_phone}</p>}
-                          {item.contact_email && <p>{item.contact_email}</p>}
-                        </div>
-                      )}
-                      {item.start_time && (
-                        <div>
-                          <p className="font-bold uppercase mb-0.5">Schedule</p>
-                          <p>{formatTime(item.start_time)}{item.end_time && ` — ${formatTime(item.end_time)}`}</p>
-                        </div>
-                      )}
-                      {item.location && (
-                        <div>
-                          <p className="font-bold uppercase mb-0.5">Location</p>
-                          <p>{item.location}</p>
-                        </div>
-                      )}
-                    </div>
-                    {item.notes && <p className="mt-1"><span className="font-bold">Notes:</span> {item.notes}</p>}
-                  </div>
-                )}
               </div>
             )
           })}
