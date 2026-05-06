@@ -3,35 +3,35 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 
 interface NavProps {
-  /** Highlight "For vendors" link when on the vendor page */
   vendorPage?: boolean;
 }
 
 export default function Nav({ vendorPage = false }: NavProps) {
   return (
-    <nav className="sticky top-0 z-50 bg-white dark:bg-cream-2 border-b border-brand-border flex items-center justify-between px-4 sm:px-12 py-0 h-[62px]">
+    <nav className="sticky top-0 z-50 bg-white/90 dark:bg-cream-2/90 backdrop-blur-xl border-b border-brand-border/60 flex items-center justify-between px-4 sm:px-12 py-0 h-[64px]">
       {/* Logo */}
-      <Link href="/" className="text-xl font-black tracking-tight text-text-1">
+      <Link href="/" className="text-xl font-black tracking-tight text-text-1 flex items-center gap-1.5">
         One<span className="text-brand">Seva</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-brand mt-2" />
       </Link>
 
       {/* Centre links */}
       <div className="hidden md:flex items-center gap-8">
         <Link
           href="/#how-it-works"
-          className="text-sm font-semibold text-text-3 hover:text-text-1 transition-colors"
+          className="text-[13px] font-semibold text-text-3 hover:text-text-1 transition-colors"
         >
           How it works
         </Link>
-        <Link href="/board" className="text-sm font-semibold text-text-3 hover:text-text-1 transition-colors">
+        <Link href="/board" className="text-[13px] font-semibold text-text-3 hover:text-text-1 transition-colors">
           Open requests
         </Link>
-        <Link href="/vendors" className="text-sm font-semibold text-text-3 hover:text-text-1 transition-colors">
+        <Link href="/vendors" className="text-[13px] font-semibold text-text-3 hover:text-text-1 transition-colors">
           Browse vendors
         </Link>
         <Link
           href="/for-vendors"
-          className={`text-sm font-semibold transition-colors ${
+          className={`text-[13px] font-semibold transition-colors ${
             vendorPage
               ? "text-brand border-b-2 border-brand pb-px"
               : "text-text-3 hover:text-text-1"
@@ -41,7 +41,7 @@ export default function Nav({ vendorPage = false }: NavProps) {
         </Link>
         <Link
           href="/#categories"
-          className="text-sm font-semibold text-text-3 hover:text-text-1 transition-colors"
+          className="text-[13px] font-semibold text-text-3 hover:text-text-1 transition-colors"
         >
           Categories
         </Link>
@@ -52,15 +52,15 @@ export default function Nav({ vendorPage = false }: NavProps) {
         <ThemeToggle />
         <Link
           href="/login"
-          className="text-sm font-semibold text-text-2 border border-brand-border rounded-lg px-4 py-2 hover:bg-cream transition-colors"
+          className="text-[13px] font-semibold text-text-2 border border-brand-border rounded-xl px-4 py-2 hover:bg-cream transition-colors"
         >
           Sign in
         </Link>
         <Link
           href={vendorPage ? "/register/vendor" : "/register/customer"}
-          className="text-sm font-bold text-white rounded-lg px-4 py-2 transition-colors bg-brand hover:bg-brand-hover"
+          className="text-[13px] font-black text-white rounded-xl px-5 py-2 transition-all duration-200 bg-brand hover:bg-brand-hover shadow-md shadow-brand/15 hover:shadow-lg hover:shadow-brand/25"
         >
-          {vendorPage ? "List my business →" : "Plan My Event →"}
+          {vendorPage ? "List my business →" : "Plan my event →"}
         </Link>
       </div>
     </nav>

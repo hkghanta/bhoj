@@ -1258,7 +1258,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         </div>
       ) : view === 'board' ? (
         /* ── Board View ─────────────────────────────────────────────── */
-        <div className={`space-y-3 ${printMode ? 'print:hidden' : ''}`}>
+        <div className="space-y-3" data-print-hide={printMode ? 'true' : undefined}>
           {/* Readiness summary bar */}
           {(() => {
             const readinessEntries = Object.values(readiness)
@@ -1616,6 +1616,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
           nav, header, aside, .print\\:hidden { display: none !important; }
           .hidden.print\\:block { display: block !important; }
           .hidden.print\\:table { display: table !important; }
+          [data-print-hide="true"] { display: none !important; }
           body { font-size: 11px; }
           @page { margin: 1.5cm 1.5cm 2cm; }
         }
