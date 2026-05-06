@@ -133,6 +133,23 @@ const CHECKLIST_CATEGORIES: Record<string, string> = {
 
 const CHECKLIST_CATEGORY_LIST = Object.keys(CHECKLIST_CATEGORIES)
 
+// ── Workflow templates per service type ────────────────────────────────────
+const SERVICE_WORKFLOW_TEMPLATES: Record<string, string[]> = {
+  CATERER: ['Identify vendors', 'Shortlist vendors', 'Get quotes', 'Finalize vendor', 'Sign contract', 'Pay deposit', 'Confirm final menu & headcount', 'Final payment'],
+  DECORATOR: ['Identify decorators', 'Shortlist decorators', 'Get quotes', 'Finalize decorator', 'Share theme & mood board', 'Confirm setup plan', 'Pay deposit', 'Final walkthrough'],
+  PHOTOGRAPHER: ['Identify photographers', 'Review portfolios', 'Get quotes', 'Finalize photographer', 'Sign contract', 'Share shot list', 'Pay deposit', 'Pre-event meeting'],
+  DJ: ['Identify DJs', 'Shortlist DJs', 'Get quotes', 'Finalize DJ', 'Share song preferences', 'Confirm equipment needs', 'Pay deposit'],
+  MEHENDI_ARTIST: ['Identify artists', 'Review portfolios', 'Get quotes', 'Finalize artist', 'Confirm designs', 'Pay deposit'],
+  MAKEUP_HAIR: ['Identify MUA', 'Get quotes', 'Book trial', 'Finalize MUA', 'Share outfit photos', 'Confirm schedule', 'Pay deposit'],
+  FLORIST: ['Identify florists', 'Get quotes', 'Finalize florist', 'Confirm arrangements', 'Pay deposit'],
+  PANDIT_OFFICIANT: ['Identify pandit / officiant', 'Confirm availability', 'Discuss ceremony details', 'Finalize officiant', 'Share rituals list'],
+  MC_HOST: ['Identify MC / host', 'Get quotes', 'Finalize MC', 'Share event flow & script', 'Pre-event rehearsal'],
+  TRANSPORT: ['Identify transport', 'Get quotes', 'Finalize transport', 'Confirm routes & timing', 'Pay deposit'],
+}
+
+// Fallback template for unknown types
+const DEFAULT_WORKFLOW = ['Identify vendors', 'Get quotes', 'Shortlist', 'Finalize vendor', 'Pay deposit', 'Confirm details']
+
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   PENDING: { bg: 'bg-gray-100', text: 'text-gray-600', label: 'Pending' },
   SEARCHING: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Searching' },
@@ -395,7 +412,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'todo' | 'board' | 'timeline'>('todo')
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [printMode, setPrintMode] = useState<'summary' | 'details' | null>(null)
+  const [printMode, setPrintMode] = useState<'summary' | 'details' | 'todo' | null>(null)
   const printRef = useRef<HTMLDivElement>(null)
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [savingTask, setSavingTask] = useState(false)
@@ -504,8 +521,59 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
     }
   }
 
+  const [addingSubtask, setAddingSubtask] = useState<string | null>(null) // unified item id
+  const [subtaskName, setSubtaskName] = useState('')
+  const [savingSubtask, setSavingSubtask] = useState(false)
+
+  async function handleAddSubtask(planItemId: string, category: string) {
+    if (!subtaskName.trim()) return
+    setSavingSubtask(true)
+    try {
+      const res = await fetch(`/api/events/${eventId}/checklist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_name: subtaskName.trim(),
+          category,
+          linked_plan_item_id: planItemId,
+        }),
+      })
+      if (res.ok) {
+        setSubtaskName('')
+        setAddingSubtask(null)
+        await fetchData()
+      }
+    } catch { /* ignore */ } finally {
+      setSavingSubtask(false)
+    }
+  }
+
+  async function addWorkflowTemplate(planItemId: string, vendorType: string, category: string) {
+    const steps = SERVICE_WORKFLOW_TEMPLATES[vendorType] ?? DEFAULT_WORKFLOW
+    for (const step of steps) {
+      await fetch(`/api/events/${eventId}/checklist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_name: step,
+          category,
+          linked_plan_item_id: planItemId,
+        }),
+      })
+    }
+    await fetchData()
+  }
+
   function toggleExpand(id: string) {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  // Build map of plan item id → linked checklist items
+  const subtasksByPlanItem: Record<string, ChecklistItem[]> = {}
+  for (const ci of checklistItems) {
+    if (!ci.linked_plan_item_id) continue
+    if (!subtasksByPlanItem[ci.linked_plan_item_id]) subtasksByPlanItem[ci.linked_plan_item_id] = []
+    subtasksByPlanItem[ci.linked_plan_item_id].push(ci)
   }
 
   // Build unified list
@@ -572,16 +640,26 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
             </button>
             {printMode !== null && (
               <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-cream-2 rounded-xl border-2 border-brand-border shadow-lg z-20 overflow-hidden">
-                <button onClick={() => { setPrintMode('summary'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
-                  className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors border-b border-brand-border/40">
-                  <p className="font-bold text-text-1">Summary</p>
-                  <p className="text-xs text-text-4">Compact table view</p>
-                </button>
-                <button onClick={() => { setPrintMode('details'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
-                  className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors">
-                  <p className="font-bold text-text-1">Full Details</p>
-                  <p className="text-xs text-text-4">Contact, notes, everything</p>
-                </button>
+                {view === 'todo' ? (
+                  <button onClick={() => { setPrintMode('todo'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors">
+                    <p className="font-bold text-text-1">To-Do List</p>
+                    <p className="text-xs text-text-4">All tasks grouped by category</p>
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => { setPrintMode('summary'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
+                      className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors border-b border-brand-border/40">
+                      <p className="font-bold text-text-1">Summary</p>
+                      <p className="text-xs text-text-4">Compact table view</p>
+                    </button>
+                    <button onClick={() => { setPrintMode('details'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
+                      className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors">
+                      <p className="font-bold text-text-1">Full Details</p>
+                      <p className="text-xs text-text-4">Contact, notes, everything</p>
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -685,11 +763,11 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
 
       {/* ── To-Do List View ──────────────────────────────────────── */}
       {view === 'todo' && (
-        <div className="print:hidden">
+        <div className={printMode === 'todo' ? '' : 'print:hidden'}>
           {/* Add Task button */}
           {!showTaskForm && (
             <button onClick={() => setShowTaskForm(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors mb-6"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors mb-6 print:hidden"
               style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
               <Plus className="h-4 w-4" /> Add Task
             </button>
@@ -697,12 +775,14 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
 
           {/* Inline add task form */}
           {showTaskForm && (
-            <TaskForm
-              planItems={planItems}
-              onSave={handleAddTask}
-              onCancel={() => setShowTaskForm(false)}
-              saving={savingTask}
-            />
+            <div className="print:hidden">
+              <TaskForm
+                planItems={planItems}
+                onSave={handleAddTask}
+                onCancel={() => setShowTaskForm(false)}
+                saving={savingTask}
+              />
+            </div>
           )}
 
           {checklistItems.length === 0 ? (
@@ -735,14 +815,18 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                       const ss = STATUS_STYLES[item.status] || STATUS_STYLES.PENDING
                       const isDone = item.status === 'FINALIZED'
                       return (
-                        <div key={item.id} className={`rounded-xl border-2 ${isDone ? 'border-green-200 bg-green-50/50' : 'border-brand-border bg-white dark:bg-cream-2'} p-3 flex items-start gap-3 transition-colors`}>
+                        <div key={item.id} className={`rounded-xl border-2 ${isDone ? 'border-green-200 bg-green-50/50' : 'border-brand-border bg-white dark:bg-cream-2'} p-3 flex items-start gap-3 transition-colors print:border print:rounded-none print:p-2`}>
                           {/* Checkbox */}
                           <button onClick={() => toggleChecklistStatus(item)}
-                            className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                            className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors print:hidden ${
                               isDone ? 'bg-green-500 border-green-500 text-white' : 'border-brand-border hover:border-brand/40'
                             }`}>
                             {isDone && <Check className="h-3 w-3" />}
                           </button>
+                          {/* Print-only checkbox symbol */}
+                          <span className="hidden print:inline-block mt-0.5 w-4 h-4 text-center flex-shrink-0 text-xs">
+                            {isDone ? '✓' : '☐'}
+                          </span>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
@@ -781,7 +865,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                           <select
                             value={item.linked_plan_item_id || ''}
                             onChange={e => updateChecklistLink(item.id, e.target.value || null)}
-                            className="text-xs rounded-lg border border-brand-border px-2 py-1 bg-white dark:bg-cream-2 text-text-3 max-w-[140px] truncate"
+                            className="text-xs rounded-lg border border-brand-border px-2 py-1 bg-white dark:bg-cream-2 text-text-3 max-w-[140px] truncate print:hidden"
                             title="Link to plan item"
                           >
                             <option value="">No link</option>
@@ -926,6 +1010,106 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                         <p className="text-sm text-text-2">{item.notes}</p>
                       </div>
                     )}
+
+                    {/* ── Inline Sub-Tasks (To-Do) ─────────────────── */}
+                    {(() => {
+                      const realPlanItemId = item.source !== 'PLATFORM' ? item.id.replace('pi-', '') : null
+                      const linkedTasks = realPlanItemId ? (subtasksByPlanItem[realPlanItemId] ?? []) : []
+                      const doneCount = linkedTasks.filter(t => t.status === 'FINALIZED').length
+                      const category = item.role ?? item.vendor_type ?? 'Admin'
+                      const vendorType = item.vendor_type
+
+                      return (
+                        <div className="mt-3 pt-3 border-t border-brand-border/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-bold uppercase text-text-4 flex items-center gap-1.5">
+                              To-Do
+                              {linkedTasks.length > 0 && (
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                                  doneCount === linkedTasks.length ? 'bg-green-100 text-green-700' : 'bg-brand-border/30 text-text-4'
+                                }`}>{doneCount}/{linkedTasks.length}</span>
+                              )}
+                            </p>
+                            <div className="flex items-center gap-1.5">
+                              {vendorType && realPlanItemId && linkedTasks.length === 0 && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); addWorkflowTemplate(realPlanItemId, vendorType, category) }}
+                                  className="text-[10px] font-bold text-brand hover:underline"
+                                >
+                                  + Add template steps
+                                </button>
+                              )}
+                              {realPlanItemId && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setAddingSubtask(addingSubtask === item.id ? null : item.id); setSubtaskName('') }}
+                                  className="text-[10px] font-bold text-brand hover:underline"
+                                >
+                                  + Add task
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {linkedTasks.length > 0 && (
+                            <div className="space-y-1.5">
+                              {linkedTasks.map(task => {
+                                const isDone = task.status === 'FINALIZED'
+                                return (
+                                  <div key={task.id} className="flex items-center gap-2.5 group">
+                                    <button onClick={(e) => { e.stopPropagation(); toggleChecklistStatus(task) }}
+                                      className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 border-2 transition-colors ${
+                                        isDone ? 'bg-green-500 border-green-500 text-white' : 'border-brand-border hover:border-brand/40'
+                                      }`}>
+                                      {isDone && <Check className="h-2.5 w-2.5" />}
+                                    </button>
+                                    <span className={`text-sm ${isDone ? 'line-through text-text-4' : 'text-text-2'}`}>
+                                      {task.item_name}
+                                    </span>
+                                    {task.due_date && (
+                                      <span className="text-[10px] text-text-4 ml-auto">
+                                        {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                      </span>
+                                    )}
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
+
+                          {linkedTasks.length === 0 && !addingSubtask && (
+                            <p className="text-xs text-text-4 italic">No tasks yet — add manually or use a template</p>
+                          )}
+
+                          {/* Inline add sub-task */}
+                          {addingSubtask === item.id && realPlanItemId && (
+                            <div className="flex items-center gap-2 mt-2" onClick={e => e.stopPropagation()}>
+                              <input
+                                autoFocus
+                                value={subtaskName}
+                                onChange={e => setSubtaskName(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') handleAddSubtask(realPlanItemId, category); if (e.key === 'Escape') { setAddingSubtask(null); setSubtaskName('') } }}
+                                placeholder="Task name..."
+                                className="flex-1 text-sm rounded-lg border border-brand-border px-2.5 py-1.5 focus:border-brand/40 focus:ring-1 focus:ring-brand/20 outline-none bg-white"
+                              />
+                              <button
+                                onClick={() => handleAddSubtask(realPlanItemId, category)}
+                                disabled={savingSubtask || !subtaskName.trim()}
+                                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-hover disabled:opacity-50"
+                              >
+                                {savingSubtask ? '...' : 'Add'}
+                              </button>
+                              <button
+                                onClick={() => { setAddingSubtask(null); setSubtaskName('') }}
+                                className="text-xs text-text-4 hover:text-text-2"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
+
                     {/* Edit/Delete for non-platform items */}
                     {item.source !== 'PLATFORM' && (
                       <div className="flex gap-2 mt-4 print:hidden">
