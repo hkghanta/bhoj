@@ -404,14 +404,20 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
     setLoading(true)
     try {
       const res = await fetch(`/api/events/${eventId}/planning`)
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        console.error('[PlanningBoard] fetchData failed:', res.status, await res.text().catch(() => ''))
+        return
+      }
       const data = await res.json()
+      console.log('[PlanningBoard] fetched checklist_items:', data.checklist_items?.length ?? 0)
       setPlatformVendors(data.platform_vendors)
       setPlanItems(data.plan_items)
       setTimelineEntries(data.timeline_entries)
       setChecklistItems(data.checklist_items ?? [])
       setReadiness(data.readiness ?? {})
-    } catch { /* ignore */ } finally {
+    } catch (e) {
+      console.error('[PlanningBoard] fetchData error:', e)
+    } finally {
       setLoading(false)
     }
   }
@@ -488,7 +494,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         return
       }
       setShowTaskForm(false)
-      fetchData()
+      await fetchData()
     } catch (e) {
       console.error('[PlanningBoard] Add task error:', e)
       alert('Failed to add task. Check console for details.')
@@ -591,15 +597,20 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
       {/* View toggle */}
       <div className="flex gap-2 mb-6 print:hidden">
         {([
-          { key: 'todo', label: 'To-Do List' },
-          { key: 'board', label: 'Event Day' },
-          { key: 'timeline', label: 'Timeline' },
+          { key: 'todo', label: 'To-Do List', count: checklistItems.length },
+          { key: 'board', label: 'Event Day', count: sorted.length },
+          { key: 'timeline', label: 'Timeline', count: timelineEntries.length },
         ] as const).map(v => (
           <button key={v.key} onClick={() => setView(v.key as 'todo' | 'board' | 'timeline')}
-            className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-colors flex items-center gap-1.5 ${
               view === v.key ? 'bg-text-1 text-white' : 'bg-cream text-text-3 hover:bg-cream-2'
             }`}>
             {v.label}
+            {v.count > 0 && (
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                view === v.key ? 'bg-white/20 text-white' : 'bg-brand-border/30 text-text-4'
+              }`}>{v.count}</span>
+            )}
           </button>
         ))}
       </div>
