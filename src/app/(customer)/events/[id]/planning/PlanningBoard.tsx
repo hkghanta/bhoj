@@ -970,8 +970,31 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                     </div>
                   </div>
 
-                  {/* Expand toggle */}
-                  <div className="flex-shrink-0 print:hidden">
+                  {/* Actions + Expand toggle */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0 print:hidden">
+                    {item.source !== 'PLATFORM' && (
+                      <>
+                        <button onClick={(e) => {
+                          e.stopPropagation()
+                          const pi = planItems.find(p => `pi-${p.id}` === item.id)
+                          if (pi) { setEditItem(pi); setShowForm(true) }
+                        }}
+                          className="p-1.5 rounded-lg text-text-4 hover:text-text-2 hover:bg-white/60 transition-colors"
+                          title="Edit">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button onClick={(e) => {
+                          e.stopPropagation()
+                          if (!confirm(`Remove "${item.title}"? This cannot be undone.`)) return
+                          const realId = item.id.replace('pi-', '')
+                          handleDelete(realId)
+                        }}
+                          className="p-1.5 rounded-lg text-text-4 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          title="Remove">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    )}
                     {isExpanded ? <ChevronUp className="h-5 w-5 text-text-4" /> : <ChevronDown className="h-5 w-5 text-text-4" />}
                   </div>
                 </div>
@@ -1110,27 +1133,6 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                       )
                     })()}
 
-                    {/* Edit/Delete for non-platform items */}
-                    {item.source !== 'PLATFORM' && (
-                      <div className="flex gap-2 mt-4 print:hidden">
-                        <button onClick={(e) => {
-                          e.stopPropagation()
-                          const pi = planItems.find(p => `pi-${p.id}` === item.id)
-                          if (pi) { setEditItem(pi); setShowForm(true) }
-                        }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-border text-xs font-bold text-text-3 hover:bg-cream">
-                          <Pencil className="h-3 w-3" /> Edit
-                        </button>
-                        <button onClick={(e) => {
-                          e.stopPropagation()
-                          const realId = item.id.replace('pi-', '')
-                          handleDelete(realId)
-                        }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-xs font-bold text-red-500 hover:bg-red-50">
-                          <Trash2 className="h-3 w-3" /> Remove
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
 
