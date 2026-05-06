@@ -181,6 +181,13 @@ export default function GuestsPage() {
   const [showImport, setShowImport] = useState(false)
   const [importText, setImportText] = useState('')
   const [importSaving, setImportSaving] = useState(false)
+  // Import from guest book
+  const [showGuestBook, setShowGuestBook] = useState(false)
+  const [guestBookContacts, setGuestBookContacts] = useState<{ id: string; label: string; email: string | null; phone: string | null; tags: string[] }[]>([])
+  const [guestBookSelected, setGuestBookSelected] = useState<Set<string>>(new Set())
+  const [guestBookLoading, setGuestBookLoading] = useState(false)
+  const [guestBookImporting, setGuestBookImporting] = useState(false)
+  const [guestBookResult, setGuestBookResult] = useState<{ imported: number; skipped: number } | null>(null)
   // Send event update
   const [showUpdate, setShowUpdate] = useState(false)
   const [updateSubject, setUpdateSubject] = useState('')
@@ -279,6 +286,66 @@ export default function GuestsPage() {
       setShowImport(false)
     }
     setImportSaving(false)
+  }
+
+  async function openGuestBook() {
+    setShowGuestBook(true)
+    setShowAdd(false)
+    setShowImport(false)
+    setGuestBookResult(null)
+    setGuestBookSelected(new Set())
+    setGuestBookLoading(true)
+    const res = await fetch('/api/contacts')
+    if (res.ok) setGuestBookContacts(await res.json())
+    setGuestBookLoading(false)
+  }
+
+  async function importFromGuestBook() {
+    if (guestBookSelected.size === 0) return
+    setGuestBookImporting(true)
+    const res = await fetch('/api/contacts/import-to-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_id: eventId, contact_ids: [...guestBookSelected] }),
+    })
+    if (res.ok) {
+      const result = await res.json()
+      setGuestBookResult(result)
+      if (result.imported > 0) {
+        // Reload households
+        const r = await fetch(`/api/events/${eventId}/guests`)
+        if (r.ok) { const d = await r.json(); setHouseholds(d.households ?? d) }
+      }
+    }
+    setGuestBookImporting(false)
+  }
+
+  function toggleGuestBookContact(id: string) {
+    setGuestBookSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
+  function toggleAllGuestBook() {
+    if (guestBookSelected.size === guestBookContacts.length) {
+      setGuestBookSelected(new Set())
+    } else {
+      setGuestBookSelected(new Set(guestBookContacts.map(c => c.id)))
+    }
+  }
+
+  async function saveToGuestBook() {
+    const res = await fetch('/api/contacts/save-from-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_id: eventId }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      alert(`Saved ${data.saved} guests to your Guest Book${data.skipped > 0 ? ` (${data.skipped} already existed)` : ''}`)
+    }
   }
 
   async function sendUpdate() {
@@ -1016,11 +1083,21 @@ export default function GuestsPage() {
           </div>
           {!noSubEvents && (
             <div className="flex items-center gap-2">
-              <button onClick={() => { setShowImport(true); setShowAdd(false) }}
+              <button onClick={openGuestBook}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-3 border border-brand-border bg-white dark:bg-cream-2 px-3 py-2 rounded-xl hover:bg-cream transition-colors">
+                <Users className="h-3.5 w-3.5" /> Guest Book
+              </button>
+              {households.length > 0 && (
+                <button onClick={saveToGuestBook}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-3 border border-brand-border bg-white dark:bg-cream-2 px-3 py-2 rounded-xl hover:bg-cream transition-colors">
+                  <Upload className="h-3.5 w-3.5" /> Save to Book
+                </button>
+              )}
+              <button onClick={() => { setShowImport(true); setShowAdd(false); setShowGuestBook(false) }}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-3 border border-brand-border bg-white dark:bg-cream-2 px-3 py-2 rounded-xl hover:bg-cream transition-colors">
                 <Download className="h-3.5 w-3.5" /> Import
               </button>
-              <button onClick={() => { setShowAdd(true); setShowImport(false) }}
+              <button onClick={() => { setShowAdd(true); setShowImport(false); setShowGuestBook(false) }}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-xl transition-colors shadow-sm">
                 <Plus className="h-4 w-4" /> Add guests
               </button>
@@ -1206,6 +1283,90 @@ export default function GuestsPage() {
                   : <><Download className="h-3.5 w-3.5" /> Import guests</>}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Guest Book import panel */}
+        {showGuestBook && (
+          <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 mb-4 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-text-1 flex items-center gap-2">
+                <Users className="h-4 w-4 text-brand" /> Import from Guest Book
+              </h3>
+              <button onClick={() => setShowGuestBook(false)} className="p-1 text-text-4 hover:text-text-3 rounded-xl transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {guestBookLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <span className="animate-spin h-5 w-5 rounded-full border-2 border-brand/30 border-t-brand" />
+              </div>
+            ) : guestBookContacts.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-sm text-text-3">Your guest book is empty.</p>
+                <a href="/contacts" className="text-sm text-brand font-semibold hover:underline mt-1 inline-block">
+                  Add contacts to your Guest Book
+                </a>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-3 mb-2">
+                  <label className="flex items-center gap-2 text-xs font-bold text-text-2 cursor-pointer">
+                    <input type="checkbox"
+                      checked={guestBookSelected.size === guestBookContacts.length}
+                      onChange={toggleAllGuestBook}
+                      className="rounded border-brand-border text-brand focus:ring-brand" />
+                    Select all ({guestBookContacts.length})
+                  </label>
+                  {guestBookSelected.size > 0 && (
+                    <span className="text-xs text-brand font-bold">{guestBookSelected.size} selected</span>
+                  )}
+                </div>
+                <div className="max-h-64 overflow-y-auto border border-brand-border/40 rounded-xl divide-y divide-brand-border/30">
+                  {guestBookContacts.map(c => (
+                    <label key={c.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-cream/50 cursor-pointer transition-colors">
+                      <input type="checkbox"
+                        checked={guestBookSelected.has(c.id)}
+                        onChange={() => toggleGuestBookContact(c.id)}
+                        className="rounded border-brand-border text-brand focus:ring-brand" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold text-text-1">{c.label}</span>
+                        {c.email && <span className="text-xs text-text-4 ml-2">{c.email}</span>}
+                      </div>
+                      {c.tags.length > 0 && (
+                        <div className="flex gap-1">
+                          {c.tags.map(tag => (
+                            <span key={tag} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-cream text-brand border border-brand-border/60">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </label>
+                  ))}
+                </div>
+                <div className="flex gap-2 justify-end pt-1">
+                  <button onClick={() => setShowGuestBook(false)}
+                    className="text-sm text-text-4 border border-brand-border rounded-xl px-4 py-2 hover:bg-cream transition-colors">
+                    Cancel
+                  </button>
+                  <button onClick={importFromGuestBook}
+                    disabled={guestBookImporting || guestBookSelected.size === 0}
+                    className="flex items-center gap-2 text-sm font-bold bg-brand hover:bg-brand-hover text-white px-5 py-2 rounded-xl transition-colors disabled:opacity-50">
+                    {guestBookImporting
+                      ? <><span className="animate-spin h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white" /> Importing…</>
+                      : <><Users className="h-3.5 w-3.5" /> Import {guestBookSelected.size} guest{guestBookSelected.size !== 1 ? 's' : ''}</>}
+                  </button>
+                </div>
+                {guestBookResult && (
+                  <p className="text-sm text-green-600 font-medium flex items-center gap-1">
+                    <Check className="h-4 w-4" />
+                    {guestBookResult.imported} imported{guestBookResult.skipped > 0 ? `, ${guestBookResult.skipped} already in this event` : ''}
+                  </p>
+                )}
+              </>
+            )}
           </div>
         )}
 

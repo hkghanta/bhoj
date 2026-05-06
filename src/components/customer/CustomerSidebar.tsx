@@ -5,7 +5,7 @@ import {
   CalendarDays, Store, FileText, MessageSquare,
   ListChecks, CalendarPlus, ChevronLeft,
   LayoutDashboard, LogOut, User, Mail,
-  Clock, Globe, LayoutGrid, CreditCard, Gift, Search,
+  Globe, LayoutGrid, CreditCard, Gift, Search,
   ClipboardList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -23,6 +23,7 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
 
   const topNav = [
     { href: '/dashboard', label: 'My Events', icon: LayoutDashboard },
+    { href: '/contacts', label: 'My Guests', icon: Mail },
     { href: '/messages', label: 'Messages', icon: MessageSquare },
     { href: '/profile', label: 'Profile', icon: User },
   ]
@@ -40,14 +41,13 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
 
   const guestNav = eventId ? [
     { href: `/events/${eventId}/guests`,      label: 'Invitations & Guests', icon: Mail },
+    { href: `/events/${eventId}/website`,     label: 'Event Website',  icon: Globe },
     { href: `/events/${eventId}/sub-events`,  label: 'Sub-Events',    icon: CalendarPlus },
   ] : []
 
   const planningNav = eventId ? [
     { href: `/events/${eventId}/planning`,         label: 'Event Plan',     icon: ClipboardList },
-    { href: `/events/${eventId}/timeline`,         label: 'Timeline',       icon: Clock },
     { href: `/events/${eventId}/checklist`,        label: 'Checklist',      icon: ListChecks },
-    { href: `/events/${eventId}/website`,          label: 'Event Website',  icon: Globe },
     { href: `/events/${eventId}/seating`,          label: 'Seating',        icon: LayoutGrid },
     { href: `/events/${eventId}/payment-schedule`, label: 'Payments',       icon: CreditCard },
     { href: `/events/${eventId}/registry`,         label: 'Gift Registry',  icon: Gift },

@@ -33,6 +33,7 @@ model Customer {
   gift_contributions GiftContribution[]
   style_preferences  StyleQuizResponse?
   mood_boards        MoodBoard[]
+  contacts           CustomerContact[]
 }
 
 model Vendor {
@@ -302,6 +303,22 @@ model SubEvent {
   event           Event                 @relation(fields: [event_id], references: [id], onDelete: Cascade)
 
   @@index([event_id])
+}
+
+model CustomerContact {
+  id          String   @id @default(cuid())
+  customer_id String
+  label       String   // household / group name e.g. "The Sharma Family"
+  email       String?
+  phone       String?
+  tags        String[] @default([]) // e.g. ["family", "friends", "colleagues"]
+  notes       String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  customer    Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+
+  @@unique([customer_id, label])
+  @@index([customer_id])
 }
 
 model GuestHousehold {

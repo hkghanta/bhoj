@@ -19,119 +19,6 @@ const TYPE_QUERY: Record<string, string> = {
   BARTENDER:       'bar service cocktail catering',
 }
 
-type DemoBiz = { name: string; address: string; rating: number; totalRatings: number; website?: string; phone?: string }
-
-// Demo/fallback data — US cities with large South Asian communities
-const DEMO_BUSINESSES: Record<string, Record<string, DemoBiz[]>> = {
-  'New York': {
-    CATERER: [
-      { name: 'Punjabi Kitchen NYC', address: '72-30 Broadway, Jackson Heights, NY 11372', rating: 4.7, totalRatings: 134, website: 'https://example.com', phone: '(718) 555-1234' },
-      { name: 'Desi Bites Catering', address: '37-47 74th St, Jackson Heights, NY 11372', rating: 4.5, totalRatings: 91, phone: '(718) 555-5678' },
-      { name: 'South Asian Banquets', address: 'Oak Tree Rd, Edison, NJ 08820', rating: 4.6, totalRatings: 108, website: 'https://example.com', phone: '(732) 555-9012' },
-      { name: 'Masala House Catering', address: '545 Oak Tree Rd, Iselin, NJ 08830', rating: 4.4, totalRatings: 67, phone: '(732) 555-3456' },
-    ],
-    PHOTOGRAPHER: [
-      { name: 'Kapil Visuals NYC', address: '250 W 57th St, New York, NY 10019', rating: 4.8, totalRatings: 113, website: 'https://example.com', phone: '(212) 555-2345' },
-      { name: 'South Asian Frames', address: '74th St, Jackson Heights, NY 11372', rating: 4.9, totalRatings: 78, website: 'https://example.com', phone: '(718) 555-6789' },
-      { name: 'Golden Moments Photography', address: 'Edison, NJ 08820', rating: 4.6, totalRatings: 95, phone: '(732) 555-3456' },
-    ],
-    DJ: [
-      { name: 'DJ Arjun NYC', address: 'Jackson Heights, NY 11372', rating: 4.7, totalRatings: 67, website: 'https://example.com', phone: '(718) 555-4567' },
-      { name: 'Bhangra Beats NY', address: 'Flushing, NY 11354', rating: 4.5, totalRatings: 44, phone: '(718) 555-5678' },
-      { name: 'Desi Soundz East Coast', address: 'Edison, NJ 08820', rating: 4.4, totalRatings: 38, phone: '(732) 555-6780' },
-    ],
-    DECORATOR: [
-      { name: 'Luxe Mandap Events NY', address: 'Parsippany, NJ 07054', rating: 4.6, totalRatings: 52, website: 'https://example.com', phone: '(973) 555-7891' },
-      { name: 'Blossom Event Design', address: 'Edison, NJ 08820', rating: 4.5, totalRatings: 61, phone: '(732) 555-8902' },
-    ],
-    MEHENDI_ARTIST: [
-      { name: 'Henna by Priya NYC', address: 'Jackson Heights, NY 11372', rating: 4.9, totalRatings: 142, website: 'https://example.com', phone: '(718) 555-9013' },
-      { name: 'Bridal Mehndi NJ', address: 'Edison, NJ 08820', rating: 4.7, totalRatings: 88, phone: '(732) 555-0124' },
-    ],
-    MAKEUP_HAIR: [
-      { name: 'Glam Bridal Studio NY', address: 'Parsippany, NJ 07054', rating: 4.8, totalRatings: 107, website: 'https://example.com', phone: '(973) 555-1235' },
-      { name: 'Radiant Bridal Beauty', address: 'Edison, NJ 08820', rating: 4.6, totalRatings: 73, phone: '(732) 555-2346' },
-    ],
-  },
-  Pittsburgh: {
-    CATERER: [
-      { name: 'Spice Garden Catering', address: '4611 Liberty Ave, Pittsburgh, PA 15224', rating: 4.7, totalRatings: 88, phone: '(412) 555-1234' },
-      { name: 'Masala House Pittsburgh', address: '307 S Craig St, Pittsburgh, PA 15213', rating: 4.5, totalRatings: 62, website: 'https://example.com', phone: '(412) 555-5678' },
-      { name: 'Saffron Indian Events', address: '1711 Penn Ave, Pittsburgh, PA 15222', rating: 4.8, totalRatings: 114, website: 'https://example.com', phone: '(412) 555-9012' },
-      { name: 'Desi Flavors Catering', address: 'Monroeville, PA 15146', rating: 4.4, totalRatings: 43, phone: '(412) 555-3456' },
-      { name: 'Royal Curry Events', address: '2200 Murray Ave, Pittsburgh, PA 15217', rating: 4.6, totalRatings: 77, website: 'https://example.com', phone: '(412) 555-7890' },
-      { name: 'Golden Temple Caterers', address: 'Wexford, PA 15090', rating: 4.3, totalRatings: 31, phone: '(724) 555-1234' },
-    ],
-    PHOTOGRAPHER: [
-      { name: 'South Asian Clicks PGH', address: 'Pittsburgh, PA 15213', rating: 4.8, totalRatings: 73, website: 'https://example.com', phone: '(412) 555-2345' },
-      { name: 'Desi Frames Photography', address: 'Cranberry Twp, PA 16066', rating: 4.6, totalRatings: 55, phone: '(724) 555-6789' },
-    ],
-    DJ: [
-      { name: 'DJ Raj Pittsburgh', address: 'Pittsburgh, PA 15222', rating: 4.7, totalRatings: 59, phone: '(412) 555-3456' },
-      { name: 'Bhangra Beats PGH', address: 'Monroeville, PA 15146', rating: 4.4, totalRatings: 38, phone: '(412) 555-7891' },
-    ],
-    DECORATOR: [
-      { name: 'Luxe Mandap Pittsburgh', address: 'Wexford, PA 15090', rating: 4.5, totalRatings: 47, website: 'https://example.com', phone: '(724) 555-4567' },
-      { name: 'Elegant Desi Events', address: 'Pittsburgh, PA 15213', rating: 4.3, totalRatings: 29, phone: '(412) 555-8902' },
-    ],
-    MEHENDI_ARTIST: [
-      { name: 'Henna by Sangita PGH', address: 'Pittsburgh, PA 15217', rating: 4.9, totalRatings: 102, website: 'https://example.com', phone: '(412) 555-9013' },
-      { name: 'Bridal Henna PA', address: 'Cranberry Twp, PA 16066', rating: 4.6, totalRatings: 61, phone: '(724) 555-0124' },
-    ],
-    MAKEUP_HAIR: [
-      { name: 'Glam Bridal Studio PGH', address: 'Pittsburgh, PA 15213', rating: 4.7, totalRatings: 84, website: 'https://example.com', phone: '(412) 555-1235' },
-    ],
-  },
-  Chicago: {
-    CATERER: [
-      { name: 'Spice Route Catering', address: '2456 W Devon Ave, Chicago, IL 60659', rating: 4.5, totalRatings: 98, phone: '(773) 555-1234' },
-      { name: 'Taste of India Events', address: '2510 W Devon Ave, Chicago, IL 60659', rating: 4.8, totalRatings: 201, website: 'https://example.com', phone: '(773) 555-5678' },
-      { name: 'Chicago Desi Caterers', address: '1820 N Clybourn Ave, Chicago, IL 60614', rating: 4.3, totalRatings: 43, phone: '(312) 555-9012' },
-    ],
-    PHOTOGRAPHER: [
-      { name: 'Moments by Rajan', address: 'Devon Ave, Chicago, IL 60659', rating: 4.7, totalRatings: 66, website: 'https://example.com', phone: '(773) 555-2345' },
-      { name: 'Chicago South Asian Weddings', address: 'Naperville, IL 60563', rating: 4.5, totalRatings: 49, phone: '(630) 555-6789' },
-    ],
-    DJ: [
-      { name: 'DJ Vikram Chicago', address: 'Devon Ave, Chicago, IL 60659', rating: 4.6, totalRatings: 53, phone: '(773) 555-3456' },
-      { name: 'Bhangra Box Chicago', address: 'Schaumburg, IL 60173', rating: 4.4, totalRatings: 37, phone: '(847) 555-7890' },
-    ],
-    DECORATOR: [
-      { name: 'Luxe Event Design Chicago', address: 'Schaumburg, IL 60173', rating: 4.5, totalRatings: 44, phone: '(847) 555-4567' },
-    ],
-    MEHENDI_ARTIST: [
-      { name: 'Henna Heaven Chicago', address: 'Devon Ave, Chicago, IL 60659', rating: 4.8, totalRatings: 99, website: 'https://example.com', phone: '(773) 555-8901' },
-    ],
-    MAKEUP_HAIR: [
-      { name: 'Bridal Glow Studio Chicago', address: 'Naperville, IL 60563', rating: 4.7, totalRatings: 84, website: 'https://example.com', phone: '(630) 555-5679' },
-    ],
-  },
-  Houston: {
-    CATERER: [
-      { name: 'Houston Desi Catering', address: '5110 Hillcroft Ave, Houston, TX 77036', rating: 4.6, totalRatings: 77, phone: '(713) 555-1234' },
-      { name: 'Curry House Events', address: '5765 Hillcroft Ave, Houston, TX 77036', rating: 4.4, totalRatings: 58, website: 'https://example.com', phone: '(713) 555-5678' },
-      { name: 'Masala Catering TX', address: 'Sugar Land, TX 77478', rating: 4.7, totalRatings: 115, phone: '(281) 555-9012' },
-    ],
-    PHOTOGRAPHER: [
-      { name: 'Houston South Asian Photos', address: 'Sugar Land, TX 77478', rating: 4.8, totalRatings: 61, website: 'https://example.com', phone: '(281) 555-2345' },
-      { name: 'Texas Desi Weddings', address: 'Houston, TX 77036', rating: 4.5, totalRatings: 43, phone: '(713) 555-6789' },
-    ],
-    DJ: [
-      { name: 'DJ Ravi Houston', address: 'Hillcroft Ave, Houston, TX 77036', rating: 4.6, totalRatings: 48, phone: '(713) 555-3456' },
-      { name: 'Bollywood Beats Texas', address: 'Sugar Land, TX 77478', rating: 4.3, totalRatings: 31, phone: '(281) 555-7891' },
-    ],
-    DECORATOR: [
-      { name: 'Texas Event Styling', address: 'Sugar Land, TX 77478', rating: 4.5, totalRatings: 36, phone: '(281) 555-4567' },
-    ],
-    MEHENDI_ARTIST: [
-      { name: 'Houston Henna Studio', address: 'Hillcroft Ave, Houston, TX 77036', rating: 4.7, totalRatings: 72, website: 'https://example.com', phone: '(713) 555-8902' },
-    ],
-    MAKEUP_HAIR: [
-      { name: 'Bridal Beauty Houston', address: 'Sugar Land, TX 77478', rating: 4.6, totalRatings: 55, phone: '(281) 555-5679' },
-    ],
-  },
-}
-
 export type LocalBusiness = {
   place_id: string
   name: string
@@ -173,9 +60,9 @@ export async function GET(req: NextRequest) {
     invites.forEach(i => invitedIds.add(i.place_id))
   }
 
-  // Get ExternalVendor records for this city/type (rich data from Google Places Details)
+  // Get ExternalVendor records for this city/type — exclude claimed (they're platform vendors now)
   const externalVendors = await prisma.externalVendor.findMany({
-    where: { city: { contains: city, mode: 'insensitive' }, vendor_type: vendorType as any, is_active: true },
+    where: { city: { contains: city, mode: 'insensitive' }, vendor_type: vendorType as any, is_active: true, claimed_by_vendor_id: null },
     include: { quote_requests: eventId ? { where: { event_request: { event_id: eventId } }, select: { id: true } } : false },
   })
   const externalByPlaceId = new Map(externalVendors.map(ev => [ev.place_id, ev]))
@@ -207,28 +94,29 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY
-
-  // No API key — use demo data
-  if (!apiKey) {
-    const cityData = DEMO_BUSINESSES[city] ?? DEMO_BUSINESSES['New York']
-    const demos = cityData[vendorType] ?? cityData['CATERER'] ?? []
-    const businesses: LocalBusiness[] = demos.map((b, i) => enrichBusiness({
-      place_id: `demo_${city}_${vendorType}_${i}`,
-      name: b.name,
-      address: b.address,
-      rating: b.rating,
-      total_ratings: b.totalRatings,
-      phone: b.phone ?? null,
-      website: b.website ?? null,
-      photo_url: null,
-      maps_url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.name + ' ' + b.address)}`,
-      invited: invitedIds.has(`demo_${city}_${vendorType}_${i}`),
+  // Serve from DB if we already have results stored
+  if (externalVendors.length > 0) {
+    const businesses: LocalBusiness[] = externalVendors.map(ev => enrichBusiness({
+      place_id: ev.place_id,
+      name: ev.name,
+      address: ev.address,
+      rating: ev.rating,
+      total_ratings: ev.total_ratings,
+      phone: ev.phone,
+      website: ev.website,
+      photo_url: ev.photo_urls[0] ?? null,
+      maps_url: ev.maps_url,
+      invited: invitedIds.has(ev.place_id),
     }))
-    return NextResponse.json({ businesses, source: 'demo' })
+    return NextResponse.json({ businesses, source: 'cached' })
   }
 
-  // Google Places Text Search
+  // No DB results — try Google Places API
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY
+  if (!apiKey) {
+    return NextResponse.json({ businesses: [], source: 'none' })
+  }
+
   const query = `${TYPE_QUERY[vendorType] ?? 'event catering'} in ${city}`
   const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${apiKey}`
 
@@ -241,24 +129,81 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ businesses: [], source: 'google', error: placesData.status })
     }
 
-    const businesses: LocalBusiness[] = (placesData.results ?? []).slice(0, 8).map((place: any) => {
+    const results = (placesData.results ?? []).slice(0, 8)
+
+    // Persist each result to ExternalVendor (upsert by place_id)
+    for (const place of results) {
+      const photoRef = place.photos?.[0]?.photo_reference
+      const photoUrls = photoRef
+        ? [`https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${photoRef}&key=${apiKey}`]
+        : []
+
+      try {
+        await prisma.externalVendor.upsert({
+          where: { place_id: place.place_id },
+          update: {
+            name: place.name,
+            address: place.formatted_address,
+            rating: place.rating ?? null,
+            total_ratings: place.user_ratings_total ?? 0,
+            photo_urls: photoUrls,
+            maps_url: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
+            lat: place.geometry?.location?.lat ?? null,
+            lng: place.geometry?.location?.lng ?? null,
+            fetched_at: new Date(),
+          },
+          create: {
+            place_id: place.place_id,
+            name: place.name,
+            address: place.formatted_address,
+            city,
+            country: 'US',
+            vendor_type: vendorType as any,
+            rating: place.rating ?? null,
+            total_ratings: place.user_ratings_total ?? 0,
+            price_level: place.price_level ?? null,
+            photo_urls: photoUrls,
+            maps_url: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
+            lat: place.geometry?.location?.lat ?? null,
+            lng: place.geometry?.location?.lng ?? null,
+          },
+        })
+      } catch (err: any) {
+        console.error(`[local-vendors] Failed to upsert ExternalVendor ${place.place_id}:`, err.message)
+      }
+    }
+
+    // Re-read from DB to get enriched data (including any prior description, hours, claimed status)
+    const freshExternals = await prisma.externalVendor.findMany({
+      where: { place_id: { in: results.map((p: any) => p.place_id) } },
+    })
+    const freshByPlaceId = new Map(freshExternals.map(ev => [ev.place_id, ev]))
+
+    const businesses: LocalBusiness[] = results.map((place: any) => {
+      const ext = freshByPlaceId.get(place.place_id)
       const photoRef = place.photos?.[0]?.photo_reference
       const photo_url = photoRef
         ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoRef}&key=${apiKey}`
         : null
 
-      return enrichBusiness({
+      return {
         place_id: place.place_id,
         name: place.name,
         address: place.formatted_address,
-        rating: place.rating ?? null,
-        total_ratings: place.user_ratings_total ?? 0,
-        phone: null,
-        website: null,
+        rating: ext?.rating ?? place.rating ?? null,
+        total_ratings: ext?.total_ratings ?? place.user_ratings_total ?? 0,
+        phone: ext?.phone ?? null,
+        website: ext?.website ?? null,
         photo_url,
+        photo_urls: ext?.photo_urls ?? [],
         maps_url: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
+        description: ext?.description ?? null,
+        business_hours: (ext?.business_hours as Record<string, string>) ?? null,
+        is_claimed: !!ext?.claimed_by_vendor_id,
+        external_vendor_id: ext?.id ?? null,
         invited: invitedIds.has(place.place_id),
-      })
+        quote_requested: quoteRequestedIds.has(place.place_id),
+      } satisfies LocalBusiness
     })
 
     return NextResponse.json({ businesses, source: 'google' })

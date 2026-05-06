@@ -6,15 +6,15 @@ import { z } from 'zod'
 const createSchema = z.object({
   source: z.enum(['EXTERNAL', 'PERSONAL']),
   title: z.string().min(1).max(200),
-  role: z.string().max(100).optional(),
-  contact_name: z.string().max(100).optional(),
-  contact_phone: z.string().max(30).optional(),
-  contact_email: z.string().email().optional().or(z.literal('')),
-  start_time: z.string().datetime().optional(),
-  end_time: z.string().datetime().optional(),
-  location: z.string().max(200).optional(),
-  notes: z.string().max(1000).optional(),
-  sort_order: z.number().int().optional(),
+  role: z.string().max(100).nullish(),
+  contact_name: z.string().max(100).nullish(),
+  contact_phone: z.string().max(30).nullish(),
+  contact_email: z.string().email().nullish().or(z.literal('')).or(z.literal(null)),
+  start_time: z.string().datetime().nullish(),
+  end_time: z.string().datetime().nullish(),
+  location: z.string().max(200).nullish(),
+  notes: z.string().max(1000).nullish(),
+  sort_order: z.number().int().nullish(),
 })
 
 type Params = { id: string }

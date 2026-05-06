@@ -274,6 +274,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'board' | 'timeline'>('board')
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+  const [printMode, setPrintMode] = useState<'summary' | 'details' | null>(null)
   const printRef = useRef<HTMLDivElement>(null)
 
   async function fetchData() {
@@ -298,10 +299,14 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
       const url = editItem
         ? `/api/events/${eventId}/plan-items/${editItem.id}`
         : `/api/events/${eventId}/plan-items`
+      // Strip null/empty values so zod validation passes
+      const cleaned = Object.fromEntries(
+        Object.entries(data).filter(([, v]) => v !== null && v !== '')
+      )
       const res = await fetch(url, {
         method: editItem ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(cleaned),
       })
       if (!res.ok) throw new Error()
       setShowForm(false)
@@ -367,9 +372,6 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
   const withoutTime = unified.filter(i => !i.start_time)
   const sorted = [...withTime, ...withoutTime]
 
-  function handlePrint() {
-    window.print()
-  }
 
   if (loading) {
     return <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-text-4" /></div>
@@ -384,10 +386,26 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
           <p className="text-text-3 mt-1">Your complete event runsheet — vendors, helpers, and timeline.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-brand-border text-sm font-bold text-text-2 hover:bg-cream transition-colors print:hidden">
-            <Printer className="h-4 w-4" /> Print Handout
-          </button>
+          <div className="relative print:hidden">
+            <button onClick={() => setPrintMode(prev => prev ? null : 'summary')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-brand-border text-sm font-bold text-text-2 hover:bg-cream transition-colors">
+              <Printer className="h-4 w-4" /> Print
+            </button>
+            {printMode !== null && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-cream-2 rounded-xl border-2 border-brand-border shadow-lg z-20 overflow-hidden">
+                <button onClick={() => { setPrintMode('summary'); setTimeout(() => { window.print(); setPrintMode(null) }, 100) }}
+                  className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors border-b border-brand-border/40">
+                  <p className="font-bold text-text-1">Summary</p>
+                  <p className="text-xs text-text-4">Compact 2-line per item</p>
+                </button>
+                <button onClick={() => { setPrintMode('details'); setTimeout(() => { window.print(); setPrintMode(null) }, 100) }}
+                  className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors">
+                  <p className="font-bold text-text-1">Full Details</p>
+                  <p className="text-xs text-text-4">Contact, notes, everything</p>
+                </button>
+              </div>
+            )}
+          </div>
           <button onClick={() => { setEditItem(null); setShowForm(true) }}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors print:hidden"
             style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
@@ -421,15 +439,59 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
       )}
 
       {/* Print header (hidden on screen) */}
-      <div ref={printRef} className="hidden print:block mb-8 border-b-2 border-black pb-4">
+      <div ref={printRef} className="hidden print:block mb-4 border-b-2 border-black pb-3">
         <h1 className="text-2xl font-black">{eventName}</h1>
         <p className="text-sm mt-1">
           {formatDate(eventDate)}
           {venueName && ` · ${venueName}`}
           {city && ` · ${city}`}
-          {guestCount > 0 && ` · ${guestCount} guests`}
         </p>
       </div>
+
+      {/* Print summary table (hidden on screen) */}
+      {printMode === 'summary' && sorted.length > 0 && (
+        <table className="hidden print:table w-full text-[11px] border-collapse mb-4" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '14%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '12%' }} />
+            <col style={{ width: '16%' }} />
+            <col style={{ width: '12%' }} />
+            <col style={{ width: '26%' }} />
+          </colgroup>
+          <thead>
+            <tr className="border-b-2 border-black text-left bg-gray-100">
+              <th className="py-2 px-2 font-bold">Time</th>
+              <th className="py-2 px-2 font-bold">Item</th>
+              <th className="py-2 px-2 font-bold">Role</th>
+              <th className="py-2 px-2 font-bold">Contact</th>
+              <th className="py-2 px-2 font-bold">Location</th>
+              <th className="py-2 px-2 font-bold">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((item, i) => (
+              <tr key={item.id} className={`border-b border-gray-300 ${i % 2 === 0 ? '' : 'bg-gray-50'}`}>
+                <td className="py-2 px-2 whitespace-nowrap align-top">
+                  {item.start_time ? formatTime(item.start_time) : '—'}
+                  {item.end_time && <><br /><span className="text-gray-500">to {formatTime(item.end_time)}</span></>}
+                </td>
+                <td className="py-2 px-2 font-medium align-top">{item.title}</td>
+                <td className="py-2 px-2 align-top">{item.role ?? '—'}</td>
+                <td className="py-2 px-2 align-top">
+                  {item.contact_name && <span className="font-medium">{item.contact_name}</span>}
+                  {item.contact_phone && <><br /><span className="text-gray-600">{item.contact_phone}</span></>}
+                  {!item.contact_name && !item.contact_phone && '—'}
+                </td>
+                <td className="py-2 px-2 align-top">{item.location ?? '—'}</td>
+                <td className="py-2 px-2 text-gray-600 align-top" style={{ wordBreak: 'break-word' }}>
+                  {item.notes ? `${item.notes.slice(0, 80)}${item.notes.length > 80 ? '…' : ''}` : '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
       {sorted.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed border-brand-border rounded-2xl print:hidden">
@@ -441,7 +503,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         </div>
       ) : view === 'board' ? (
         /* ── Board View ─────────────────────────────────────────────── */
-        <div className="space-y-3">
+        <div className={`space-y-3 ${printMode === 'summary' ? 'print:hidden' : ''}`}>
           {sorted.map(item => {
             const st = SOURCE_STYLES[item.source]
             const Icon = st.icon
@@ -492,9 +554,9 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                   </div>
                 </div>
 
-                {/* Expanded details */}
+                {/* Expanded details — always visible in print */}
                 {(isExpanded || false) && (
-                  <div className="border-t border-brand-border/40 px-4 py-4 bg-white/50">
+                  <div className="border-t border-brand-border/40 px-4 py-4 bg-white/50 print:hidden">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
                       {(item.contact_name || item.contact_phone || item.contact_email) && (
                         <div>
@@ -550,15 +612,47 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                   </div>
                 )}
 
-                {/* Print-only expanded details (always shown) */}
-                <div className="hidden print:block border-t border-gray-200 px-4 py-3 text-xs">
-                  {(item.contact_name || item.contact_phone || item.contact_email) && (
-                    <p>
-                      Contact: {[item.contact_name, item.contact_phone, item.contact_email].filter(Boolean).join(' · ')}
+                {/* Print-only: summary (compact) */}
+                {printMode === 'summary' && (
+                  <div className="hidden print:block border-t border-gray-200 px-4 py-1.5 text-xs">
+                    <p className="text-gray-600">
+                      {[
+                        item.contact_name,
+                        item.contact_phone,
+                        item.location && `@ ${item.location}`,
+                      ].filter(Boolean).join(' · ')}
+                      {item.notes && ` — ${item.notes.slice(0, 80)}${item.notes.length > 80 ? '…' : ''}`}
                     </p>
-                  )}
-                  {item.notes && <p className="mt-1">Notes: {item.notes}</p>}
-                </div>
+                  </div>
+                )}
+                {/* Print-only: full details */}
+                {printMode === 'details' && (
+                  <div className="hidden print:block border-t border-gray-200 px-4 py-3 text-xs">
+                    <div className="grid grid-cols-3 gap-2">
+                      {(item.contact_name || item.contact_phone || item.contact_email) && (
+                        <div>
+                          <p className="font-bold uppercase mb-0.5">Contact</p>
+                          {item.contact_name && <p>{item.contact_name}</p>}
+                          {item.contact_phone && <p>{item.contact_phone}</p>}
+                          {item.contact_email && <p>{item.contact_email}</p>}
+                        </div>
+                      )}
+                      {item.start_time && (
+                        <div>
+                          <p className="font-bold uppercase mb-0.5">Schedule</p>
+                          <p>{formatTime(item.start_time)}{item.end_time && ` — ${formatTime(item.end_time)}`}</p>
+                        </div>
+                      )}
+                      {item.location && (
+                        <div>
+                          <p className="font-bold uppercase mb-0.5">Location</p>
+                          <p>{item.location}</p>
+                        </div>
+                      )}
+                    </div>
+                    {item.notes && <p className="mt-1"><span className="font-bold">Notes:</span> {item.notes}</p>}
+                  </div>
+                )}
               </div>
             )
           })}
@@ -658,13 +752,19 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         </div>
       )}
 
+      {/* Print footer */}
+      <div className="hidden print:block fixed bottom-0 left-0 right-0 text-center text-[9px] text-gray-400 py-2 border-t border-gray-200">
+        Powered by OneSeva · oneseva.com
+      </div>
+
       {/* Print styles */}
       <style jsx global>{`
         @media print {
           nav, header, aside, .print\\:hidden { display: none !important; }
           .hidden.print\\:block { display: block !important; }
+          .hidden.print\\:table { display: table !important; }
           body { font-size: 11px; }
-          @page { margin: 1.5cm; }
+          @page { margin: 1.5cm 1.5cm 2cm; }
         }
       `}</style>
     </div>

@@ -219,7 +219,12 @@ export default function VendorDiscoveryPage() {
       const incoming = data.grouped ?? {}
       setGrouped(incoming)
       const types = Object.keys(incoming)
-      if (types.length > 0) setActiveType(prev => prev ?? types[0])
+      if (types.length > 0) {
+        setActiveType(prev => prev ?? types[0])
+      } else {
+        // No platform matches — default to CATERER so local businesses still load
+        setActiveType(prev => prev ?? 'CATERER')
+      }
     }
 
     if (refresh) setRefreshing(false)
@@ -252,8 +257,10 @@ export default function VendorDiscoveryPage() {
   }
 
   const vendorTypes = Object.keys(grouped)
+  // "Add a service" shows types not already visible in the left panel
+  const shownTypes = new Set([...vendorTypes, ...ALL_SERVICE_TYPES.filter(s => AVAILABLE_TYPES.has(s.type)).map(s => s.type)])
   const availableToAdd = ALL_SERVICE_TYPES.filter(
-    s => !vendorTypes.includes(s.type) && AVAILABLE_TYPES.has(s.type)
+    s => !shownTypes.has(s.type) && AVAILABLE_TYPES.has(s.type)
   )
 
   const coverUrl = (vendor: Match['vendor']) =>
@@ -358,7 +365,7 @@ export default function VendorDiscoveryPage() {
           </div>
           <p className="text-sm text-text-3">
             {loading ? 'Finding the best vendors for your event…' :
-              vendorTypes.length === 0 ? 'No matches yet — this usually takes a moment.' :
+              vendorTypes.length === 0 ? 'Browse local vendors in your area.' :
               `Vendors across ${vendorTypes.length} categories matched for your event.`}
           </p>
         </div>
@@ -407,12 +414,15 @@ export default function VendorDiscoveryPage() {
               </div>
             )}
             <div className="bg-white dark:bg-cream-2 rounded-xl border overflow-hidden">
-              {vendorTypes.length === 0 ? (
-                <div className="px-4 py-6 text-center text-sm text-text-4">
-                  No matches yet
-                </div>
-              ) : (
-                vendorTypes.map(type => {
+              {(() => {
+                // Show matched vendor types + available types (so local businesses are always browsable)
+                const matchedTypes = vendorTypes
+                const availableServiceTypes = ALL_SERVICE_TYPES
+                  .filter(s => AVAILABLE_TYPES.has(s.type))
+                  .map(s => s.type)
+                // Merge: matched types first, then unmatched available types
+                const allTypes = [...matchedTypes, ...availableServiceTypes.filter(t => !matchedTypes.includes(t))]
+                return allTypes.map(type => {
                   const count = grouped[type]?.length ?? 0
                   const isActive = activeType === type
                   return (
@@ -429,15 +439,17 @@ export default function VendorDiscoveryPage() {
                         <span>{VENDOR_TYPE_EMOJIS[type] ?? '🏢'}</span>
                         <span className="truncate">{VENDOR_TYPE_LABELS[type] ?? type}</span>
                       </span>
-                      <span className={`text-xs rounded-full px-1.5 py-0.5 font-medium flex-shrink-0 ml-1 ${
-                        isActive ? 'bg-cream-2 text-brand' : 'bg-cream-2 text-text-3'
-                      }`}>
-                        {count}
-                      </span>
+                      {count > 0 && (
+                        <span className={`text-xs rounded-full px-1.5 py-0.5 font-medium flex-shrink-0 ml-1 ${
+                          isActive ? 'bg-cream-2 text-brand' : 'bg-cream-2 text-text-3'
+                        }`}>
+                          {count}
+                        </span>
+                      )}
                     </button>
                   )
                 })
-              )}
+              })()}
             </div>
 
             {availableToAdd.length > 0 && (
@@ -732,26 +744,24 @@ export default function VendorDiscoveryPage() {
 
                 {/* Local businesses section */}
                 {eventCity && (
-                  <div className="mt-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-text-2">
-                          Local businesses near {eventCity}
-                        </h3>
-                        <p className="text-xs text-text-4 mt-0.5">
-                          Not on OneSeva yet — request a quote or invite them to join
-                        </p>
-                      </div>
+                  <div className="mt-8">
+                    <div className="mb-4">
+                      <h3 className="text-base font-semibold text-text-1">
+                        Local Businesses near {eventCity}
+                      </h3>
+                      <p className="text-sm text-text-3 mt-0.5">
+                        Not on OneSeva yet — request a quote or invite them to join
+                      </p>
                     </div>
 
                     {localLoading ? (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {[1,2,3].map(i => <div key={i} className="h-20 bg-white dark:bg-cream-2 rounded-xl border animate-pulse" />)}
                       </div>
                     ) : localBusinesses.length === 0 ? (
-                      <div className="bg-cream rounded-xl border border-dashed p-6 text-center text-sm text-text-4">
-                        No local businesses found for this category.
-                      </div>
+                      <p className="text-sm text-text-4 py-4">
+                        No local businesses found for this category in {eventCity}.
+                      </p>
                     ) : (
                       <div className="space-y-3">
                         {localBusinesses.map(biz => {
@@ -762,80 +772,68 @@ export default function VendorDiscoveryPage() {
                           const hasDetails = biz.description || biz.business_hours || hasPhotos
 
                           return (
-                            <div key={biz.place_id} className="bg-white dark:bg-cream-2 rounded-xl border hover:shadow-sm transition-shadow overflow-hidden">
-                              <div className="flex gap-3 p-4">
+                            <div key={biz.place_id} className="bg-white dark:bg-cream-2 rounded-xl border overflow-hidden">
+                              <div className="flex gap-4 p-4">
                                 {/* Photo */}
-                                <div className="w-16 h-16 rounded-xl overflow-hidden bg-cream-2 flex-shrink-0">
+                                <div className="w-14 h-14 rounded-lg overflow-hidden bg-cream-2 flex-shrink-0">
                                   {(biz.photo_urls[0] || biz.photo_url) ? (
                                     <img src={biz.photo_urls[0] || biz.photo_url!} alt={biz.name} className="w-full h-full object-cover" />
                                   ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-2xl bg-cream">
+                                    <div className="w-full h-full flex items-center justify-center text-lg bg-cream text-text-4">
                                       {VENDOR_TYPE_EMOJIS[activeType] ?? '🏢'}
                                     </div>
                                   )}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <button
-                                      onClick={() => hasDetails && setExpandedBizId(isExpanded ? null : biz.place_id)}
-                                      className={`font-semibold text-sm text-text-1 truncate ${hasDetails ? 'hover:text-brand cursor-pointer' : ''}`}
-                                    >
-                                      {biz.name}
-                                    </button>
-                                    {biz.is_claimed && (
-                                      <span className="flex items-center gap-0.5 text-xs text-blue-600">
-                                        <Shield className="h-3 w-3" /> Claimed
-                                      </span>
-                                    )}
-                                    {biz.rating && (
-                                      <span className="flex items-center gap-0.5 text-xs text-text-3 flex-shrink-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-semibold text-text-1 truncate">{biz.name}</span>
+                                    {biz.rating != null && (
+                                      <span className="flex items-center gap-0.5 text-xs text-text-3">
                                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                                         {biz.rating}
-                                        <span className="text-text-4">({biz.total_ratings})</span>
+                                        {biz.total_ratings > 0 && <span className="text-text-4">({biz.total_ratings})</span>}
                                       </span>
                                     )}
                                   </div>
-                                  <p className="text-xs text-text-4 mt-0.5 truncate flex items-center gap-1">
-                                    <MapPin className="h-3 w-3 flex-shrink-0" />{biz.address}
+                                  <p className="text-xs text-text-4 mt-0.5 truncate">
+                                    {biz.address}
                                   </p>
                                   {biz.description && (
-                                    <p className="text-xs text-text-3 mt-1 line-clamp-2">{biz.description}</p>
+                                    <p className="text-xs text-text-3 mt-1 line-clamp-1">{biz.description}</p>
                                   )}
                                 </div>
 
-                                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                                  <div className="flex items-center gap-1.5">
-                                    <a href={biz.maps_url} target="_blank" rel="noopener noreferrer"
-                                      className="p-1.5 rounded-xl border border-brand-border text-text-4 hover:text-brand hover:border-brand transition-colors"
-                                      title="View on Google Maps"
+                                {/* Quick links */}
+                                <div className="flex items-start gap-1.5 flex-shrink-0">
+                                  <a href={biz.maps_url} target="_blank" rel="noopener noreferrer"
+                                    className="p-1.5 rounded-lg text-text-4 hover:text-brand transition-colors"
+                                    title="Google Maps"
+                                  >
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </a>
+                                  {biz.phone && (
+                                    <a href={`tel:${biz.phone}`}
+                                      className="p-1.5 rounded-lg text-text-4 hover:text-green-600 transition-colors"
+                                      title={biz.phone}
                                     >
-                                      <ExternalLink className="h-3.5 w-3.5" />
+                                      <Phone className="h-3.5 w-3.5" />
                                     </a>
-                                    {biz.phone && (
-                                      <a href={`tel:${biz.phone}`}
-                                        className="p-1.5 rounded-xl border border-brand-border text-text-4 hover:text-green-600 hover:border-green-300 transition-colors"
-                                        title={biz.phone}
-                                      >
-                                        <Phone className="h-3.5 w-3.5" />
-                                      </a>
-                                    )}
-                                    {biz.website && (
-                                      <a href={biz.website} target="_blank" rel="noopener noreferrer"
-                                        className="p-1.5 rounded-xl border border-brand-border text-text-4 hover:text-blue-600 hover:border-blue-300 transition-colors"
-                                        title="Visit website"
-                                      >
-                                        <Globe className="h-3.5 w-3.5" />
-                                      </a>
-                                    )}
-                                  </div>
+                                  )}
+                                  {biz.website && (
+                                    <a href={biz.website} target="_blank" rel="noopener noreferrer"
+                                      className="p-1.5 rounded-lg text-text-4 hover:text-blue-600 transition-colors"
+                                      title="Website"
+                                    >
+                                      <Globe className="h-3.5 w-3.5" />
+                                    </a>
+                                  )}
                                 </div>
                               </div>
 
                               {/* Expanded detail panel */}
                               {isExpanded && hasDetails && (
-                                <div className="px-4 pb-3 border-t bg-cream/50">
-                                  {/* Photo gallery */}
+                                <div className="px-4 pb-3 border-t">
                                   {hasPhotos && (
                                     <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
                                       {biz.photo_urls.slice(0, 5).map((url, i) => (
@@ -845,7 +843,6 @@ export default function VendorDiscoveryPage() {
                                       ))}
                                     </div>
                                   )}
-                                  {/* Business hours */}
                                   {biz.business_hours && (
                                     <div className="mt-3">
                                       <p className="text-xs font-medium text-text-2 mb-1">Business Hours</p>
@@ -862,22 +859,23 @@ export default function VendorDiscoveryPage() {
                                 </div>
                               )}
 
-                              {/* Action bar */}
-                              <div className="flex items-center gap-2 px-4 py-2.5 border-t bg-cream/30">
-                                {hasDetails && (
+                              {/* Actions */}
+                              <div className="flex items-center gap-2 px-4 py-2.5 border-t">
+                                {hasDetails ? (
                                   <button
                                     onClick={() => setExpandedBizId(isExpanded ? null : biz.place_id)}
                                     className="text-xs text-text-4 hover:text-text-2 mr-auto"
                                   >
-                                    {isExpanded ? 'Show less' : 'Show details'}
+                                    {isExpanded ? 'Hide details' : 'More details'}
                                   </button>
+                                ) : (
+                                  <div className="mr-auto" />
                                 )}
-                                {!hasDetails && <div className="mr-auto" />}
 
                                 <button
                                   onClick={() => !isInvited && inviteBusiness(biz)}
                                   disabled={isInvited || invitingId === biz.place_id}
-                                  className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-xl border transition-colors ${
+                                  className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
                                     isInvited
                                       ? 'bg-green-50 border-green-200 text-green-600 cursor-default'
                                       : invitingId === biz.place_id
@@ -886,29 +884,29 @@ export default function VendorDiscoveryPage() {
                                   }`}
                                 >
                                   {isInvited ? (
-                                    <><CheckCircle2 className="h-3.5 w-3.5" /> Invited</>
+                                    <><CheckCircle2 className="h-3 w-3" /> Invited</>
                                   ) : (
-                                    <><UserPlus className="h-3.5 w-3.5" /> Invite</>
+                                    <><UserPlus className="h-3 w-3" /> Invite</>
                                   )}
                                 </button>
 
                                 <button
                                   onClick={() => !isQuoteRequested && requestQuote(biz)}
                                   disabled={isQuoteRequested || requestingQuoteId === biz.place_id}
-                                  className={`flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-colors ${
+                                  className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors ${
                                     isQuoteRequested
-                                      ? 'bg-amber-50 border-amber-200 text-amber-600 cursor-default'
+                                      ? 'bg-green-50 border border-green-200 text-green-600 cursor-default'
                                       : requestingQuoteId === biz.place_id
-                                      ? 'opacity-50 cursor-wait border-brand text-brand'
-                                      : 'border-brand bg-brand text-white hover:bg-brand/90'
+                                      ? 'opacity-50 cursor-wait bg-brand text-white'
+                                      : 'bg-brand text-white hover:bg-brand/90'
                                   }`}
                                 >
                                   {isQuoteRequested ? (
-                                    <><CheckCircle2 className="h-3.5 w-3.5" /> Quote Requested</>
+                                    <><CheckCircle2 className="h-3 w-3" /> Quote Requested</>
                                   ) : requestingQuoteId === biz.place_id ? (
-                                    'Requesting...'
+                                    'Sending...'
                                   ) : (
-                                    <><FileText className="h-3.5 w-3.5" /> Request Quote</>
+                                    <><FileText className="h-3 w-3" /> Request Quote</>
                                   )}
                                 </button>
                               </div>
