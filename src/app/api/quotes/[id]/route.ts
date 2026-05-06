@@ -6,6 +6,10 @@ import { QuoteStatus } from '@prisma/client'
 import { enqueueNotification } from '@/lib/notifications/enqueue'
 import { NOTIFICATION_EVENTS } from '@/lib/notifications/types'
 
+function fmt(n: number, currency: string) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n)
+}
+
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -90,28 +94,55 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       data: { status: parsed.data.status },
     })
 
-    // Auto-create EventVendor when quote is accepted
+    // Auto-create EventVendor + EventPlanItem when quote is accepted
     if (parsed.data.status === 'ACCEPTED') {
       const fullQuote = await prisma.quote.findUnique({
         where: { id },
         include: {
-          match: { include: { event_request: { select: { event_id: true } } } },
+          vendor: { select: { id: true, business_name: true, vendor_type: true, phone_business: true, phone_cell: true, email: true, city: true } },
+          match: { include: { event_request: { select: { event_id: true, vendor_type: true } } } },
         },
       })
       if (fullQuote) {
+        const eventId = fullQuote.match.event_request.event_id
+        const vendorId = fullQuote.vendor_id
+
+        // Create EventVendor
         await prisma.eventVendor.upsert({
-          where: {
-            event_id_vendor_id: {
-              event_id: fullQuote.match.event_request.event_id,
-              vendor_id: fullQuote.vendor_id,
-            },
-          },
+          where: { event_id_vendor_id: { event_id: eventId, vendor_id: vendorId } },
           update: { quote_id: id },
-          create: {
-            event_id: fullQuote.match.event_request.event_id,
-            vendor_id: fullQuote.vendor_id,
-            quote_id: id,
+          create: { event_id: eventId, vendor_id: vendorId, quote_id: id },
+        })
+
+        // Auto-create EventPlanItem for the Event Day view
+        const vendorType = fullQuote.match.event_request.vendor_type
+        const roleLabel = vendorType.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+        await prisma.eventPlanItem.upsert({
+          where: { event_id_vendor_id: { event_id: eventId, vendor_id: vendorId } },
+          update: {
+            title: fullQuote.vendor.business_name,
+            role: roleLabel,
+            contact_name: fullQuote.vendor.business_name,
+            contact_phone: fullQuote.vendor.phone_business ?? fullQuote.vendor.phone_cell ?? null,
+            contact_email: fullQuote.vendor.email,
           },
+          create: {
+            event_id: eventId,
+            vendor_id: vendorId,
+            source: 'PLATFORM',
+            title: fullQuote.vendor.business_name,
+            role: roleLabel,
+            contact_name: fullQuote.vendor.business_name,
+            contact_phone: fullQuote.vendor.phone_business ?? fullQuote.vendor.phone_cell ?? null,
+            contact_email: fullQuote.vendor.email,
+            notes: `Accepted quote — ${fmt(Number(fullQuote.total_estimate), fullQuote.currency)}`,
+          },
+        })
+
+        // Auto-finalize any checklist item for this vendor type
+        await prisma.eventChecklistItem.updateMany({
+          where: { event_id: eventId, category: roleLabel, status: { in: ['PENDING', 'SEARCHING', 'SHORTLISTED'] } },
+          data: { status: 'FINALIZED', finalized_price: fullQuote.total_estimate, completed_at: new Date() },
         })
       }
     }

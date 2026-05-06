@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   CheckCircle2, XCircle, MessageSquare, MapPin, ExternalLink,
   ChevronRight, ChevronDown, ChevronUp, Shield, Phone,
-  ArrowLeftRight, Scale, Clock, Calendar, Users, Filter,
+  ArrowLeftRight, Clock, Calendar, Users, Filter,
 } from 'lucide-react'
 
 // ─── OneSeva quote types ───────────────────────────────────────────────────
@@ -653,6 +653,30 @@ function ServiceGroup({
   )
 }
 
+// ─── Pipeline row type ────────────────────────────────────────────────────
+
+type PipelineRow = {
+  id: string
+  name: string
+  service: string
+  source: 'OneSeva' | 'Board' | 'External'
+  price: string
+  status: string
+  statusColor: string
+  statusBg: string
+}
+
+const PIPELINE_STATUS_ORDER: Record<string, number> = {
+  Finalized: 0,
+  Accepted: 1,
+  'Quote Received': 2,
+  Received: 3,
+  Viewed: 4,
+  'Quote Requested': 5,
+  New: 6,
+  Declined: 7,
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────
 
 export default function EventQuotesPage() {
@@ -752,6 +776,51 @@ export default function EventQuotesPage() {
     setBoardResponses(r => r.map(x => x.id === responseId ? { ...x, status: 'DECLINED' } : x))
   }
 
+  // ── Build pipeline rows ────────────────────────────────────────────────
+  const sentOneseva = onesevQuotes.filter(q => q.status !== 'DRAFT')
+
+  const pipelineRows: PipelineRow[] = [
+    ...sentOneseva.map(q => {
+      const statusCfg = ONESEVA_STATUS[q.status] ?? ONESEVA_STATUS.DRAFT
+      const isTray = q.pricing_type === 'PER_TRAY'
+      return {
+        id: `oneseva-${q.id}`,
+        name: q.vendor.business_name,
+        service: serviceLabel(q.match?.event_request?.vendor_type ?? 'CATERER'),
+        source: 'OneSeva' as const,
+        price: !isTray && q.price_per_head
+          ? `${fmt(Number(q.price_per_head), q.currency)}/head`
+          : fmt(Number(q.total_estimate), q.currency),
+        status: q.status === 'ACCEPTED' ? 'Finalized' : statusCfg.label,
+        statusColor: q.status === 'ACCEPTED' ? 'text-green-700' : statusCfg.text,
+        statusBg: q.status === 'ACCEPTED' ? 'bg-green-50' : 'bg-cream',
+      }
+    }),
+    ...boardResponses.map(r => {
+      const statusCfg = BOARD_STATUS[r.status] ?? BOARD_STATUS.PENDING
+      const priceUnitLabel: Record<string, string> = {
+        per_head: '/head', per_event: '/event', per_hour: '/hr', per_day: '/day',
+      }
+      return {
+        id: `board-${r.id}`,
+        name: r.name,
+        service: serviceLabel(r.vendor_type),
+        source: 'Board' as const,
+        price: r.quoted_price
+          ? `$${Number(r.quoted_price).toLocaleString()}${priceUnitLabel[r.price_unit ?? ''] ?? ''}`
+          : r.price_note ?? '—',
+        status: r.status === 'ACCEPTED_RESPONSE' ? 'Finalized' : statusCfg.label,
+        statusColor: r.status === 'ACCEPTED_RESPONSE' ? 'text-green-700' : statusCfg.text,
+        statusBg: r.status === 'ACCEPTED_RESPONSE' ? 'bg-green-50' : statusCfg.bg,
+      }
+    }),
+  ].sort((a, b) => (PIPELINE_STATUS_ORDER[a.status] ?? 99) - (PIPELINE_STATUS_ORDER[b.status] ?? 99))
+
+  // Filter pipeline rows
+  const filteredPipeline = filterType === 'all'
+    ? pipelineRows
+    : pipelineRows.filter(r => r.service === serviceLabel(filterType))
+
   // ── Group everything by vendor_type ─────────────────────────────────────
   const allServiceTypes = Array.from(new Set([
     ...onesevQuotes.map(q => q.match?.event_request?.vendor_type ?? 'CATERER'),
@@ -762,11 +831,12 @@ export default function EventQuotesPage() {
     ? allServiceTypes
     : [filterType]
 
-  const totalCount = onesevQuotes.filter(q => q.status !== 'DRAFT').length + boardResponses.length
+  const totalCount = sentOneseva.length + boardResponses.length
+  const finalizedCount = pipelineRows.filter(r => r.status === 'Finalized').length
 
   if (loading) {
     return (
-      <div className="max-w-4xl">
+      <div className="max-w-5xl">
         <div className="flex items-center gap-1.5 text-sm text-text-4 mb-4">
           <Link href="/dashboard" className="hover:text-brand">My Events</Link>
           <ChevronRight className="h-3.5 w-3.5" />
@@ -783,11 +853,10 @@ export default function EventQuotesPage() {
     )
   }
 
-  const sentOneseva = onesevQuotes.filter(q => q.status !== 'DRAFT')
   const allEmpty = sentOneseva.length === 0 && boardResponses.length === 0
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-1.5 text-sm text-text-4 mb-6">
         <Link href="/dashboard" className="hover:text-brand">My Events</Link>
@@ -798,11 +867,12 @@ export default function EventQuotesPage() {
       </div>
 
       {/* Page header */}
-      <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
+      <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl sm:text-4xl font-black text-text-1 tracking-tight">Quotes & Responses</h1>
           <p className="text-text-3 mt-1">
-            {totalCount} total · {sentOneseva.length} from OneSeva · {boardResponses.length} from public board
+            {totalCount} total
+            {finalizedCount > 0 && <> · <span className="text-green-600 font-bold">{finalizedCount} finalized</span></>}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -829,6 +899,59 @@ export default function EventQuotesPage() {
         </div>
       </div>
 
+      {/* ── Vendor Pipeline Table ───────────────────────────────────────── */}
+      {!allEmpty && filteredPipeline.length > 0 && (
+        <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border overflow-hidden mb-8 shadow-sm">
+          <div className="px-5 py-3 border-b border-brand-border bg-cream flex items-center justify-between">
+            <h2 className="text-sm font-black text-text-1 uppercase tracking-wider">Vendor Pipeline</h2>
+            <span className="text-xs text-text-4">{filteredPipeline.length} vendor{filteredPipeline.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-brand-border">
+                  <th className="text-left px-5 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Vendor</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Service</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Source</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Price</th>
+                  <th className="text-center px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-brand-border/50">
+                {filteredPipeline.map(row => (
+                  <tr key={row.id} className={`transition-colors hover:bg-cream/50 ${row.status === 'Finalized' ? 'bg-green-50/30' : ''}`}>
+                    <td className="px-5 py-3">
+                      <span className="font-bold text-text-1">{row.name}</span>
+                    </td>
+                    <td className="px-4 py-3 text-text-3">{row.service}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        row.source === 'OneSeva' ? SOURCE_BADGE.oneseva :
+                        row.source === 'Board' ? SOURCE_BADGE.board :
+                        'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}>
+                        {row.source}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold text-text-1">{row.price}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${row.statusBg} border border-transparent`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          row.status === 'Finalized' ? 'bg-green-500' :
+                          row.status === 'Declined' ? 'bg-red-400' :
+                          'bg-blue-500'
+                        }`} />
+                        <span className={row.statusColor}>{row.status}</span>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Empty state */}
       {allEmpty && (
         <div className="bg-white dark:bg-cream-2 rounded-3xl border border-brand-border shadow-sm p-16 text-center">
@@ -845,7 +968,7 @@ export default function EventQuotesPage() {
         </div>
       )}
 
-      {/* Groups */}
+      {/* Detail cards grouped by service */}
       {!allEmpty && (
         <div className="space-y-8">
           {filteredServiceTypes.map((vendorType, idx) => {

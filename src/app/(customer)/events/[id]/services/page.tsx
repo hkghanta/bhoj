@@ -15,21 +15,28 @@ const ADDON_TYPES = new Set([
   'EQUIPMENT_RENTAL',                                     // → part of Logistics
 ])
 
-const SERVICE_CATEGORIES = [
-  { label: 'Food & Drink', types: ['CATERER'] },
-  { label: 'Photo & Video', types: ['PHOTOGRAPHER'] },
-  { label: 'Decor', types: ['DECORATOR'] },
-  { label: 'Music & Entertainment', types: ['DJ', 'MC_HOST'] },
-  { label: 'Beauty', types: ['MEHENDI_ARTIST', 'MAKEUP_HAIR'] },
-  { label: 'Ceremony & Stationery', types: ['PANDIT_OFFICIANT', 'INVITATION_DESIGNER'] },
-  { label: 'Logistics', types: ['TRANSPORT', 'SECURITY'] },
-]
+const VENDOR_TYPE_LABELS: Record<string, string> = {
+  CATERER: 'Catering',
+  DECORATOR: 'Decoration',
+  PHOTOGRAPHER: 'Photography',
+  DJ: 'DJ / Music',
+  MEHENDI_ARTIST: 'Mehendi Artist',
+  MAKEUP_HAIR: 'Makeup & Hair',
+  FLORIST: 'Florist',
+  MC_HOST: 'MC / Host',
+  PANDIT_OFFICIANT: 'Pandit / Officiant',
+  INVITATION_DESIGNER: 'Invitations',
+  TRANSPORT: 'Transport',
+  SECURITY: 'Security',
+}
 
 type ServiceItem = {
   vendor_type: string
   label: string
   icon: string
   matchCount: number
+  quoteCount: number
+  acceptedCount: number
   added: boolean
 }
 
@@ -45,16 +52,55 @@ export default async function ServicePickerPage({ params }: { params: Promise<{ 
   })
   if (!event) notFound()
 
-  const [enabledServices, eventRequests] = await Promise.all([
+  const [enabledServices, eventRequests, quotes, eventVendors] = await Promise.all([
     prisma.serviceConfig.findMany({
       where: { is_enabled: true },
       orderBy: { sort_order: 'asc' },
     }),
     prisma.eventRequest.findMany({
       where: { event_id: id },
-      include: { _count: { select: { matches: true } } },
+      include: {
+        _count: { select: { matches: true } },
+        matches: {
+          select: { id: true },
+        },
+      },
+    }),
+    prisma.quote.findMany({
+      where: {
+        match: { event_request: { event_id: id } },
+        status: { not: 'DRAFT' },
+      },
+      select: {
+        id: true,
+        status: true,
+        match: { select: { event_request: { select: { vendor_type: true } } } },
+      },
+    }),
+    prisma.eventVendor.findMany({
+      where: { event_id: id },
+      select: {
+        id: true,
+        vendor: { select: { vendor_type: true } },
+      },
     }),
   ])
+
+  // Count quotes and accepted per vendor type
+  const quotesByType: Record<string, number> = {}
+  const acceptedByType: Record<string, number> = {}
+  for (const q of quotes) {
+    const vt = q.match.event_request.vendor_type
+    quotesByType[vt] = (quotesByType[vt] ?? 0) + 1
+    if (q.status === 'ACCEPTED') {
+      acceptedByType[vt] = (acceptedByType[vt] ?? 0) + 1
+    }
+  }
+  // Also count event vendors
+  for (const ev of eventVendors) {
+    const vt = ev.vendor.vendor_type
+    acceptedByType[vt] = (acceptedByType[vt] ?? 0)
+  }
 
   const requestByType: Record<string, { matchCount: number }> = {}
   for (const r of eventRequests) {
@@ -63,124 +109,122 @@ export default async function ServicePickerPage({ params }: { params: Promise<{ 
 
   const addedTypes = new Set(eventRequests.map(r => r.vendor_type as string))
 
-  // Build a lookup of all services by vendor_type (exclude add-on types)
-  const serviceMap: Record<string, ServiceItem> = {}
+  // Build flat list of all services (no grouping)
+  const services: ServiceItem[] = []
+  const seenTypes = new Set<string>()
+
   for (const svc of enabledServices) {
     if (ADDON_TYPES.has(svc.vendor_type)) continue
-    serviceMap[svc.vendor_type] = {
+    if (seenTypes.has(svc.vendor_type)) continue
+    seenTypes.add(svc.vendor_type)
+    services.push({
       vendor_type: svc.vendor_type,
       label: svc.label,
       icon: svc.icon,
       matchCount: requestByType[svc.vendor_type]?.matchCount ?? 0,
+      quoteCount: quotesByType[svc.vendor_type] ?? 0,
+      acceptedCount: acceptedByType[svc.vendor_type] ?? 0,
       added: addedTypes.has(svc.vendor_type as string),
-    }
+    })
   }
   // Add orphaned requests that aren't add-ons
   for (const r of eventRequests) {
     if (ADDON_TYPES.has(r.vendor_type)) continue
-    if (!serviceMap[r.vendor_type]) {
-      serviceMap[r.vendor_type] = {
-        vendor_type: r.vendor_type,
-        label: (r.vendor_type as string).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-        icon: '📋',
-        matchCount: r._count.matches,
-        added: true,
-      }
-    }
+    if (seenTypes.has(r.vendor_type)) continue
+    seenTypes.add(r.vendor_type)
+    services.push({
+      vendor_type: r.vendor_type,
+      label: VENDOR_TYPE_LABELS[r.vendor_type] ?? (r.vendor_type as string).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+      icon: '📋',
+      matchCount: r._count.matches,
+      quoteCount: quotesByType[r.vendor_type] ?? 0,
+      acceptedCount: acceptedByType[r.vendor_type] ?? 0,
+      added: true,
+    })
   }
 
-  const addedCount = Object.values(serviceMap).filter(s => s.added).length
-  const availableCount = Object.values(serviceMap).filter(s => !s.added).length
+  // Sort: added first, then alphabetical
+  services.sort((a, b) => {
+    if (a.added && !b.added) return -1
+    if (!a.added && b.added) return 1
+    return a.label.localeCompare(b.label)
+  })
 
-  // Group services by category
-  const allTypes = new Set(Object.keys(serviceMap))
-  const categories = SERVICE_CATEGORIES
-    .map(cat => ({
-      label: cat.label,
-      services: cat.types
-        .filter(t => allTypes.has(t))
-        .map(t => serviceMap[t])
-        .filter(Boolean),
-    }))
-    .filter(cat => cat.services.length > 0)
+  const addedCount = services.filter(s => s.added).length
 
-  // Catch any services not in any category
-  const categorizedTypes = new Set(SERVICE_CATEGORIES.flatMap(c => c.types))
-  const uncategorized = Object.values(serviceMap).filter(s => !categorizedTypes.has(s.vendor_type))
-  if (uncategorized.length > 0) {
-    categories.push({ label: 'Other', services: uncategorized })
+  function statusInfo(svc: ServiceItem) {
+    if (svc.acceptedCount > 0) return { label: 'Finalized', color: 'text-green-600', bg: 'bg-green-50', icon: '✅' }
+    if (svc.quoteCount > 0) return { label: `${svc.quoteCount} quote${svc.quoteCount > 1 ? 's' : ''}`, color: 'text-purple-600', bg: 'bg-purple-50', icon: '💬' }
+    if (svc.matchCount > 0) return { label: `${svc.matchCount} matched`, color: 'text-brand', bg: 'bg-cream', icon: '🔍' }
+    if (svc.added) return { label: 'Posted', color: 'text-amber-600', bg: 'bg-amber-50', icon: '📝' }
+    return null
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-text-4">
         <Link href="/dashboard" className="hover:text-brand transition-colors">My Events</Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
         <Link href={`/events/${id}`} className="hover:text-brand transition-colors">{event.event_name}</Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-        <span className="text-text-2 font-medium" aria-current="page">Services</span>
+        <span className="text-text-2 font-medium" aria-current="page">Requirements</span>
       </nav>
 
       <div>
-        <h1 className="text-4xl font-black tracking-tight text-text-1">Services</h1>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-text-1">Requirements</h1>
         <p className="text-sm text-text-3 mt-1">
           {addedCount > 0
-            ? `${addedCount} service${addedCount > 1 ? 's' : ''} added${availableCount > 0 ? ' — tap + to add more' : ''}`
-            : 'Select a service to add requirements and find vendors'}
+            ? `${addedCount} service${addedCount > 1 ? 's' : ''} posted — tap any to update requirements or find vendors`
+            : 'Post your requirements to start finding vendors'}
         </p>
       </div>
 
-      {/* Services grouped by category */}
-      <div className="space-y-8">
-        {categories.map(cat => (
-          <section key={cat.label}>
-            <h2 className="text-lg font-black text-text-1 mb-3">{cat.label}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {cat.services.map(svc => {
-                const slug = vendorTypeToSlug(svc.vendor_type)
-                if (svc.added) {
-                  return (
-                    <Link
-                      key={svc.vendor_type}
-                      href={`/events/${id}/services/${slug}`}
-                      className="group flex items-start gap-3 rounded-2xl border border-brand-border bg-white dark:bg-cream-2 p-4 hover:border-brand hover:shadow-sm transition-all"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center text-xl flex-shrink-0">
-                        {svc.icon}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-bold text-text-1 group-hover:text-brand transition-colors">{svc.label}</span>
-                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
-                        </div>
-                        {svc.matchCount > 0 ? (
-                          <span className="text-xs font-bold text-brand">{svc.matchCount} vendor{svc.matchCount > 1 ? 's' : ''} matched</span>
-                        ) : (
-                          <span className="text-xs text-text-4">Requirements submitted</span>
-                        )}
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-text-4 flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Link>
-                  )
-                }
-                return (
-                  <Link
-                    key={svc.vendor_type}
-                    href={`/events/${id}/services/${slug}`}
-                    className="group flex items-center gap-3 rounded-2xl border border-dashed border-brand-border bg-white dark:bg-cream-2 p-4 hover:border-brand hover:bg-cream transition-all"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center text-xl flex-shrink-0">
-                      {svc.icon}
-                    </div>
-                    <span className="text-sm font-bold text-text-3 group-hover:text-text-1 transition-colors flex-1">{svc.label}</span>
-                    <Plus className="h-4 w-4 text-text-4 group-hover:text-brand transition-colors flex-shrink-0" />
-                  </Link>
-                )
-              })}
-            </div>
-          </section>
-        ))}
+      {/* Flat grid — no category grouping */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {services.map(svc => {
+          const slug = vendorTypeToSlug(svc.vendor_type)
+          const status = statusInfo(svc)
+
+          if (svc.added) {
+            return (
+              <Link
+                key={svc.vendor_type}
+                href={`/events/${id}/services/${slug}`}
+                className="group flex items-start gap-3 rounded-2xl border border-brand-border bg-white dark:bg-cream-2 p-4 hover:border-brand hover:shadow-sm transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center text-xl flex-shrink-0">
+                  {svc.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-text-1 group-hover:text-brand transition-colors">{svc.label}</span>
+                    {svc.acceptedCount > 0 && <CheckCircle2 className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />}
+                  </div>
+                  {status && (
+                    <span className={`inline-flex items-center gap-1 text-xs font-bold mt-1 px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
+                      {status.label}
+                    </span>
+                  )}
+                </div>
+                <ArrowRight className="h-4 w-4 text-text-4 flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+            )
+          }
+          return (
+            <Link
+              key={svc.vendor_type}
+              href={`/events/${id}/services/${slug}`}
+              className="group flex items-center gap-3 rounded-2xl border border-dashed border-brand-border bg-white dark:bg-cream-2 p-4 hover:border-brand hover:bg-cream transition-all"
+            >
+              <div className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center text-xl flex-shrink-0">
+                {svc.icon}
+              </div>
+              <span className="text-sm font-bold text-text-3 group-hover:text-text-1 transition-colors flex-1">{svc.label}</span>
+              <Plus className="h-4 w-4 text-text-4 group-hover:text-brand transition-colors flex-shrink-0" />
+            </Link>
+          )
+        })}
       </div>
 
       <div className="pt-2">

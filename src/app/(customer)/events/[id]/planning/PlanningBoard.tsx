@@ -37,7 +37,7 @@ type PlatformVendor = {
 
 type PlanItem = {
   id: string
-  source: 'EXTERNAL' | 'PERSONAL'
+  source: 'PLATFORM' | 'EXTERNAL' | 'PERSONAL'
   title: string
   role: string | null
   contact_name: string | null
@@ -168,7 +168,7 @@ function PlanItemForm({
   onCancel: () => void
   saving: boolean
 }) {
-  const [source, setSource] = useState<'EXTERNAL' | 'PERSONAL'>(initial?.source ?? 'EXTERNAL')
+  const [source, setSource] = useState<'EXTERNAL' | 'PERSONAL'>(initial?.source === 'PERSONAL' ? 'PERSONAL' : 'EXTERNAL')
   const [title, setTitle] = useState(initial?.title ?? '')
   const [role, setRole] = useState(initial?.role ?? '')
   const [contactName, setContactName] = useState(initial?.contact_name ?? '')

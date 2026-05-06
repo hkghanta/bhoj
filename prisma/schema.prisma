@@ -107,6 +107,7 @@ model Vendor {
   cancellation_preset    CancellationPreset?   @relation(fields: [cancellation_preset_id], references: [id])
   custom_station_templates StationTemplate[]   @relation("CustomStationTemplates")
   event_vendors          EventVendor[]
+  plan_items             EventPlanItem[]
   claimed_external       ExternalVendor?
 }
 
@@ -1662,7 +1663,8 @@ model EventTimelineEntry {
 model EventPlanItem {
   id            String    @id @default(cuid())
   event_id      String
-  source        String    // "EXTERNAL" or "PERSONAL"
+  source        String    // "PLATFORM", "EXTERNAL" or "PERSONAL"
+  vendor_id     String?   // links to platform Vendor when source = "PLATFORM"
   title         String    // "Rose & Bloom Decorators" or "Bring garlands from home"
   role          String?   // "Decorator", "Cake", "Flowers", etc.
   contact_name  String?
@@ -1676,8 +1678,10 @@ model EventPlanItem {
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
   event           Event                @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  vendor          Vendor?              @relation(fields: [vendor_id], references: [id])
   checklist_items EventChecklistItem[]
 
+  @@unique([event_id, vendor_id])
   @@index([event_id])
 }
 

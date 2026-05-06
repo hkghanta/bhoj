@@ -58,9 +58,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     orderBy: { created_at: 'asc' },
   })
 
-  // External vendors + personal helpers
+  // External vendors + personal helpers (exclude PLATFORM items — they come via eventVendors)
   const planItems = await prisma.eventPlanItem.findMany({
-    where: { event_id: id },
+    where: { event_id: id, vendor_id: null },
     orderBy: [{ sort_order: 'asc' }, { start_time: 'asc' }, { created_at: 'asc' }],
   })
 
