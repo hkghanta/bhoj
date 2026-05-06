@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import {
   Clock, MapPin, Phone, Mail, User, Plus, Pencil, Trash2, Loader2,
   Printer, Building2, UserCheck, Heart, ChevronDown, ChevronUp, X,
+  Check, Circle, CalendarDays, LinkIcon,
 } from 'lucide-react'
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -59,6 +60,21 @@ type TimelineEntry = {
   location: string | null
 }
 
+type ChecklistItem = {
+  id: string
+  category: string
+  item_name: string
+  status: string // PENDING, SEARCHING, SHORTLISTED, FINALIZED, NOT_NEEDED
+  due_date: string | null
+  notes: string | null
+  external_vendor_name: string | null
+  external_vendor_phone: string | null
+  linked_plan_item_id: string | null
+  linked_plan_item: { id: string; title: string } | null
+}
+
+type ReadinessMap = Record<string, { done: number; total: number }>
+
 // Unified item for display
 type UnifiedItem = {
   id: string
@@ -108,6 +124,21 @@ const SOURCE_STYLES = {
   PLATFORM: { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-700', label: 'OneSeva', icon: Building2 },
   EXTERNAL: { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-700', label: 'External', icon: UserCheck },
   PERSONAL: { bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-100 text-purple-700', label: 'Personal', icon: Heart },
+}
+
+const CHECKLIST_CATEGORIES: Record<string, string> = {
+  'Food & Drink': '\u{1F37D}', 'Venue & Decor': '\u{1F338}', 'Photography': '\u{1F4F7}',
+  'Entertainment': '\u{1F3B5}', 'Beauty & Wellness': '\u{1F484}', 'Ceremony': '\u{1F64F}', 'Admin': '\u{1F4CB}',
+}
+
+const CHECKLIST_CATEGORY_LIST = Object.keys(CHECKLIST_CATEGORIES)
+
+const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  PENDING: { bg: 'bg-gray-100', text: 'text-gray-600', label: 'Pending' },
+  SEARCHING: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Searching' },
+  SHORTLISTED: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Shortlisted' },
+  FINALIZED: { bg: 'bg-green-100', text: 'text-green-700', label: 'Finalized' },
+  NOT_NEEDED: { bg: 'bg-gray-50', text: 'text-gray-400', label: 'Not Needed' },
 }
 
 function formatTime(iso: string) {
@@ -262,6 +293,94 @@ function PlanItemForm({
   )
 }
 
+// ── Task Form ──────────────────────────────────────────────────────────────
+
+function TaskForm({
+  planItems,
+  onSave,
+  onCancel,
+  saving,
+}: {
+  planItems: PlanItem[]
+  onSave: (data: { item_name: string; category: string; due_date: string | null; notes: string | null; linked_plan_item_id: string | null }) => void
+  onCancel: () => void
+  saving: boolean
+}) {
+  const [itemName, setItemName] = useState('')
+  const [category, setCategory] = useState(CHECKLIST_CATEGORY_LIST[0])
+  const [dueDate, setDueDate] = useState('')
+  const [notes, setNotes] = useState('')
+  const [linkedPlanItemId, setLinkedPlanItemId] = useState('')
+
+  const inputCls = 'w-full rounded-xl border-2 border-brand-border px-3.5 py-2.5 text-sm focus:border-brand/40 focus:ring-2 focus:ring-brand/20 outline-none bg-white dark:bg-cream-2 text-text-1 placeholder:text-text-4'
+
+  return (
+    <div className="bg-white dark:bg-cream-2 rounded-2xl border-2 border-brand-border p-6 shadow-sm mb-6">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-lg font-black text-text-1">Add Task</h3>
+        <button onClick={onCancel} className="p-1.5 rounded-lg hover:bg-cream"><X className="h-4 w-4 text-text-4" /></button>
+      </div>
+      <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-bold text-text-2 mb-1.5">Task Name *</label>
+            <input className={inputCls} value={itemName} onChange={e => setItemName(e.target.value)}
+              placeholder="e.g. Book photographer, Order flowers" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-text-2 mb-1.5">Category</label>
+            <select className={inputCls} value={category} onChange={e => setCategory(e.target.value)}>
+              {CHECKLIST_CATEGORY_LIST.map(cat => (
+                <option key={cat} value={cat}>{CHECKLIST_CATEGORIES[cat]} {cat}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label className="block text-sm font-bold text-text-2 mb-1.5">Due Date</label>
+            <input type="date" className={inputCls} value={dueDate} onChange={e => setDueDate(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-text-2 mb-1.5">Link to Plan Item</label>
+            <select className={inputCls} value={linkedPlanItemId} onChange={e => setLinkedPlanItemId(e.target.value)}>
+              <option value="">None</option>
+              {planItems.map(pi => (
+                <option key={pi.id} value={pi.id}>{pi.title}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-text-2 mb-1.5">Notes</label>
+            <input className={inputCls} value={notes} onChange={e => setNotes(e.target.value)}
+              placeholder="Optional notes" />
+          </div>
+        </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <button type="button" onClick={onCancel}
+            className="px-4 py-2.5 rounded-xl border-2 border-brand-border text-sm font-bold text-text-3 hover:bg-cream transition-colors">
+            Cancel
+          </button>
+          <button type="button" disabled={saving || !itemName.trim()} onClick={() => {
+            onSave({
+              item_name: itemName.trim(),
+              category,
+              due_date: dueDate ? new Date(dueDate).toISOString() : null,
+              notes: notes || null,
+              linked_plan_item_id: linkedPlanItemId || null,
+            })
+          }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors disabled:opacity-60"
+            style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            Add Task
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main Component ──────────────────────────────────────────────────────────
 
 export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, guestCount, currency }: Props) {
@@ -269,13 +388,17 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
   const [platformVendors, setPlatformVendors] = useState<PlatformVendor[]>([])
   const [planItems, setPlanItems] = useState<PlanItem[]>([])
   const [timelineEntries, setTimelineEntries] = useState<TimelineEntry[]>([])
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([])
+  const [readiness, setReadiness] = useState<ReadinessMap>({})
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState<PlanItem | null>(null)
   const [saving, setSaving] = useState(false)
-  const [view, setView] = useState<'board' | 'timeline'>('board')
+  const [view, setView] = useState<'todo' | 'board' | 'timeline'>('todo')
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [printMode, setPrintMode] = useState<'summary' | 'details' | null>(null)
   const printRef = useRef<HTMLDivElement>(null)
+  const [showTaskForm, setShowTaskForm] = useState(false)
+  const [savingTask, setSavingTask] = useState(false)
 
   async function fetchData() {
     setLoading(true)
@@ -286,6 +409,8 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
       setPlatformVendors(data.platform_vendors)
       setPlanItems(data.plan_items)
       setTimelineEntries(data.timeline_entries)
+      setChecklistItems(data.checklist_items ?? [])
+      setReadiness(data.readiness ?? {})
     } catch { /* ignore */ } finally {
       setLoading(false)
     }
@@ -323,6 +448,45 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
       await fetch(`/api/events/${eventId}/plan-items/${itemId}`, { method: 'DELETE' })
       fetchData()
     } catch { /* ignore */ }
+  }
+
+  async function toggleChecklistStatus(item: ChecklistItem) {
+    const newStatus = item.status === 'FINALIZED' ? 'PENDING' : 'FINALIZED'
+    try {
+      await fetch(`/api/events/${eventId}/checklist/${item.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      fetchData()
+    } catch { /* ignore */ }
+  }
+
+  async function updateChecklistLink(itemId: string, linkedPlanItemId: string | null) {
+    try {
+      await fetch(`/api/events/${eventId}/checklist/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ linked_plan_item_id: linkedPlanItemId }),
+      })
+      fetchData()
+    } catch { /* ignore */ }
+  }
+
+  async function handleAddTask(data: { item_name: string; category: string; due_date: string | null; notes: string | null; linked_plan_item_id: string | null }) {
+    setSavingTask(true)
+    try {
+      const res = await fetch(`/api/events/${eventId}/checklist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error()
+      setShowTaskForm(false)
+      fetchData()
+    } catch { /* ignore */ } finally {
+      setSavingTask(false)
+    }
   }
 
   function toggleExpand(id: string) {
@@ -378,7 +542,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
   }
 
   return (
-    <div>
+    <div className="w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
@@ -393,12 +557,12 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
             </button>
             {printMode !== null && (
               <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-cream-2 rounded-xl border-2 border-brand-border shadow-lg z-20 overflow-hidden">
-                <button onClick={() => { setPrintMode('summary'); setTimeout(() => { window.print(); setPrintMode(null) }, 100) }}
+                <button onClick={() => { setPrintMode('summary'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
                   className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors border-b border-brand-border/40">
                   <p className="font-bold text-text-1">Summary</p>
-                  <p className="text-xs text-text-4">Compact 2-line per item</p>
+                  <p className="text-xs text-text-4">Compact table view</p>
                 </button>
-                <button onClick={() => { setPrintMode('details'); setTimeout(() => { window.print(); setPrintMode(null) }, 100) }}
+                <button onClick={() => { setPrintMode('details'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
                   className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors">
                   <p className="font-bold text-text-1">Full Details</p>
                   <p className="text-xs text-text-4">Contact, notes, everything</p>
@@ -406,22 +570,28 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
               </div>
             )}
           </div>
-          <button onClick={() => { setEditItem(null); setShowForm(true) }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors print:hidden"
-            style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
-            <Plus className="h-4 w-4" /> Add Item
-          </button>
+          {view !== 'todo' && (
+            <button onClick={() => { setEditItem(null); setShowForm(true) }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors print:hidden"
+              style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
+              <Plus className="h-4 w-4" /> Add Item
+            </button>
+          )}
         </div>
       </div>
 
       {/* View toggle */}
       <div className="flex gap-2 mb-6 print:hidden">
-        {(['board', 'timeline'] as const).map(v => (
-          <button key={v} onClick={() => setView(v)}
+        {([
+          { key: 'todo', label: 'To-Do List' },
+          { key: 'board', label: 'Event Day' },
+          { key: 'timeline', label: 'Timeline' },
+        ] as const).map(v => (
+          <button key={v.key} onClick={() => setView(v.key as 'todo' | 'board' | 'timeline')}
             className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
-              view === v ? 'bg-text-1 text-white' : 'bg-cream text-text-3 hover:bg-cream-2'
+              view === v.key ? 'bg-text-1 text-white' : 'bg-cream text-text-3 hover:bg-cream-2'
             }`}>
-            {v === 'board' ? 'All Items' : 'Timeline View'}
+            {v.label}
           </button>
         ))}
       </div>
@@ -493,7 +663,124 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         </table>
       )}
 
-      {sorted.length === 0 ? (
+      {/* ── To-Do List View ──────────────────────────────────────── */}
+      {view === 'todo' && (
+        <div className="print:hidden">
+          {/* Add Task button */}
+          {!showTaskForm && (
+            <button onClick={() => setShowTaskForm(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors mb-6"
+              style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
+              <Plus className="h-4 w-4" /> Add Task
+            </button>
+          )}
+
+          {/* Inline add task form */}
+          {showTaskForm && (
+            <TaskForm
+              planItems={planItems}
+              onSave={handleAddTask}
+              onCancel={() => setShowTaskForm(false)}
+              saving={savingTask}
+            />
+          )}
+
+          {checklistItems.length === 0 ? (
+            <div className="text-center py-16 border-2 border-dashed border-brand-border rounded-2xl">
+              <Circle className="h-10 w-10 text-text-4 mx-auto mb-3" />
+              <p className="text-base text-text-3 font-bold">No tasks yet</p>
+              <p className="text-sm text-text-4 mt-1">
+                Add pre-event tasks like booking vendors, ordering decorations, confirming menus.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {Object.entries(
+                checklistItems.reduce<Record<string, ChecklistItem[]>>((acc, item) => {
+                  const cat = item.category || 'Other'
+                  if (!acc[cat]) acc[cat] = []
+                  acc[cat].push(item)
+                  return acc
+                }, {})
+              ).map(([category, items]) => (
+                <div key={category}>
+                  <h3 className="text-sm font-black text-text-2 mb-3 flex items-center gap-2">
+                    <span>{CHECKLIST_CATEGORIES[category] || '\u{1F4CB}'}</span> {category}
+                    <span className="text-xs font-medium text-text-4">
+                      ({items.filter(i => i.status === 'FINALIZED').length}/{items.length} done)
+                    </span>
+                  </h3>
+                  <div className="space-y-2">
+                    {items.map(item => {
+                      const ss = STATUS_STYLES[item.status] || STATUS_STYLES.PENDING
+                      const isDone = item.status === 'FINALIZED'
+                      return (
+                        <div key={item.id} className={`rounded-xl border-2 ${isDone ? 'border-green-200 bg-green-50/50' : 'border-brand-border bg-white dark:bg-cream-2'} p-3 flex items-start gap-3 transition-colors`}>
+                          {/* Checkbox */}
+                          <button onClick={() => toggleChecklistStatus(item)}
+                            className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                              isDone ? 'bg-green-500 border-green-500 text-white' : 'border-brand-border hover:border-brand/40'
+                            }`}>
+                            {isDone && <Check className="h-3 w-3" />}
+                          </button>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`font-bold text-sm ${isDone ? 'line-through text-text-4' : 'text-text-1'}`}>
+                                {item.item_name}
+                              </span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ss.bg} ${ss.text}`}>
+                                {ss.label}
+                              </span>
+                              {item.linked_plan_item && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 flex items-center gap-1">
+                                  <LinkIcon className="h-2.5 w-2.5" /> {item.linked_plan_item.title}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-text-4 flex-wrap">
+                              {item.due_date && (
+                                <span className="flex items-center gap-1">
+                                  <CalendarDays className="h-3 w-3" />
+                                  {new Date(item.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </span>
+                              )}
+                              {item.external_vendor_name && (
+                                <span className="flex items-center gap-1">
+                                  <User className="h-3 w-3" /> {item.external_vendor_name}
+                                </span>
+                              )}
+                              {item.notes && (
+                                <span className="text-text-4 truncate max-w-[200px]">{item.notes}</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Link dropdown */}
+                          <select
+                            value={item.linked_plan_item_id || ''}
+                            onChange={e => updateChecklistLink(item.id, e.target.value || null)}
+                            className="text-xs rounded-lg border border-brand-border px-2 py-1 bg-white dark:bg-cream-2 text-text-3 max-w-[140px] truncate"
+                            title="Link to plan item"
+                          >
+                            <option value="">No link</option>
+                            {planItems.map(pi => (
+                              <option key={pi.id} value={pi.id}>{pi.title}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {view !== 'todo' && sorted.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed border-brand-border rounded-2xl print:hidden">
           <User className="h-10 w-10 text-text-4 mx-auto mb-3" />
           <p className="text-base text-text-3 font-bold">No items in your plan yet</p>
@@ -504,10 +791,32 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
       ) : view === 'board' ? (
         /* ── Board View ─────────────────────────────────────────────── */
         <div className={`space-y-3 ${printMode === 'summary' ? 'print:hidden' : ''}`}>
+          {/* Readiness summary bar */}
+          {(() => {
+            const readinessEntries = Object.values(readiness)
+            if (readinessEntries.length === 0) return null
+            const totalReady = readinessEntries.filter(r => r.done === r.total).length
+            const totalItems = readinessEntries.length
+            const pct = Math.round((totalReady / totalItems) * 100)
+            return (
+              <div className="rounded-2xl border-2 border-brand-border bg-cream p-4 mb-3 print:hidden">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-black text-text-1">{totalReady}/{totalItems} items ready</span>
+                  <span className="text-xs font-bold text-text-3">{pct}%</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-brand-border/40 overflow-hidden">
+                  <div className="h-full rounded-full bg-green-500 transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            )
+          })()}
           {sorted.map(item => {
             const st = SOURCE_STYLES[item.source]
             const Icon = st.icon
             const isExpanded = expanded[item.id]
+            // Readiness badge for plan items
+            const realPlanId = item.source !== 'PLATFORM' ? item.id.replace('pi-', '') : null
+            const itemReadiness = realPlanId ? readiness[realPlanId] : null
 
             return (
               <div key={item.id} className={`rounded-2xl border-2 ${st.border} ${st.bg} overflow-hidden transition-shadow hover:shadow-md print:border print:shadow-none`}>
@@ -528,6 +837,15 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                       <h3 className="font-black text-text-1 text-base">{item.title}</h3>
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${st.badge}`}>{st.label}</span>
                       {item.role && <span className="text-xs font-semibold text-text-3 bg-white/60 px-2 py-0.5 rounded-full">{item.role}</span>}
+                      {itemReadiness && (
+                        itemReadiness.done === itemReadiness.total ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">Ready ✓</span>
+                        ) : itemReadiness.done > 0 ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{itemReadiness.done}/{itemReadiness.total} tasks done</span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-600">Not ready</span>
+                        )
+                      )}
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-sm text-text-3 flex-wrap">
                       {item.start_time && (
@@ -657,21 +975,21 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
             )
           })}
         </div>
-      ) : (
+      ) : view === 'timeline' ? (
         /* ── Timeline View ──────────────────────────────────────────── */
-        <div className="relative pl-8">
+        <div className={`relative pl-8 w-full ${printMode === 'summary' ? 'print:hidden' : ''}`}>
           <div className="absolute left-3.5 top-0 bottom-0 w-0.5 bg-brand-border" />
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             {withTime.map(item => {
               const st = SOURCE_STYLES[item.source]
 
               return (
-                <div key={item.id} className="relative">
+                <div key={item.id} className="relative w-full">
                   <div className={`absolute -left-[18px] top-5 w-4 h-4 rounded-full border-2 border-white shadow-sm ${
                     item.source === 'PLATFORM' ? 'bg-blue-500' : item.source === 'EXTERNAL' ? 'bg-amber-500' : 'bg-purple-500'
                   }`} />
-                  <div className={`rounded-2xl border-2 ${st.border} bg-white p-4 shadow-sm`}>
-                    <div className="flex items-center gap-2 text-sm text-text-3 mb-1">
+                  <div className={`rounded-2xl border-2 ${st.border} bg-white p-4 shadow-sm w-full`}>
+                    <div className="flex items-center gap-2 text-sm text-text-3 mb-2">
                       <Clock className="h-3.5 w-3.5" />
                       <span className="font-bold text-text-1">
                         {formatTime(item.start_time!)}
@@ -679,14 +997,20 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                       </span>
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${st.badge}`}>{st.label}</span>
                     </div>
-                    <h3 className="font-black text-text-1">{item.title}</h3>
-                    {item.role && <p className="text-sm text-text-3">{item.role}</p>}
-                    <div className="flex items-center gap-3 mt-2 text-xs text-text-3 flex-wrap">
-                      {item.contact_name && <span className="flex items-center gap-1"><User className="h-3 w-3" /> {item.contact_name}</span>}
-                      {item.contact_phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {item.contact_phone}</span>}
-                      {item.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {item.location}</span>}
+                    <div className="flex items-start justify-between gap-6">
+                      <div className="min-w-0">
+                        <h3 className="font-black text-text-1">{item.title}</h3>
+                        {item.role && <p className="text-sm text-text-3">{item.role}</p>}
+                        {item.notes && <p className="text-xs text-text-4 mt-1.5">{item.notes}</p>}
+                      </div>
+                      {(item.contact_name || item.contact_phone || item.location) && (
+                        <div className="flex-shrink-0 text-right space-y-1 text-xs text-text-3">
+                          {item.contact_name && <p className="flex items-center justify-end gap-1 font-medium text-text-2"><User className="h-3 w-3" /> {item.contact_name}</p>}
+                          {item.contact_phone && <p className="flex items-center justify-end gap-1"><Phone className="h-3 w-3" /> {item.contact_phone}</p>}
+                          {item.location && <p className="flex items-center justify-end gap-1"><MapPin className="h-3 w-3" /> {item.location}</p>}
+                        </div>
+                      )}
                     </div>
-                    {item.notes && <p className="text-xs text-text-4 mt-2">{item.notes}</p>}
                   </div>
                 </div>
               )
@@ -715,11 +1039,11 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
             </div>
           )}
         </div>
-      )}
+      ) : null}
 
       {/* Summary footer */}
       {sorted.length > 0 && (
-        <div className="mt-8 p-4 rounded-2xl bg-cream border-2 border-brand-border/60">
+        <div className="mt-8 p-4 rounded-2xl bg-cream border-2 border-brand-border/60 print:hidden">
           <div className="flex flex-wrap gap-6 text-sm">
             <div>
               <span className="text-text-4 font-medium">Total items</span>

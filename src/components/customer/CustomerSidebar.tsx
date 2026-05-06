@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   CalendarDays, Store, FileText, MessageSquare,
-  ListChecks, CalendarPlus, ChevronLeft,
+  CalendarPlus, ChevronLeft,
   LayoutDashboard, LogOut, User, Mail,
   Globe, LayoutGrid, CreditCard, Gift, Search,
   ClipboardList,
@@ -23,7 +23,7 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
 
   const topNav = [
     { href: '/dashboard', label: 'My Events', icon: LayoutDashboard },
-    { href: '/contacts', label: 'My Guests', icon: Mail },
+    { href: '/contacts', label: 'Guest Book', icon: Mail },
     { href: '/messages', label: 'Messages', icon: MessageSquare },
     { href: '/profile', label: 'Profile', icon: User },
   ]
@@ -34,7 +34,7 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
   ] : []
 
   const vendorNav = eventId ? [
-    { href: `/events/${eventId}/services`,    label: 'Services',       icon: Store },
+    { href: `/events/${eventId}/services`,    label: 'Requirements',   icon: Store },
     { href: `/events/${eventId}/vendors`,     label: 'Find Vendors',   icon: Search },
     { href: `/events/${eventId}/quotes`,      label: 'Quotes',         icon: FileText },
   ] : []
@@ -47,7 +47,6 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
 
   const planningNav = eventId ? [
     { href: `/events/${eventId}/planning`,         label: 'Event Plan',     icon: ClipboardList },
-    { href: `/events/${eventId}/checklist`,        label: 'Checklist',      icon: ListChecks },
     { href: `/events/${eventId}/seating`,          label: 'Seating',        icon: LayoutGrid },
     { href: `/events/${eventId}/payment-schedule`, label: 'Payments',       icon: CreditCard },
     { href: `/events/${eventId}/registry`,         label: 'Gift Registry',  icon: Gift },

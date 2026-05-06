@@ -9,6 +9,9 @@ const createSchema = z.object({
   external_vendor_name: z.string().optional(),
   external_vendor_phone: z.string().optional(),
   external_vendor_email: z.string().email().optional().or(z.literal('')),
+  linked_plan_item_id: z.string().optional().nullable(),
+  due_date: z.string().datetime().optional().nullable(),
+  notes: z.string().optional().nullable(),
 })
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -25,8 +28,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const parsed = createSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
 
+  const createData: Record<string, unknown> = { ...parsed.data, event_id: id, status: 'PENDING' }
+  if (parsed.data.due_date) createData.due_date = new Date(parsed.data.due_date)
+
   const item = await prisma.eventChecklistItem.create({
-    data: { ...parsed.data, event_id: id, status: 'PENDING' },
+    data: createData as any,
   })
 
   return NextResponse.json(item, { status: 201 })

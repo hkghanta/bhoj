@@ -70,10 +70,32 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     orderBy: { start_time: 'asc' },
   })
 
+  // Checklist items
+  const checklistItems = await prisma.eventChecklistItem.findMany({
+    where: { event_id: id },
+    include: { linked_plan_item: { select: { id: true, title: true } } },
+    orderBy: [{ category: 'asc' }, { created_at: 'asc' }],
+  })
+
+  // Readiness: for each plan item that has linked checklist items, compute done vs total
+  const readiness: Record<string, { done: number; total: number }> = {}
+  for (const ci of checklistItems) {
+    if (!ci.linked_plan_item_id) continue
+    if (!readiness[ci.linked_plan_item_id]) {
+      readiness[ci.linked_plan_item_id] = { done: 0, total: 0 }
+    }
+    readiness[ci.linked_plan_item_id].total++
+    if (ci.status === 'FINALIZED') {
+      readiness[ci.linked_plan_item_id].done++
+    }
+  }
+
   return NextResponse.json({
     event,
     platform_vendors: eventVendors,
     plan_items: planItems,
     timeline_entries: timelineEntries,
+    checklist_items: checklistItems,
+    readiness,
   })
 }

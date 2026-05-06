@@ -17,7 +17,15 @@ const updateSchema = z.object({
   balance_due_date: z.string().datetime().optional().nullable(),
   notes: z.string().optional().nullable(),
   due_date: z.string().datetime().optional().nullable(),
+  linked_plan_item_id: z.string().optional().nullable(),
 })
+
+export async function PATCH(
+  req: NextRequest,
+  ctx: { params: Promise<{ id: string; itemId: string }> }
+) {
+  return PUT(req, ctx)
+}
 
 export async function PUT(
   req: NextRequest,

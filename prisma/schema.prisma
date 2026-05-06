@@ -259,8 +259,10 @@ model EventChecklistItem {
   sub_event_id          String?
   oneseva_vendor_id     String?
   vendor_type           VendorType?
+  linked_plan_item_id   String?
   event                 Event           @relation(fields: [event_id], references: [id], onDelete: Cascade)
   sub_event             SubEvent?       @relation(fields: [sub_event_id], references: [id])
+  linked_plan_item      EventPlanItem?  @relation(fields: [linked_plan_item_id], references: [id], onDelete: SetNull)
 
   @@index([sub_event_id])
 }
@@ -1673,7 +1675,8 @@ model EventPlanItem {
   sort_order    Int       @default(0)
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
-  event         Event     @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  event           Event                @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  checklist_items EventChecklistItem[]
 
   @@index([event_id])
 }
