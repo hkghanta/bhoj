@@ -405,7 +405,8 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
     try {
       const res = await fetch(`/api/events/${eventId}/planning`)
       if (!res.ok) {
-        console.error('[PlanningBoard] fetchData failed:', res.status, await res.text().catch(() => ''))
+        const errBody = await res.json().catch(() => ({}))
+        console.error('[PlanningBoard] fetchData failed:', res.status, errBody)
         return
       }
       const data = await res.json()
