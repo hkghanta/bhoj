@@ -72,3 +72,24 @@ export async function PUT(
 
   return NextResponse.json(item)
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string; itemId: string }> }
+) {
+  const session = await auth()
+  if (!session || (session.user as any).role !== 'customer') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { id, itemId } = await params
+
+  const event = await prisma.event.findFirst({
+    where: { id, customer_id: (session.user!.id as string) },
+  })
+  if (!event) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  await prisma.eventChecklistItem.delete({ where: { id: itemId } })
+
+  return NextResponse.json({ deleted: true })
+}

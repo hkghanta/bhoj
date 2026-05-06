@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import {
   Clock, MapPin, Phone, Mail, User, Plus, Pencil, Trash2, Loader2,
   Printer, Building2, UserCheck, Heart, ChevronDown, ChevronUp, X,
-  Check, Circle, CalendarDays, LinkIcon,
+  Check, Circle, CalendarDays, LinkIcon, LayoutList, Network,
 } from 'lucide-react'
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -416,6 +416,9 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
   const printRef = useRef<HTMLDivElement>(null)
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [savingTask, setSavingTask] = useState(false)
+  const [todoGroupBy, setTodoGroupBy] = useState<'category' | 'activity'>('category')
+  const [printCategories, setPrintCategories] = useState<Set<string>>(new Set())
+  const [showPrintFilter, setShowPrintFilter] = useState(false)
 
   async function fetchData() {
     setLoading(true)
@@ -493,6 +496,13 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ linked_plan_item_id: linkedPlanItemId }),
       })
+      fetchData()
+    } catch { /* ignore */ }
+  }
+
+  async function deleteChecklistItem(itemId: string) {
+    try {
+      await fetch(`/api/events/${eventId}/checklist/${itemId}`, { method: 'DELETE' })
       fetchData()
     } catch { /* ignore */ }
   }
@@ -634,18 +644,72 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
         </div>
         <div className="flex items-center gap-2">
           <div className="relative print:hidden">
-            <button onClick={() => setPrintMode(prev => prev ? null : 'summary')}
+            <button onClick={() => { setPrintMode(prev => prev ? null : 'summary'); setShowPrintFilter(false) }}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-brand-border text-sm font-bold text-text-2 hover:bg-cream transition-colors">
               <Printer className="h-4 w-4" /> Print
             </button>
             {printMode !== null && (
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-cream-2 rounded-xl border-2 border-brand-border shadow-lg z-20 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 w-56 bg-white dark:bg-cream-2 rounded-xl border-2 border-brand-border shadow-lg z-20 overflow-hidden">
                 {view === 'todo' ? (
-                  <button onClick={() => { setPrintMode('todo'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
-                    className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors">
-                    <p className="font-bold text-text-1">To-Do List</p>
-                    <p className="text-xs text-text-4">All tasks grouped by category</p>
-                  </button>
+                  <>
+                    {!showPrintFilter ? (
+                      <>
+                        <button onClick={() => {
+                          setPrintCategories(new Set()) // empty = all
+                          setPrintMode('todo')
+                          setTimeout(() => { window.print(); setPrintMode(null) }, 300)
+                        }}
+                          className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors border-b border-brand-border/40">
+                          <p className="font-bold text-text-1">Print All</p>
+                          <p className="text-xs text-text-4">All tasks grouped by {todoGroupBy}</p>
+                        </button>
+                        <button onClick={() => {
+                          const cats = new Set(checklistItems.map(i => i.category || 'Other'))
+                          setPrintCategories(cats)
+                          setShowPrintFilter(true)
+                        }}
+                          className="w-full text-left px-4 py-3 text-sm hover:bg-cream transition-colors">
+                          <p className="font-bold text-text-1">Select Categories...</p>
+                          <p className="text-xs text-text-4">Choose which categories to print</p>
+                        </button>
+                      </>
+                    ) : (
+                      <div className="p-3">
+                        <p className="text-xs font-black text-text-2 mb-2">Select categories to print:</p>
+                        <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                          {Array.from(new Set(checklistItems.map(i => i.category || 'Other'))).sort().map(cat => (
+                            <label key={cat} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-cream rounded px-1 py-0.5">
+                              <input type="checkbox" checked={printCategories.has(cat)}
+                                onChange={() => {
+                                  const next = new Set(printCategories)
+                                  next.has(cat) ? next.delete(cat) : next.add(cat)
+                                  setPrintCategories(next)
+                                }}
+                                className="rounded border-brand-border" />
+                              <span>{CHECKLIST_CATEGORIES[cat] || '📋'}</span>
+                              <span className="text-text-2">{cat}</span>
+                              <span className="text-text-4 text-xs ml-auto">
+                                ({checklistItems.filter(i => (i.category || 'Other') === cat).length})
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 mt-3 pt-2 border-t border-brand-border/40">
+                          <button onClick={() => setShowPrintFilter(false)}
+                            className="flex-1 text-xs font-bold text-text-3 hover:text-text-1 py-1.5">Cancel</button>
+                          <button onClick={() => {
+                            setShowPrintFilter(false)
+                            setPrintMode('todo')
+                            setTimeout(() => { window.print(); setPrintMode(null); setPrintCategories(new Set()) }, 300)
+                          }}
+                            disabled={printCategories.size === 0}
+                            className="flex-1 text-xs font-bold bg-brand text-white rounded-lg py-1.5 hover:bg-brand-hover disabled:opacity-50">
+                            Print {printCategories.size} {printCategories.size === 1 ? 'category' : 'categories'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <>
                     <button onClick={() => { setPrintMode('summary'); setTimeout(() => { window.print(); setPrintMode(null) }, 300) }}
@@ -764,18 +828,34 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
       {/* ── To-Do List View ──────────────────────────────────────── */}
       {view === 'todo' && (
         <div className={printMode === 'todo' ? '' : 'print:hidden'}>
-          {/* Add Task button */}
-          {!showTaskForm && (
-            <button onClick={() => setShowTaskForm(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors mb-6 print:hidden"
-              style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
-              <Plus className="h-4 w-4" /> Add Task
-            </button>
-          )}
+          {/* Top bar: group-by toggle + add task */}
+          <div className="flex items-center justify-between mb-4 print:hidden">
+            <div className="flex items-center gap-1 bg-cream rounded-xl p-1">
+              <button onClick={() => setTodoGroupBy('category')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  todoGroupBy === 'category' ? 'bg-white text-text-1 shadow-sm' : 'text-text-3 hover:text-text-2'
+                }`}>
+                <LayoutList className="h-3.5 w-3.5" /> By Category
+              </button>
+              <button onClick={() => setTodoGroupBy('activity')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  todoGroupBy === 'activity' ? 'bg-white text-text-1 shadow-sm' : 'text-text-3 hover:text-text-2'
+                }`}>
+                <Network className="h-3.5 w-3.5" /> By Activity
+              </button>
+            </div>
+            {!showTaskForm && (
+              <button onClick={() => setShowTaskForm(true)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors"
+                style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
+                <Plus className="h-4 w-4" /> Add Task
+              </button>
+            )}
+          </div>
 
           {/* Inline add task form */}
           {showTaskForm && (
-            <div className="print:hidden">
+            <div className="print:hidden mb-4">
               <TaskForm
                 planItems={planItems}
                 onSave={handleAddTask}
@@ -793,7 +873,8 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                 Add pre-event tasks like booking vendors, ordering decorations, confirming menus.
               </p>
             </div>
-          ) : (
+          ) : todoGroupBy === 'category' ? (
+            /* ── By Category (flat list grouped by category) ─── */
             <div className="space-y-6">
               {Object.entries(
                 checklistItems.reduce<Record<string, ChecklistItem[]>>((acc, item) => {
@@ -802,7 +883,9 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                   acc[cat].push(item)
                   return acc
                 }, {})
-              ).map(([category, items]) => (
+              )
+                .filter(([cat]) => printCategories.size === 0 || printCategories.has(cat))
+                .map(([category, items]) => (
                 <div key={category}>
                   <h3 className="text-sm font-black text-text-2 mb-3 flex items-center gap-2">
                     <span>{CHECKLIST_CATEGORIES[category] || '\u{1F4CB}'}</span> {category}
@@ -816,19 +899,15 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                       const isDone = item.status === 'FINALIZED'
                       return (
                         <div key={item.id} className={`rounded-xl border-2 ${isDone ? 'border-green-200 bg-green-50/50' : 'border-brand-border bg-white dark:bg-cream-2'} p-3 flex items-start gap-3 transition-colors print:border print:rounded-none print:p-2`}>
-                          {/* Checkbox */}
                           <button onClick={() => toggleChecklistStatus(item)}
                             className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors print:hidden ${
                               isDone ? 'bg-green-500 border-green-500 text-white' : 'border-brand-border hover:border-brand/40'
                             }`}>
                             {isDone && <Check className="h-3 w-3" />}
                           </button>
-                          {/* Print-only checkbox symbol */}
                           <span className="hidden print:inline-block mt-0.5 w-4 h-4 text-center flex-shrink-0 text-xs">
                             {isDone ? '✓' : '☐'}
                           </span>
-
-                          {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className={`font-bold text-sm ${isDone ? 'line-through text-text-4' : 'text-text-1'}`}>
@@ -860,25 +939,234 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                               )}
                             </div>
                           </div>
-
-                          {/* Link dropdown */}
-                          <select
-                            value={item.linked_plan_item_id || ''}
-                            onChange={e => updateChecklistLink(item.id, e.target.value || null)}
-                            className="text-xs rounded-lg border border-brand-border px-2 py-1 bg-white dark:bg-cream-2 text-text-3 max-w-[140px] truncate print:hidden"
-                            title="Link to plan item"
-                          >
-                            <option value="">No link</option>
-                            {planItems.map(pi => (
-                              <option key={pi.id} value={pi.id}>{pi.title}</option>
-                            ))}
-                          </select>
+                          <div className="flex items-center gap-1.5 flex-shrink-0 print:hidden">
+                            <select
+                              value={item.linked_plan_item_id || ''}
+                              onChange={e => updateChecklistLink(item.id, e.target.value || null)}
+                              className="text-xs rounded-lg border border-brand-border px-2 py-1 bg-white dark:bg-cream-2 text-text-3 max-w-[120px] truncate"
+                              title="Link to plan item"
+                            >
+                              <option value="">No link</option>
+                              {planItems.map(pi => (
+                                <option key={pi.id} value={pi.id}>{pi.title}</option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => { if (confirm(`Delete "${item.item_name}"?`)) deleteChecklistItem(item.id) }}
+                              className="p-1.5 rounded-lg text-text-4 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              title="Delete task">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
                       )
                     })}
                   </div>
                 </div>
               ))}
+            </div>
+          ) : (
+            /* ── By Activity (hierarchical: activity → sub-tasks) ─── */
+            <div className="space-y-4">
+              {(() => {
+                // Group: platform vendors + plan items as parent activities, with linked tasks underneath
+                const activities: { id: string; title: string; role: string; source: string; vendor_type: string | null; tasks: ChecklistItem[] }[] = []
+
+                // Platform vendors
+                for (const pv of platformVendors) {
+                  activities.push({
+                    id: `pv-${pv.id}`,
+                    title: pv.vendor.business_name,
+                    role: pv.role || VENDOR_TYPE_LABELS[pv.vendor.vendor_type] || pv.vendor.vendor_type,
+                    source: 'PLATFORM',
+                    vendor_type: pv.vendor.vendor_type,
+                    tasks: [], // platform vendors don't have linked_plan_item_id — tasks link via plan items
+                  })
+                }
+
+                // Plan items (external + personal)
+                for (const pi of planItems) {
+                  const linked = checklistItems.filter(ci => ci.linked_plan_item_id === pi.id)
+                  activities.push({
+                    id: `pi-${pi.id}`,
+                    title: pi.title,
+                    role: pi.role || '',
+                    source: pi.source,
+                    vendor_type: null,
+                    tasks: linked,
+                  })
+                }
+
+                // Unlinked tasks (not connected to any plan item)
+                const linkedIds = new Set(checklistItems.filter(ci => ci.linked_plan_item_id).map(ci => ci.id))
+                const unlinked = checklistItems.filter(ci => !linkedIds.has(ci.id) || !ci.linked_plan_item_id)
+                  .filter(ci => !ci.linked_plan_item_id)
+
+                // Filter: only show activities that have tasks, or all if none have tasks
+                const withTasks = activities.filter(a => a.tasks.length > 0)
+                const withoutTasks = activities.filter(a => a.tasks.length === 0)
+
+                return (
+                  <>
+                    {/* Activities with linked tasks */}
+                    {withTasks.map(activity => {
+                      const st = SOURCE_STYLES[activity.source as keyof typeof SOURCE_STYLES] || SOURCE_STYLES.EXTERNAL
+                      const Icon = st.icon
+                      const doneCount = activity.tasks.filter(t => t.status === 'FINALIZED').length
+                      const allDone = doneCount === activity.tasks.length
+                      return (
+                        <div key={activity.id} className={`rounded-2xl border-2 ${allDone ? 'border-green-200 bg-green-50/30' : st.border + ' ' + st.bg} overflow-hidden`}>
+                          {/* Activity header */}
+                          <div className="flex items-center gap-3 px-4 py-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${st.badge}`}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="font-black text-text-1 text-sm">{activity.title}</h3>
+                                {activity.role && <span className="text-xs text-text-3">{activity.role}</span>}
+                              </div>
+                            </div>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                              allDone ? 'bg-green-100 text-green-700' : 'bg-white/60 text-text-3'
+                            }`}>{doneCount}/{activity.tasks.length}</span>
+                          </div>
+                          {/* Linked tasks */}
+                          <div className="border-t border-brand-border/30 bg-white/40 px-4 py-2.5 space-y-1.5">
+                            {activity.tasks.map(task => {
+                              const isDone = task.status === 'FINALIZED'
+                              const ss = STATUS_STYLES[task.status] || STATUS_STYLES.PENDING
+                              return (
+                                <div key={task.id} className="group flex items-center gap-2.5">
+                                  <button onClick={() => toggleChecklistStatus(task)}
+                                    className={`w-4.5 h-4.5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-colors print:hidden ${
+                                      isDone ? 'bg-green-500 border-green-500 text-white' : 'border-brand-border hover:border-brand/40'
+                                    }`}>
+                                    {isDone && <Check className="h-2.5 w-2.5" />}
+                                  </button>
+                                  <span className="hidden print:inline-block w-4 text-center flex-shrink-0 text-xs">
+                                    {isDone ? '✓' : '☐'}
+                                  </span>
+                                  <span className={`text-sm flex-1 ${isDone ? 'line-through text-text-4' : 'text-text-2'}`}>
+                                    {task.item_name}
+                                  </span>
+                                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${ss.bg} ${ss.text} print:hidden`}>
+                                    {ss.label}
+                                  </span>
+                                  {task.due_date && (
+                                    <span className="text-[10px] text-text-4">
+                                      {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    </span>
+                                  )}
+                                  <button
+                                    onClick={() => { if (confirm(`Delete "${task.item_name}"?`)) deleteChecklistItem(task.id) }}
+                                    className="p-1 rounded text-text-4 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all print:hidden"
+                                    title="Delete task">
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {/* Activities without tasks */}
+                    {withoutTasks.length > 0 && (
+                      <div>
+                        <h3 className="text-xs font-black text-text-4 uppercase mb-2 print:text-[10px]">No tasks linked yet</h3>
+                        <div className="space-y-1.5">
+                          {withoutTasks.map(activity => {
+                            const st = SOURCE_STYLES[activity.source as keyof typeof SOURCE_STYLES] || SOURCE_STYLES.EXTERNAL
+                            return (
+                              <div key={activity.id} className="flex items-center gap-3 rounded-xl border border-dashed border-brand-border/60 px-4 py-2.5 bg-white/50">
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${st.badge}`}>{st.label}</span>
+                                <span className="text-sm text-text-3">{activity.title}</span>
+                                {activity.role && <span className="text-xs text-text-4">· {activity.role}</span>}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Unlinked tasks */}
+                    {unlinked.length > 0 && (
+                      <div>
+                        <h3 className="text-xs font-black text-text-4 uppercase mb-2 print:text-[10px]">General Tasks</h3>
+                        <div className="space-y-2">
+                          {unlinked.map(task => {
+                            const isDone = task.status === 'FINALIZED'
+                            const ss = STATUS_STYLES[task.status] || STATUS_STYLES.PENDING
+                            return (
+                              <div key={task.id} className={`rounded-xl border-2 ${isDone ? 'border-green-200 bg-green-50/50' : 'border-brand-border bg-white'} p-3 flex items-start gap-3 print:border print:rounded-none print:p-2`}>
+                                <button onClick={() => toggleChecklistStatus(task)}
+                                  className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors print:hidden ${
+                                    isDone ? 'bg-green-500 border-green-500 text-white' : 'border-brand-border hover:border-brand/40'
+                                  }`}>
+                                  {isDone && <Check className="h-3 w-3" />}
+                                </button>
+                                <span className="hidden print:inline-block mt-0.5 w-4 h-4 text-center flex-shrink-0 text-xs">
+                                  {isDone ? '✓' : '☐'}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className={`font-bold text-sm ${isDone ? 'line-through text-text-4' : 'text-text-1'}`}>
+                                      {task.item_name}
+                                    </span>
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ss.bg} ${ss.text}`}>
+                                      {ss.label}
+                                    </span>
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-text-4">
+                                      {task.category}
+                                    </span>
+                                  </div>
+                                  {(task.due_date || task.external_vendor_name || task.notes) && (
+                                    <div className="flex items-center gap-3 mt-1 text-xs text-text-4 flex-wrap">
+                                      {task.due_date && (
+                                        <span className="flex items-center gap-1">
+                                          <CalendarDays className="h-3 w-3" />
+                                          {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                        </span>
+                                      )}
+                                      {task.external_vendor_name && (
+                                        <span className="flex items-center gap-1">
+                                          <User className="h-3 w-3" /> {task.external_vendor_name}
+                                        </span>
+                                      )}
+                                      {task.notes && <span className="truncate max-w-[200px]">{task.notes}</span>}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1.5 flex-shrink-0 print:hidden">
+                                  <select
+                                    value={task.linked_plan_item_id || ''}
+                                    onChange={e => updateChecklistLink(task.id, e.target.value || null)}
+                                    className="text-xs rounded-lg border border-brand-border px-2 py-1 bg-white text-text-3 max-w-[120px] truncate"
+                                    title="Link to activity"
+                                  >
+                                    <option value="">No link</option>
+                                    {planItems.map(pi => (
+                                      <option key={pi.id} value={pi.id}>{pi.title}</option>
+                                    ))}
+                                  </select>
+                                  <button
+                                    onClick={() => { if (confirm(`Delete "${task.item_name}"?`)) deleteChecklistItem(task.id) }}
+                                    className="p-1.5 rounded-lg text-text-4 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                    title="Delete task">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
             </div>
           )}
         </div>
