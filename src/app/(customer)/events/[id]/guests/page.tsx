@@ -202,16 +202,13 @@ export default function GuestsPage() {
   // Invitation settings panel (message + guest info)
   const [editEventInfo, setEditEventInfo]     = useState(false)
   const [infoSaving, setInfoSaving]           = useState(false)
-  const [websiteSlug, setWebsiteSlug]         = useState<string | null>(null)
 
   useEffect(() => {
     setAppUrl(window.location.origin)
     Promise.all([
       fetch(`/api/events/${eventId}`).then(r => r.json()),
       fetch(`/api/events/${eventId}/guests`).then(r => r.json()),
-      fetch(`/api/events/${eventId}/website`).then(r => r.ok ? r.json() : null),
-    ]).then(([ev, h, w]) => {
-      if (w?.is_published && w?.slug) setWebsiteSlug(w.slug)
+    ]).then(([ev, h]) => {
       setEvent(ev)
       setBannerMsg(ev.invite_message ?? '')
       setBannerTheme(ev.invite_theme ?? 'orange')
@@ -361,9 +358,7 @@ export default function GuestsPage() {
   }
 
   function copyLink(token: string, householdId: string) {
-    const url = websiteSlug
-      ? `${appUrl}/w/${websiteSlug}?token=${token}`
-      : `${appUrl}/e/${token}`
+    const url = `${appUrl}/e/${token}`
     navigator.clipboard.writeText(url)
     setCopiedId(householdId)
     setTimeout(() => setCopiedId(null), 2000)
@@ -632,28 +627,6 @@ export default function GuestsPage() {
                 </div>
               </div>
 
-              {/* Invite link mode indicator */}
-              <div className="px-6 py-3 md:px-10">
-                {websiteSlug ? (
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="flex items-center gap-1.5 bg-green-400/20 text-green-200 border border-green-300/20 px-3 py-1.5 rounded-full font-medium">
-                      <ExternalLink className="h-3 w-3" /> Guests will land on your event website
-                    </span>
-                    <Link href={`/events/${eventId}/website`} className="text-white/50 underline underline-offset-2 hover:text-white/80">
-                      Edit website
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="flex items-center gap-1.5 bg-white/10 dark:bg-cream-2/10 text-white/60 border border-white/10 px-3 py-1.5 rounded-full font-medium">
-                      <Link2 className="h-3 w-3" /> Guests will receive a simple RSVP link
-                    </span>
-                    <Link href={`/events/${eventId}/website`} className="text-amber-300/80 underline underline-offset-2 hover:text-amber-200 font-medium">
-                      Create an event website for a branded experience
-                    </Link>
-                  </div>
-                )}
-              </div>
 
               {/* Guest count bar */}
               {total > 0 && (

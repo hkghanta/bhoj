@@ -39,21 +39,13 @@ export async function POST(
     },
   })
 
-  // Use event website URL if published, otherwise simple RSVP
-  const website = await prisma.eventWebsite.findFirst({
-    where: { event_id: id, is_published: true },
-    select: { slug: true },
-  })
-
   let sent = 0
   let skipped = 0
 
   for (const household of households) {
     if (!household.email) { skipped++; continue }
     try {
-      const rsvpUrl = website
-        ? `${APP_URL}/w/${website.slug}?token=${household.token}`
-        : `${APP_URL}/e/${household.token}`
+      const rsvpUrl = `${APP_URL}/e/${household.token}`
       const subEvents: { name: string; date: string; venue: string | null }[] = [{
         name: event.event_name,
         date: format(event.event_date, 'EEE d MMM yyyy, h:mm a'),

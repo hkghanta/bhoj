@@ -190,7 +190,7 @@ model Event {
   collaborators      EventCollaborator[]
   coordinator        EventCoordinator?
   payment_schedules  PaymentSchedule[]
-  website            EventWebsite?
+
   gift_registry      GiftRegistry?
   seating_charts     SeatingChart[]
   timeline_entries   EventTimelineEntry[]
@@ -1437,26 +1437,6 @@ enum InstallmentStatus {
   CANCELLED
 }
 
-// ─── Feature: Event Website Builder ───────────────────────────────────────────
-
-model EventWebsite {
-  id            String   @id @default(cuid())
-  event_id      String   @unique
-  slug          String   @unique // priya-raj, my-wedding-2026
-  template      String   @default("classic") // classic, modern, floral, minimal, royal
-  hero_photo    String?
-  our_story     String?
-  travel_info   String?
-  accommodation String?
-  faq           Json?    // [{question, answer}]
-  sections      Json?    // [{type, title, content, order}]
-  colors        Json?    // {primary, secondary, accent, background}
-  is_published  Boolean  @default(false)
-  custom_domain String?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  event         Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
-}
 
 // ─── Feature: Gift Registry & Cash Funds ──────────────────────────────────────
 

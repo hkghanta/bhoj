@@ -5,7 +5,7 @@ import {
   CalendarDays, Store, FileText, MessageSquare,
   ChevronLeft,
   LayoutDashboard, LogOut, User, Mail,
-  Globe, LayoutGrid, CreditCard, Gift, Search,
+  LayoutGrid, CreditCard, Gift, Search,
   ClipboardList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -41,7 +41,6 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
 
   const guestNav = eventId ? [
     { href: `/events/${eventId}/guests`,      label: 'Invitations & Guests', icon: Mail },
-    { href: `/events/${eventId}/website`,     label: 'Event Website',  icon: Globe },
   ] : []
 
   const planningNav = eventId ? [

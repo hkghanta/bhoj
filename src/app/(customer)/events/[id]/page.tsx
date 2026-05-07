@@ -6,7 +6,7 @@ import { EventDeleteButton } from '@/components/customer/EventDeleteButton'
 import {
   CalendarDays, MapPin, Users, FileText,
   MessageSquare, ChevronRight, Wallet,
-  Users2, Globe, Gift, LayoutGrid, Clock,
+  Users2, Gift, LayoutGrid, Clock,
   UtensilsCrossed, CreditCard, UserPlus, Wrench,
   ArrowRight, Sparkles, ClipboardList,
 } from 'lucide-react'
@@ -416,7 +416,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
             { href: `/events/${id}/timeline`, icon: Clock, label: 'Timeline', bg: 'bg-purple-50 dark:bg-purple-950/40', color: 'text-purple-600 dark:text-purple-400' },
             { href: `/events/${id}/seating`, icon: LayoutGrid, label: 'Seating', bg: 'bg-blue-50 dark:bg-blue-950/40', color: 'text-blue-600 dark:text-blue-400' },
             { href: `/events/${id}/collaborators`, icon: UserPlus, label: 'Co-Planners', bg: 'bg-green-50 dark:bg-green-950/40', color: 'text-green-600 dark:text-green-400' },
-            { href: `/events/${id}/website`, icon: Globe, label: 'Event Website', bg: 'bg-indigo-50 dark:bg-indigo-950/40', color: 'text-indigo-600 dark:text-indigo-400' },
+
             { href: `/events/${id}/registry`, icon: Gift, label: 'Gift Registry', bg: 'bg-pink-50 dark:bg-pink-950/40', color: 'text-pink-600 dark:text-pink-400' },
             { href: `/events/${id}/tastings`, icon: UtensilsCrossed, label: 'Tastings', bg: 'bg-red-50 dark:bg-red-950/40', color: 'text-red-600 dark:text-red-400' },
             { href: `/events/${id}/payment-schedule`, icon: CreditCard, label: 'Payments', bg: 'bg-emerald-50 dark:bg-emerald-950/40', color: 'text-emerald-600 dark:text-emerald-400' },

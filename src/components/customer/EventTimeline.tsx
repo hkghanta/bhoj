@@ -317,7 +317,7 @@ export function EventTimeline({ eventId, eventDates }: Props) {
 
             <label className="flex items-center gap-2 text-sm text-text-2">
               <input type="checkbox" checked={form.is_public} onChange={e => setForm(f => ({ ...f, is_public: e.target.checked }))} className="rounded border-brand-border" />
-              Visible on event website
+              Visible to guests
             </label>
 
             <div className="flex justify-end gap-2">

@@ -30,14 +30,7 @@ export async function POST(
   if (!household) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (!household.email) return NextResponse.json({ error: 'No email address for this household' }, { status: 400 })
 
-  // Use event website URL if published, otherwise simple RSVP
-  const website = await prisma.eventWebsite.findFirst({
-    where: { event_id: id, is_published: true },
-    select: { slug: true },
-  })
-  const rsvpUrl = website
-    ? `${APP_URL}/w/${website.slug}?token=${household.token}`
-    : `${APP_URL}/e/${household.token}`
+  const rsvpUrl = `${APP_URL}/e/${household.token}`
   const subEvents: { name: string; date: string; venue: string | null }[] = [{
     name: household.event.event_name,
     date: format(household.event.event_date, 'EEE d MMM yyyy, h:mm a'),
