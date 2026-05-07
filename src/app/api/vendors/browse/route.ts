@@ -61,6 +61,7 @@ export async function GET(req: NextRequest) {
       profile_photo_url: true,
       is_verified: true,
       description: true,
+      sustainability_tags: true,
       metrics: {
         orderBy: { period: 'desc' },
         take: 1,
@@ -90,6 +91,7 @@ export async function GET(req: NextRequest) {
       profile_photo_url: v.profile_photo_url,
       is_verified: v.is_verified,
       description: v.description,
+      sustainability_tags: v.sustainability_tags,
       avg_rating: v.metrics[0]?.avg_rating ? Number(v.metrics[0].avg_rating) : null,
       starting_price: v.menu_packages[0]?.price_per_head ? Number(v.menu_packages[0].price_per_head) : null,
       currency: v.menu_packages[0]?.currency ?? 'USD',

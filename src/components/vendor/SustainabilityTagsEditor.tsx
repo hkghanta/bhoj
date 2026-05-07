@@ -4,14 +4,14 @@ import { Leaf, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const SUSTAINABILITY_TAGS = [
-  { value: 'COMPOSTABLE', label: 'Compostable Packaging', icon: '♻️' },
-  { value: 'LOCALLY_SOURCED', label: 'Locally Sourced', icon: '📍' },
-  { value: 'ORGANIC', label: 'Organic Ingredients', icon: '🌿' },
-  { value: 'ZERO_WASTE', label: 'Zero Waste', icon: '🗑️' },
-  { value: 'PLANT_BASED', label: 'Plant-Based Options', icon: '🌱' },
-  { value: 'FAIR_TRADE', label: 'Fair Trade', icon: '🤝' },
-  { value: 'SEASONAL_MENU', label: 'Seasonal Menu', icon: '🍂' },
-  { value: 'ENERGY_EFFICIENT', label: 'Energy Efficient', icon: '⚡' },
+  { value: 'compostable', label: 'Compostable packaging', icon: '♻️' },
+  { value: 'locally_sourced', label: 'Locally sourced ingredients', icon: '📍' },
+  { value: 'organic', label: 'Organic certified', icon: '🌿' },
+  { value: 'zero_waste', label: 'Zero waste commitment', icon: '🗑️' },
+  { value: 'farm_to_table', label: 'Farm to table', icon: '🌾' },
+  { value: 'eco_packaging', label: 'Eco-friendly packaging', icon: '📦' },
+  { value: 'energy_efficient', label: 'Energy efficient operations', icon: '⚡' },
+  { value: 'carbon_neutral', label: 'Carbon neutral', icon: '🌍' },
 ]
 
 export function SustainabilityTagsEditor() {

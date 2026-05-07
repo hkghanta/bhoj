@@ -133,6 +133,7 @@ interface BrowseVendor {
   avg_rating: number | null
   starting_price: number | null
   currency: string
+  sustainability_tags: string[]
 }
 
 // ─── Data fetching ──────────────────────────────────────────────────────────
@@ -206,6 +207,17 @@ export async function generateMetadata({
 
 // ─── Components ─────────────────────────────────────────────────────────────
 
+const SUSTAINABILITY_LABELS: Record<string, string> = {
+  compostable: 'Compostable packaging',
+  locally_sourced: 'Locally sourced',
+  organic: 'Organic certified',
+  zero_waste: 'Zero waste',
+  farm_to_table: 'Farm to table',
+  eco_packaging: 'Eco-friendly packaging',
+  energy_efficient: 'Energy efficient',
+  carbon_neutral: 'Carbon neutral',
+}
+
 function VendorCard({ vendor }: { vendor: BrowseVendor }) {
   const name = getDisplayName(vendor)
 
@@ -263,6 +275,21 @@ function VendorCard({ vendor }: { vendor: BrowseVendor }) {
           <p className="text-sm text-text-3 line-clamp-2 mb-3 leading-relaxed">
             {vendor.description}
           </p>
+        )}
+
+        {vendor.sustainability_tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {vendor.sustainability_tags.slice(0, 3).map(tag => (
+              <span key={tag} className="bg-green-50 text-green-600 text-xs px-1.5 py-0.5 rounded">
+                {SUSTAINABILITY_LABELS[tag] ?? tag}
+              </span>
+            ))}
+            {vendor.sustainability_tags.length > 3 && (
+              <span className="bg-green-50 text-green-600 text-xs px-1.5 py-0.5 rounded">
+                +{vendor.sustainability_tags.length - 3}
+              </span>
+            )}
+          </div>
         )}
 
         <div className="flex items-center justify-between pt-3 border-t border-brand-border">

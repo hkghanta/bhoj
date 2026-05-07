@@ -180,12 +180,13 @@ function TrayBill({ lines, discountType, discountValue, discountNote, currency }
 // ─── OneSeva Quote Row ─────────────────────────────────────────────────────
 
 function OnesevQuoteRow({
-  quote, eventId, onAccept, onDecline,
+  quote, eventId, onAccept, onDecline, highlightTags = [],
 }: {
   quote: OnesevQuote
   eventId: string
   onAccept: (id: string) => Promise<void>
   onDecline: (id: string) => Promise<void>
+  highlightTags?: string[]
 }) {
   const [expanded, setExpanded] = useState(false)
   const [acting, setActing] = useState(false)
@@ -247,6 +248,22 @@ function OnesevQuoteRow({
                 </span>
               )}
             </div>
+            {highlightTags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                {highlightTags.map(tag => (
+                  <span
+                    key={tag}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                      tag === 'Best Price' ? 'bg-green-100 text-green-700' :
+                      tag === 'Fastest Response' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-2 text-xs text-text-4">
               <MapPin className="h-3 w-3" />{quote.vendor.city}
               <span className="text-brand-border">·</span>
@@ -385,13 +402,14 @@ function OnesevQuoteRow({
 // ─── Board Response Row ────────────────────────────────────────────────────
 
 function BoardResponseRow({
-  response, requestToken, onAskQuote, onAccept, onDecline,
+  response, requestToken, onAskQuote, onAccept, onDecline, highlightTags = [],
 }: {
   response: BoardResponse
   requestToken: string
   onAskQuote: (id: string) => Promise<void>
   onAccept: (id: string) => Promise<void>
   onDecline: (id: string) => Promise<void>
+  highlightTags?: string[]
 }) {
   const [expanded, setExpanded] = useState(false)
   const [acting, setActing] = useState(false)
@@ -429,6 +447,22 @@ function BoardResponseRow({
                 </span>
               )}
             </div>
+            {highlightTags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                {highlightTags.map(tag => (
+                  <span
+                    key={tag}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                      tag === 'Best Price' ? 'bg-green-100 text-green-700' :
+                      tag === 'Fastest Response' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-2 text-xs text-text-4">
               <Clock className="h-3 w-3" />
               {fmtDate(response.created_at)}
@@ -686,6 +720,7 @@ export default function EventQuotesPage() {
   const [tokenMap, setTokenMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [filterType, setFilterType] = useState<string>('all')
+  const [highlightTags, setHighlightTags] = useState<Record<string, string[]>>({})
 
   const fetchAll = useCallback(async () => {
     const [quotesRes, responsesRes] = await Promise.all([
@@ -693,19 +728,95 @@ export default function EventQuotesPage() {
       fetch(`/api/events/${eventId}/responses`),
     ])
 
+    let fetchedQuotes: OnesevQuote[] = []
+    let fetchedResponses: BoardResponse[] = []
+
     if (quotesRes.ok) {
       const quotesData = await quotesRes.json()
-      if (Array.isArray(quotesData)) setOnesevQuotes(quotesData)
+      if (Array.isArray(quotesData)) {
+        fetchedQuotes = quotesData
+        setOnesevQuotes(quotesData)
+      }
     }
 
     if (responsesRes.ok) {
       const responsesData = await responsesRes.json()
       if (responsesData && Array.isArray(responsesData.responses)) {
+        fetchedResponses = responsesData.responses
         setBoardResponses(responsesData.responses)
         setTokenMap(responsesData.token_map ?? {})
       }
     }
 
+    // ── Compute highlight tags ──────────────────────────────────────────
+    const tags: Record<string, string[]> = {}
+
+    // Group OneSeva quotes by vendor_type and find cheapest in each group
+    const sentQuotes = fetchedQuotes.filter(q => q.status !== 'DRAFT')
+    const quotesByType: Record<string, OnesevQuote[]> = {}
+    for (const q of sentQuotes) {
+      const vt = q.match?.event_request?.vendor_type ?? 'CATERER'
+      ;(quotesByType[vt] ??= []).push(q)
+    }
+
+    // Group board responses by vendor_type
+    const responsesByType: Record<string, BoardResponse[]> = {}
+    for (const r of fetchedResponses) {
+      ;(responsesByType[r.vendor_type] ??= []).push(r)
+    }
+
+    // For each vendor_type, find "Best Price" across both OneSeva quotes and board responses
+    const allVendorTypes = new Set([...Object.keys(quotesByType), ...Object.keys(responsesByType)])
+    for (const vt of allVendorTypes) {
+      let cheapestId: string | null = null
+      let cheapestPrice = Infinity
+
+      // Check OneSeva quotes
+      for (const q of (quotesByType[vt] ?? [])) {
+        const price = q.price_per_head ? Number(q.price_per_head) : Number(q.total_estimate)
+        if (price > 0 && price < cheapestPrice) {
+          cheapestPrice = price
+          cheapestId = q.id
+        }
+      }
+
+      // Check board responses with quoted_price
+      for (const r of (responsesByType[vt] ?? [])) {
+        if (r.quoted_price) {
+          const price = Number(r.quoted_price)
+          if (price > 0 && price < cheapestPrice) {
+            cheapestPrice = price
+            cheapestId = r.id
+          }
+        }
+      }
+
+      // Only tag if there are at least 2 items with prices to compare
+      const priceCount = (quotesByType[vt] ?? []).filter(q => (q.price_per_head ? Number(q.price_per_head) : Number(q.total_estimate)) > 0).length
+        + (responsesByType[vt] ?? []).filter(r => r.quoted_price && Number(r.quoted_price) > 0).length
+      if (cheapestId && priceCount >= 2) {
+        ;(tags[cheapestId] ??= []).push('Best Price')
+      }
+
+      // "Fastest Response" — board responses only, earliest created_at
+      const boardGroup = responsesByType[vt] ?? []
+      if (boardGroup.length >= 2) {
+        let fastestId: string | null = null
+        let fastestTime = Infinity
+        for (const r of boardGroup) {
+          const t = new Date(r.created_at).getTime()
+          if (t < fastestTime) {
+            fastestTime = t
+            fastestId = r.id
+          }
+        }
+        if (fastestId) {
+          ;(tags[fastestId] ??= []).push('Fastest Response')
+        }
+      }
+    }
+
+    setHighlightTags(tags)
     setLoading(false)
   }, [eventId])
 
@@ -992,6 +1103,7 @@ export default function EventQuotesPage() {
                     eventId={eventId}
                     onAccept={handleOnesevAccept}
                     onDecline={handleOnesevDecline}
+                    highlightTags={highlightTags[q.id] ?? []}
                   />
                 ))}
                 {boardGroup.map(r => (
@@ -1002,6 +1114,7 @@ export default function EventQuotesPage() {
                     onAskQuote={handleAskQuote}
                     onAccept={handleBoardAccept}
                     onDecline={handleBoardDecline}
+                    highlightTags={highlightTags[r.id] ?? []}
                   />
                 ))}
               </ServiceGroup>

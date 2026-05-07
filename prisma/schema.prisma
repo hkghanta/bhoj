@@ -297,15 +297,21 @@ model CustomerContact {
 }
 
 model GuestHousehold {
-  id         String                @id @default(cuid())
-  event_id   String
-  label      String
-  email      String?
-  phone      String?
-  token      String                @unique @default(cuid())
-  declined   Boolean               @default(false)
-  created_at DateTime              @default(now())
-  event      Event                 @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  id              String                @id @default(cuid())
+  event_id        String
+  label           String
+  email           String?
+  phone           String?
+  token           String                @unique @default(cuid())
+  declined        Boolean               @default(false)
+  rsvp_status     String?
+  rsvp_count      Int?
+  meal_preference String?
+  allergens       String[]              @default([])
+  rsvp_note       String?
+  responded_at    DateTime?
+  created_at      DateTime              @default(now())
+  event           Event                 @relation(fields: [event_id], references: [id], onDelete: Cascade)
   @@index([event_id])
 }
 

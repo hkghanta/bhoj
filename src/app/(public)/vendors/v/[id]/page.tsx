@@ -184,14 +184,14 @@ const BADGE_CONFIG: Record<string, { label: string; color: string; icon: string 
 }
 
 const SUSTAINABILITY_LABELS: Record<string, { label: string; icon: string }> = {
-  COMPOSTABLE: { label: 'Compostable', icon: '♻️' },
-  LOCALLY_SOURCED: { label: 'Locally Sourced', icon: '📍' },
-  ORGANIC: { label: 'Organic', icon: '🌿' },
-  ZERO_WASTE: { label: 'Zero Waste', icon: '🗑️' },
-  PLANT_BASED: { label: 'Plant-Based', icon: '🌱' },
-  FAIR_TRADE: { label: 'Fair Trade', icon: '🤝' },
-  SEASONAL_MENU: { label: 'Seasonal', icon: '🍂' },
-  ENERGY_EFFICIENT: { label: 'Energy Efficient', icon: '⚡' },
+  compostable: { label: 'Compostable packaging', icon: '♻️' },
+  locally_sourced: { label: 'Locally sourced ingredients', icon: '📍' },
+  organic: { label: 'Organic certified', icon: '🌿' },
+  zero_waste: { label: 'Zero waste commitment', icon: '🗑️' },
+  farm_to_table: { label: 'Farm to table', icon: '🌾' },
+  eco_packaging: { label: 'Eco-friendly packaging', icon: '📦' },
+  energy_efficient: { label: 'Energy efficient operations', icon: '⚡' },
+  carbon_neutral: { label: 'Carbon neutral', icon: '🌍' },
 }
 
 function getDisplayName(vendor: Vendor): string {

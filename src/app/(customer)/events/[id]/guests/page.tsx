@@ -12,7 +12,7 @@ import {
 import Link from 'next/link'
 import { useRef as useFileRef } from 'react'
 
-type Household = { id: string; label: string; email: string | null; token: string; declined: boolean }
+type Household = { id: string; label: string; email: string | null; token: string; declined: boolean; rsvp_status: string | null; rsvp_count: number | null; meal_preference: string | null; allergens: string[]; rsvp_note: string | null; responded_at: string | null }
 type EventData = {
   event_name: string
   event_type: string
@@ -455,6 +455,13 @@ export default function GuestsPage() {
   const declined   = households.filter(h => h.declined).length
   const invited    = total - declined
   const pendingWithEmail = households.filter(h => !h.declined && h.email).length
+
+  // RSVP stats
+  const rsvpAttending    = households.filter(h => h.rsvp_status === 'attending')
+  const rsvpMaybe        = households.filter(h => h.rsvp_status === 'maybe')
+  const rsvpNotAttending = households.filter(h => h.rsvp_status === 'not_attending')
+  const rsvpPending      = households.filter(h => !h.rsvp_status && !h.declined)
+  const attendingGuestTotal = rsvpAttending.reduce((sum, h) => sum + (h.rsvp_count ?? 1), 0)
 
   const filteredHouseholds = households.filter(h => {
     if (filter === 'declined') return h.declined
@@ -905,12 +912,13 @@ export default function GuestsPage() {
 
       {/* ── RSVP Stats strip ─────────────────────────────────────────── */}
       {total > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
-            { label: 'Total invited', value: total,      sub: 'households',  color: 'text-text-1',   bg: 'bg-cream',   border: 'border-brand-border' },
-            { label: 'Invited',       value: invited,    sub: 'households',  color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-200' },
-            { label: 'With email',    value: pendingWithEmail, sub: 'households', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' },
-            { label: 'Declined',      value: declined,   sub: 'households',  color: 'text-rose-700',   bg: 'bg-rose-50',   border: 'border-rose-200' },
+            { label: 'Total invited', value: total,                    sub: `${total} household${total !== 1 ? 's' : ''}`,                         color: 'text-text-1',     bg: 'bg-cream',     border: 'border-brand-border' },
+            { label: 'Attending',     value: rsvpAttending.length,     sub: `${attendingGuestTotal} guest${attendingGuestTotal !== 1 ? 's' : ''}`,  color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-200' },
+            { label: 'Maybe',         value: rsvpMaybe.length,         sub: 'household' + (rsvpMaybe.length !== 1 ? 's' : ''),                      color: 'text-amber-700',  bg: 'bg-amber-50',  border: 'border-amber-200' },
+            { label: 'Not attending', value: rsvpNotAttending.length,  sub: 'household' + (rsvpNotAttending.length !== 1 ? 's' : ''),               color: 'text-rose-700',   bg: 'bg-rose-50',   border: 'border-rose-200' },
+            { label: 'Pending',       value: rsvpPending.length,       sub: 'no response',                                                          color: 'text-text-3',     bg: 'bg-cream',     border: 'border-brand-border' },
           ].map(s => (
             <div key={s.label} className={`${s.bg} border ${s.border} rounded-2xl px-4 py-3.5`}>
               <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
@@ -1197,7 +1205,10 @@ export default function GuestsPage() {
             {filteredHouseholds.map(h => {
               const statusBorder = h.declined
                 ? 'border-l-brand-border'
-                : 'border-l-green-400'
+                : h.rsvp_status === 'attending' ? 'border-l-green-400'
+                : h.rsvp_status === 'maybe' ? 'border-l-amber-400'
+                : h.rsvp_status === 'not_attending' ? 'border-l-red-400'
+                : 'border-l-gray-300'
 
               return (
                 <div key={h.id}
@@ -1217,6 +1228,27 @@ export default function GuestsPage() {
                           <XCircle className="h-3 w-3" /> Declined
                         </span>
                       )}
+                      {/* RSVP status badge */}
+                      {h.rsvp_status === 'attending' && (
+                        <span className="inline-flex items-center gap-1 text-[11px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                          <CheckCircle2 className="h-3 w-3" /> Attending{h.rsvp_count != null && h.rsvp_count > 0 ? ` (${h.rsvp_count})` : ''}
+                        </span>
+                      )}
+                      {h.rsvp_status === 'maybe' && (
+                        <span className="inline-flex items-center gap-1 text-[11px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">
+                          <AlertCircle className="h-3 w-3" /> Maybe
+                        </span>
+                      )}
+                      {h.rsvp_status === 'not_attending' && (
+                        <span className="inline-flex items-center gap-1 text-[11px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-semibold">
+                          <XCircle className="h-3 w-3" /> Not attending
+                        </span>
+                      )}
+                      {!h.rsvp_status && !h.declined && (
+                        <span className="inline-flex items-center text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-semibold">
+                          Pending
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-4">
                       {h.email && <span className="truncate max-w-[180px]">{h.email}</span>}
@@ -1224,6 +1256,20 @@ export default function GuestsPage() {
                         <span className="italic text-text-4">no email — share link manually</span>
                       )}
                     </div>
+                    {/* Meal preference & allergens for guests who responded */}
+                    {h.responded_at && (h.meal_preference || h.allergens.length > 0 || h.rsvp_note) && (
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-4 mt-1.5">
+                        {h.meal_preference && (
+                          <span>{ALL_DIETARY_OPTIONS.find(o => o.value === h.meal_preference)?.emoji ?? ''} {ALL_DIETARY_OPTIONS.find(o => o.value === h.meal_preference)?.label ?? h.meal_preference}</span>
+                        )}
+                        {h.allergens.length > 0 && (
+                          <span className="text-amber-600">Allergies: {h.allergens.join(', ')}</span>
+                        )}
+                        {h.rsvp_note && (
+                          <span className="italic truncate max-w-[240px]">&ldquo;{h.rsvp_note}&rdquo;</span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions */}
