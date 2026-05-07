@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { EventDeleteButton } from '@/components/customer/EventDeleteButton'
 import {
   CalendarDays, MapPin, Users, FileText,
-  MessageSquare, ChevronRight, Wallet, CalendarPlus,
+  MessageSquare, ChevronRight, Wallet,
   Users2, Globe, Gift, LayoutGrid, Clock,
   UtensilsCrossed, CreditCard, UserPlus, Wrench,
   ArrowRight, Sparkles, ClipboardList,
@@ -29,7 +29,6 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
     where: { id, customer_id: customerId },
     include: {
       checklist_items: { select: { id: true, status: true } },
-      sub_events: { orderBy: [{ sort_order: 'asc' }, { event_date: 'asc' }] },
     },
   })
 
@@ -151,7 +150,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
     if (addedServices.length > 0 && quoteCount === 0) {
       nextSteps.push({ text: 'Vendors are being matched — quotes will appear here soon', href: `/events/${id}/quotes`, priority: 'low' })
     }
-    if (daysUntil > 0 && daysUntil <= 30 && event.sub_events.length === 0) {
+    if (daysUntil > 0 && daysUntil <= 30) {
       nextSteps.push({ text: 'Your event is less than a month away — add a day-of timeline', href: `/events/${id}/timeline`, priority: 'medium' })
     }
   }
@@ -438,56 +437,6 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
         </div>
       </section>
 
-      {/* Sub-events */}
-      <section aria-label="Sub-events">
-        {event.sub_events.length > 0 ? (
-          <>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-2xl font-black text-text-1">Sub-Events</h2>
-              <Link href={`/events/${id}/sub-events`} className="text-sm text-brand font-bold hover:underline">
-                Manage
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {event.sub_events.map(se => (
-                <div key={se.id} className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-5 hover:shadow-sm transition-shadow">
-                  <p className="font-bold text-text-1 text-sm mb-1">{se.name}</p>
-                  <p className="text-xs text-text-3 flex items-center gap-1.5">
-                    <CalendarDays className="h-3.5 w-3.5 text-text-4" aria-hidden="true" />
-                    {format(se.event_date, 'EEE d MMM, h:mm a')}
-                  </p>
-                  {se.venue && (
-                    <p className="text-xs text-text-4 mt-1 flex items-center gap-1.5 truncate">
-                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
-                      {se.venue}
-                    </p>
-                  )}
-                </div>
-              ))}
-              <Link href={`/events/${id}/sub-events`}
-                className="bg-cream rounded-2xl border-2 border-dashed border-brand-border p-5 flex items-center justify-center gap-2 text-sm text-text-4 hover:border-brand hover:text-brand transition-colors min-h-[90px]"
-                aria-label="Add another occasion"
-              >
-                <CalendarPlus className="h-5 w-5" aria-hidden="true" />
-                Add occasion
-              </Link>
-            </div>
-          </>
-        ) : (
-          <Link href={`/events/${id}/sub-events`}
-            className="flex items-center gap-3 text-sm text-text-4 hover:text-brand transition-colors bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-5 hover:border-brand"
-            aria-label="Add sub-events like Mehendi, Reception, Sangeet"
-          >
-            <span className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center" aria-hidden="true">
-              <CalendarPlus className="h-5 w-5" />
-            </span>
-            <div>
-              <span className="font-bold text-text-3">Add sub-events</span>
-              <p className="text-xs text-text-4 mt-0.5">Mehendi, Reception, Sangeet...</p>
-            </div>
-          </Link>
-        )}
-      </section>
     </div>
   )
 }

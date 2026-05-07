@@ -25,7 +25,6 @@ export async function POST(
     where: { id: householdId, event_id: id, event: { customer_id: session.user!.id as string } },
     include: {
       event: true,
-      invites: { include: { sub_event: true } },
     },
   })
   if (!household) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -39,11 +38,11 @@ export async function POST(
   const rsvpUrl = website
     ? `${APP_URL}/w/${website.slug}?token=${household.token}`
     : `${APP_URL}/e/${household.token}`
-  const subEvents = household.invites.map(inv => ({
-    name: inv.sub_event.name,
-    date: format(inv.sub_event.event_date, 'EEE d MMM yyyy, h:mm a'),
-    venue: inv.sub_event.venue,
-  }))
+  const subEvents: { name: string; date: string; venue: string | null }[] = [{
+    name: household.event.event_name,
+    date: format(household.event.event_date, 'EEE d MMM yyyy, h:mm a'),
+    venue: household.event.venue,
+  }]
 
   const html = await render(
     React.createElement(InviteEmail, {

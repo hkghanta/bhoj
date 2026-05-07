@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MapPin, Calendar, Clock, ChevronDown, ChevronUp, Heart, CheckCircle2, UserPlus, Send } from 'lucide-react'
+import { MapPin, Calendar, Clock, ChevronDown, ChevronUp, Heart, Send } from 'lucide-react'
 
 type SubEvent = {
   id: string
@@ -11,19 +11,11 @@ type SubEvent = {
   notes: string | null
 }
 
-type RsvpInvite = {
-  id: string
-  respondedAt: string | null
-  subEventName: string
-  subEventDate: string
-  attendees: { id: string; name: string; dietaryType: string }[]
-}
-
 type RsvpData = {
   householdLabel: string
   token: string
   declined: boolean
-  invites: RsvpInvite[]
+  invites: never[]
 }
 
 type Props = {
@@ -79,16 +71,6 @@ export function PublicEventWebsite({
   rsvp,
 }: Props) {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const [rsvpStatus, setRsvpStatus] = useState<Record<string, 'pending' | 'accepted' | 'saving'>>(
-    () => {
-      if (!rsvp) return {}
-      const s: Record<string, 'pending' | 'accepted'> = {}
-      rsvp.invites.forEach(inv => { s[inv.id] = inv.respondedAt ? 'accepted' : 'pending' })
-      return s
-    }
-  )
-  const [attendeeName, setAttendeeName] = useState('')
-  const [addingAttendee, setAddingAttendee] = useState<string | null>(null)
 
   const primary = colors.primary || '#c2410c'
   const secondary = colors.secondary || '#1e293b'
@@ -96,37 +78,6 @@ export function PublicEventWebsite({
   const days = daysUntil(eventDate)
 
   const hasContent = ourStory || travelInfo || accommodation || subEvents.length > 0 || faq.length > 0 || rsvp
-
-  async function respondToInvite(inviteId: string) {
-    if (!rsvp) return
-    setRsvpStatus(prev => ({ ...prev, [inviteId]: 'saving' }))
-    try {
-      const res = await fetch(`/api/rsvp/${rsvp.token}/${inviteId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accepted: true }),
-      })
-      if (res.ok) {
-        setRsvpStatus(prev => ({ ...prev, [inviteId]: 'accepted' }))
-      }
-    } catch {
-      setRsvpStatus(prev => ({ ...prev, [inviteId]: 'pending' }))
-    }
-  }
-
-  async function addAttendee(inviteId: string) {
-    if (!rsvp || !attendeeName.trim()) return
-    setAddingAttendee(inviteId)
-    try {
-      await fetch(`/api/rsvp/${rsvp.token}/${inviteId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accepted: true, add_attendee: attendeeName.trim() }),
-      })
-      setAttendeeName('')
-    } catch { /* silent */ }
-    setAddingAttendee(null)
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-cream-2" style={{ '--color-primary': primary, '--color-secondary': secondary, '--color-accent': accent } as React.CSSProperties}>
@@ -205,83 +156,10 @@ export function PublicEventWebsite({
                 <p className="text-text-4">You have declined this invitation.</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {rsvp.invites.map(inv => {
-                  const status = rsvpStatus[inv.id] ?? 'pending'
-                  return (
-                    <div key={inv.id} className="bg-white dark:bg-cream-2 rounded-2xl p-6 shadow-sm border border-brand-border">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h3 className="font-semibold text-lg" style={{ color: secondary }}>{inv.subEventName}</h3>
-                          <div className="flex gap-3 text-sm text-text-4 mt-1">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3.5 w-3.5" />
-                              {formatDate(inv.subEventDate)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3.5 w-3.5" />
-                              {formatTime(inv.subEventDate)}
-                            </span>
-                          </div>
-                        </div>
-                        {status === 'accepted' ? (
-                          <span className="flex items-center gap-1.5 text-green-600 text-sm font-medium bg-green-50 px-3 py-1.5 rounded-full">
-                            <CheckCircle2 className="h-4 w-4" /> Accepted
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => respondToInvite(inv.id)}
-                            disabled={status === 'saving'}
-                            className="flex items-center gap-1.5 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors disabled:opacity-50"
-                            style={{ background: accent }}
-                          >
-                            {status === 'saving' ? (
-                              <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
-                            ) : (
-                              <CheckCircle2 className="h-4 w-4" />
-                            )}
-                            Accept
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Attendees */}
-                      {inv.attendees.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-brand-border">
-                          <p className="text-xs text-text-4 uppercase tracking-wider mb-2">Attending</p>
-                          <div className="flex flex-wrap gap-2">
-                            {inv.attendees.map(a => (
-                              <span key={a.id} className="inline-flex items-center gap-1 bg-cream text-text-3 text-sm px-3 py-1 rounded-full border border-brand-border">
-                                {a.name}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Add attendee */}
-                      {status === 'accepted' && (
-                        <div className="mt-3 flex gap-2">
-                          <input
-                            className="flex-1 rounded-lg border border-brand-border px-3 py-2 text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none"
-                            placeholder="Add a guest name..."
-                            value={addingAttendee === inv.id ? attendeeName : ''}
-                            onFocus={() => setAddingAttendee(inv.id)}
-                            onChange={e => setAttendeeName(e.target.value)}
-                          />
-                          <button
-                            onClick={() => addAttendee(inv.id)}
-                            disabled={!attendeeName.trim() || addingAttendee !== inv.id}
-                            className="flex items-center gap-1 text-sm font-medium px-3 py-2 rounded-lg text-white disabled:opacity-40"
-                            style={{ background: primary }}
-                          >
-                            <UserPlus className="h-3.5 w-3.5" /> Add
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+              <div className="bg-white dark:bg-cream-2 rounded-2xl p-8 text-center border border-brand-border shadow-sm">
+                <p className="text-text-3">
+                  We look forward to seeing you at the event!
+                </p>
               </div>
             )}
           </div>

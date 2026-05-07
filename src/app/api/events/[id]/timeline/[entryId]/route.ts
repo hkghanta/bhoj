@@ -53,7 +53,6 @@ export async function PATCH(
     start_time,
     end_time,
     category,
-    sub_event_id,
     vendor_id,
     vendor_name,
     location,
@@ -65,7 +64,6 @@ export async function PATCH(
     start_time?: string
     end_time?: string | null
     category?: string | null
-    sub_event_id?: string | null
     vendor_id?: string | null
     vendor_name?: string | null
     location?: string | null
@@ -81,7 +79,6 @@ export async function PATCH(
       ...(start_time !== undefined && { start_time: new Date(start_time) }),
       ...(end_time !== undefined && { end_time: end_time ? new Date(end_time) : null }),
       ...(category !== undefined && { category }),
-      ...(sub_event_id !== undefined && { sub_event_id }),
       ...(vendor_id !== undefined && { vendor_id }),
       ...(vendor_name !== undefined && { vendor_name }),
       ...(location !== undefined && { location }),

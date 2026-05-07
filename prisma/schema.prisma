@@ -185,7 +185,6 @@ model Event {
   requests           EventRequest[]
   households         GuestHousehold[]
   local_invites      LocalVendorInvite[]
-  sub_events         SubEvent[]
   photos             EventPhoto[]
   contracts          Contract[]
   collaborators      EventCollaborator[]
@@ -257,15 +256,11 @@ model EventChecklistItem {
   due_date              DateTime?
   completed_at          DateTime?
   created_at            DateTime        @default(now())
-  sub_event_id          String?
   oneseva_vendor_id     String?
   vendor_type           VendorType?
   linked_plan_item_id   String?
   event                 Event           @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  sub_event             SubEvent?       @relation(fields: [sub_event_id], references: [id])
   linked_plan_item      EventPlanItem?  @relation(fields: [linked_plan_item_id], references: [id], onDelete: SetNull)
-
-  @@index([sub_event_id])
 }
 
 model EventRequest {
@@ -278,35 +273,12 @@ model EventRequest {
   public_status   String               @default("OPEN")
   service_notes   String?
   created_at      DateTime             @default(now())
-  sub_event_id    String?
   menu_preference EventMenuPreference?
   event           Event                @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  sub_event       SubEvent?            @relation(fields: [sub_event_id], references: [id])
   matches         Match[]
   responses       RequestResponse[]
-
-  @@index([sub_event_id])
 }
 
-model SubEvent {
-  id              String                @id @default(cuid())
-  event_id        String
-  name            String
-  event_date      DateTime
-  venue           String?
-  guest_count     Int?
-  budget          Decimal?              @db.Decimal(12, 2)
-  currency        String                @default("USD")
-  notes           String?
-  sort_order      Int                   @default(0)
-  created_at      DateTime              @default(now())
-  checklist_items EventChecklistItem[]
-  requests        EventRequest[]
-  invites         GuestSubEventInvite[]
-  event           Event                 @relation(fields: [event_id], references: [id], onDelete: Cascade)
-
-  @@index([event_id])
-}
 
 model CustomerContact {
   id          String   @id @default(cuid())
@@ -334,37 +306,9 @@ model GuestHousehold {
   declined   Boolean               @default(false)
   created_at DateTime              @default(now())
   event      Event                 @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  invites    GuestSubEventInvite[]
-
   @@index([event_id])
 }
 
-model GuestSubEventInvite {
-  id           String          @id @default(cuid())
-  household_id String
-  sub_event_id String
-  responded_at DateTime?
-  created_at   DateTime        @default(now())
-  attendees    GuestAttendee[]
-  household    GuestHousehold  @relation(fields: [household_id], references: [id], onDelete: Cascade)
-  sub_event    SubEvent        @relation(fields: [sub_event_id], references: [id], onDelete: Cascade)
-
-  @@unique([household_id, sub_event_id])
-  @@index([household_id])
-  @@index([sub_event_id])
-}
-
-model GuestAttendee {
-  id           String              @id @default(cuid())
-  invite_id    String
-  name         String?
-  dietary_type GuestDietaryType    @default(NON_VEG)
-  allergens    String[]            @default([])
-  created_at   DateTime            @default(now())
-  invite       GuestSubEventInvite @relation(fields: [invite_id], references: [id], onDelete: Cascade)
-
-  @@index([invite_id])
-}
 
 model Match {
   id               String        @id @default(cuid())
@@ -1568,7 +1512,6 @@ model GiftContribution {
 model SeatingChart {
   id           String         @id @default(cuid())
   event_id     String
-  sub_event_id String?        // optional: per sub-event seating
   name         String         @default("Main Seating")
   layout_type  String         @default("dining") // dining, ceremony, theater
   layout       Json?          // floor plan layout data {width, height, background}
@@ -1639,7 +1582,6 @@ model SeatAssignment {
 model EventTimelineEntry {
   id           String   @id @default(cuid())
   event_id     String
-  sub_event_id String?
   title        String   // "Baraat Arrival", "Caterer Setup", "DJ Sound Check"
   description  String?
   start_time   DateTime

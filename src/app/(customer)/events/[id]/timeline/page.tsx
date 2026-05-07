@@ -12,21 +12,13 @@ export default async function TimelinePage({ params }: { params: Promise<{ id: s
 
   const event = await prisma.event.findFirst({
     where: { id, customer_id: customerId },
-    include: {
-      sub_events: { orderBy: [{ sort_order: 'asc' }, { event_date: 'asc' }] },
-    },
   })
 
   if (!event) notFound()
 
-  // Build date list: main event + sub-events
+  // Build date list: main event
   const eventDates = [
     { id: 'main', label: event.event_name, date: event.event_date.toISOString() },
-    ...event.sub_events.map(se => ({
-      id: se.id,
-      label: se.name,
-      date: se.event_date.toISOString(),
-    })),
   ]
 
   return (

@@ -51,7 +51,7 @@ export async function GET(
 
 /**
  * POST /api/events/[id]/seating
- * Create a seating chart. Body: { name?, sub_event_id?, layout? }. Customer only.
+ * Create a seating chart. Body: { name?, layout?, layout_type? }. Customer only.
  */
 export async function POST(
   req: NextRequest,
@@ -84,9 +84,8 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { name, sub_event_id, layout, layout_type } = body as {
+  const { name, layout, layout_type } = body as {
     name?: string
-    sub_event_id?: string
     layout?: Record<string, unknown>
     layout_type?: string
   }
@@ -95,7 +94,6 @@ export async function POST(
     data: {
       event_id: id,
       name: name ?? 'Main Seating',
-      sub_event_id: sub_event_id ?? null,
       layout_type: layout_type ?? 'dining',
       layout: layout ? (layout as Prisma.InputJsonValue) : Prisma.JsonNull,
     },

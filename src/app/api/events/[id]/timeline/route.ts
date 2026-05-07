@@ -83,7 +83,6 @@ export async function POST(
     start_time,
     end_time,
     category,
-    sub_event_id,
     vendor_id,
     vendor_name,
     location,
@@ -95,7 +94,6 @@ export async function POST(
     start_time: string
     end_time?: string
     category?: string
-    sub_event_id?: string
     vendor_id?: string
     vendor_name?: string
     location?: string
@@ -116,7 +114,6 @@ export async function POST(
         start_time: new Date(start_time),
         end_time: end_time ? new Date(end_time) : null,
         category: category ?? null,
-        sub_event_id: sub_event_id ?? null,
         vendor_id: vendor_id ?? null,
         vendor_name: vendor_name ?? null,
         location: location ?? null,

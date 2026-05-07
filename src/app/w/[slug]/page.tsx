@@ -17,16 +17,6 @@ async function getWebsite(slug: string) {
           event_date: true,
           city: true,
           venue: true,
-          sub_events: {
-            select: {
-              id: true,
-              name: true,
-              event_date: true,
-              venue: true,
-              notes: true,
-            },
-            orderBy: { event_date: 'asc' },
-          },
         },
       },
     },
@@ -44,14 +34,6 @@ async function getHouseholdByToken(token: string, eventId: string) {
       label: true,
       token: true,
       declined: true,
-      invites: {
-        select: {
-          id: true,
-          responded_at: true,
-          sub_event: { select: { id: true, name: true, event_date: true } },
-          attendees: { select: { id: true, name: true, dietary_type: true } },
-        },
-      },
     },
   })
   return household
@@ -103,28 +85,12 @@ export default async function EventWebsitePage({
       faq={faq}
       colors={colors}
       template={website.template}
-      subEvents={website.event.sub_events.map(se => ({
-        id: se.id,
-        name: se.name,
-        date: se.event_date.toISOString(),
-        venue: se.venue,
-        notes: se.notes,
-      }))}
+      subEvents={[]}
       rsvp={household ? {
         householdLabel: household.label,
         token: household.token,
         declined: household.declined,
-        invites: household.invites.map(inv => ({
-          id: inv.id,
-          respondedAt: inv.responded_at?.toISOString() ?? null,
-          subEventName: inv.sub_event.name,
-          subEventDate: inv.sub_event.event_date.toISOString(),
-          attendees: inv.attendees.map(a => ({
-            id: a.id,
-            name: a.name ?? '',
-            dietaryType: a.dietary_type ?? '',
-          })),
-        })),
+        invites: [],
       } : undefined}
     />
   )

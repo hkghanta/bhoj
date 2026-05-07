@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   CalendarDays, Store, FileText, MessageSquare,
-  CalendarPlus, ChevronLeft,
+  ChevronLeft,
   LayoutDashboard, LogOut, User, Mail,
   Globe, LayoutGrid, CreditCard, Gift, Search,
   ClipboardList,
@@ -42,7 +42,6 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
   const guestNav = eventId ? [
     { href: `/events/${eventId}/guests`,      label: 'Invitations & Guests', icon: Mail },
     { href: `/events/${eventId}/website`,     label: 'Event Website',  icon: Globe },
-    { href: `/events/${eventId}/sub-events`,  label: 'Sub-Events',    icon: CalendarPlus },
   ] : []
 
   const planningNav = eventId ? [

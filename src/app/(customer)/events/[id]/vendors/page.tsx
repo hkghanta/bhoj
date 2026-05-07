@@ -96,8 +96,6 @@ export default function VendorDiscoveryPage() {
   const [activeType, setActiveType] = useState<string | null>(null)
   const [showAddService, setShowAddService] = useState(false)
   const [addingType, setAddingType] = useState<string | null>(null)
-  const [subEvents, setSubEvents] = useState<{ id: string; name: string }[]>([])
-  const [activeSubEventId, setActiveSubEventId] = useState<string | null>(null)
   const [estimating, setEstimating] = useState<string | null>(null)
   const [estimatedMatchIds, setEstimatedMatchIds] = useState<Set<string>>(new Set())
   // Filters
@@ -125,9 +123,6 @@ export default function VendorDiscoveryPage() {
         setEventVendors(data.vendors ?? [])
         setEventVendorTotal(data.total_spend ?? 0)
       })
-    fetch(`/api/events/${eventId}/sub-events`)
-      .then(r => r.ok ? r.json() : [])
-      .then(setSubEvents)
     // Fetch event city for local businesses
     fetch(`/api/events/${eventId}`)
       .then(r => r.ok ? r.json() : null)
@@ -210,9 +205,7 @@ export default function VendorDiscoveryPage() {
     if (refresh) setRefreshing(true)
     else setLoading(true)
 
-    const url = activeSubEventId
-      ? `/api/matches?eventId=${eventId}&subEventId=${activeSubEventId}`
-      : `/api/matches?eventId=${eventId}`
+    const url = `/api/matches?eventId=${eventId}`
     const res = await fetch(url)
     if (res.ok) {
       const data = await res.json()
@@ -389,30 +382,6 @@ export default function VendorDiscoveryPage() {
         <div className="flex gap-6">
           {/* Left: vendor type list + add service */}
           <div className="w-52 flex-shrink-0 space-y-2">
-            {subEvents.length > 1 && (
-              <div className="mb-4 flex gap-1.5 flex-wrap">
-                <button
-                  onClick={() => { setActiveSubEventId(null); loadMatches() }}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                    activeSubEventId === null
-                      ? 'border-brand bg-cream text-brand font-medium'
-                      : 'border-brand-border text-text-3 hover:border-brand-border'
-                  }`}>
-                  All
-                </button>
-                {subEvents.map(se => (
-                  <button key={se.id}
-                    onClick={() => { setActiveSubEventId(se.id); loadMatches() }}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                      activeSubEventId === se.id
-                        ? 'border-brand bg-cream text-brand font-medium'
-                        : 'border-brand-border text-text-3 hover:border-brand-border'
-                    }`}>
-                    {se.name}
-                  </button>
-                ))}
-              </div>
-            )}
             <div className="bg-white dark:bg-cream-2 rounded-xl border overflow-hidden">
               {(() => {
                 // Show matched vendor types + available types (so local businesses are always browsable)

@@ -78,7 +78,7 @@ const VENDOR_CARDS = [
 const PERKS = [
   { icon: "🌍", title: "Plan from anywhere", desc: "You're in Los Angeles, the celebration's in New York — no problem. Manage vendors, guests and RSVPs from anywhere in the world." },
   { icon: "✨", title: "Smart vendor matching", desc: "Our algorithm scores every vendor against your dietary requirements, budget, city, and event type. Best fits always rise to the top." },
-  { icon: "🗓", title: "Multi-event support", desc: "Mehendi, Sangeet, Haldi, Reception — manage all your sub-events, vendors and guests in one unified dashboard." },
+  { icon: "🗓", title: "Multi-event support", desc: "Mehendi, Sangeet, Haldi, Reception — manage all your vendors and guests in one unified dashboard." },
   { icon: "💬", title: "Compare quotes side by side", desc: "Receive detailed quotes with menus and package breakdowns. Message vendors directly, no middlemen." },
   { icon: "👥", title: "Guest & RSVP management", desc: "Invite guests, track responses, and collect dietary requirements — all in the same platform as your vendor management." },
   { icon: "✅", title: "Event task tracker", desc: "Never drop the ball. Track every task for your event — vendor confirmations, payments, invites, décor — see exactly what's done and what's pending." },
@@ -417,7 +417,7 @@ export default function HomePage() {
             <p className="text-base text-text-3 leading-relaxed mb-8">From vendor matching to guest RSVPs — manage everything in one place, wherever you are.</p>
             <div className="flex flex-col gap-3.5 mb-10">
               {[
-                ["🗓", "Multi-event planning", "Mehendi, Sangeet, Haldi, Reception together"],
+                ["🗓", "Multi-event planning", "Mehendi, Sangeet, Haldi, Reception — all managed in one place"],
                 ["✨", "Smart vendor matching", "ranked by dietary needs, budget & city"],
                 ["💬", "Compare quotes", "menus and packages side by side"],
                 ["👥", "Guest & RSVP management", "track responses and dietary requirements"],

@@ -13,12 +13,11 @@ type TimelineEntry = {
   vendor_name: string | null
   location: string | null
   is_public: boolean
-  sub_event_id: string | null
 }
 
 type EventDate = {
-  id: string    // 'main' or sub-event id
-  label: string // event/sub-event name
+  id: string    // 'main' or date id
+  label: string // event name
   date: string  // ISO date string
 }
 
@@ -80,7 +79,6 @@ export function EventTimeline({ eventId, eventDates }: Props) {
     vendor_name: '',
     location: '',
     is_public: true,
-    sub_event_id: '',
   }
 
   const [form, setForm] = useState(emptyForm)
@@ -131,19 +129,8 @@ export function EventTimeline({ eventId, eventDates }: Props) {
       vendor_name: entry.vendor_name ?? '',
       location: entry.location ?? '',
       is_public: entry.is_public,
-      sub_event_id: entry.sub_event_id ?? '',
     })
     setShowForm(true)
-  }
-
-  // When user picks a sub-event, auto-set the day to that sub-event's date
-  function handleSubEventChange(subEventId: string) {
-    const match = eventDates.find(d => d.id === subEventId)
-    setForm(f => ({
-      ...f,
-      sub_event_id: subEventId,
-      ...(match ? { day: toDateStr(match.date) } : {}),
-    }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -158,7 +145,6 @@ export function EventTimeline({ eventId, eventDates }: Props) {
       vendor_name: form.vendor_name || null,
       location: form.location || null,
       is_public: form.is_public,
-      sub_event_id: form.sub_event_id || null,
     }
     try {
       const url = editingId
@@ -306,23 +292,12 @@ export function EventTimeline({ eventId, eventDates }: Props) {
               </div>
             </div>
 
-            {/* Day + Sub-event */}
+            {/* Day + Time */}
             <div className="grid gap-4 sm:grid-cols-2">
-              {eventDates.length > 1 ? (
-                <div>
-                  <label className="block text-sm font-medium text-text-2 mb-1">Event Day</label>
-                  <select className={inputCls} value={form.sub_event_id || 'main'} onChange={e => handleSubEventChange(e.target.value === 'main' ? '' : e.target.value)}>
-                    {eventDates.map(d => (
-                      <option key={d.id} value={d.id}>{d.label} — {formatDate(d.date)}</option>
-                    ))}
-                  </select>
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-text-2 mb-1">Date</label>
-                  <input type="date" required className={inputCls} value={form.day} onChange={e => setForm(f => ({ ...f, day: e.target.value }))} />
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-text-2 mb-1">Date</label>
+                <input type="date" required className={inputCls} value={form.day} onChange={e => setForm(f => ({ ...f, day: e.target.value }))} />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-text-2 mb-1">Start Time *</label>

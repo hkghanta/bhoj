@@ -36,12 +36,6 @@ export async function POST(
       event_id: id,
       email: { not: null },
       declined: false,
-      ...(mode === 'pending' ? {
-        invites: { every: { responded_at: null } },
-      } : {}),
-    },
-    include: {
-      invites: { include: { sub_event: true } },
     },
   })
 
@@ -60,11 +54,11 @@ export async function POST(
       const rsvpUrl = website
         ? `${APP_URL}/w/${website.slug}?token=${household.token}`
         : `${APP_URL}/e/${household.token}`
-      const subEvents = household.invites.map(inv => ({
-        name: inv.sub_event.name,
-        date: format(inv.sub_event.event_date, 'EEE d MMM yyyy, h:mm a'),
-        venue: inv.sub_event.venue,
-      }))
+      const subEvents: { name: string; date: string; venue: string | null }[] = [{
+        name: event.event_name,
+        date: format(event.event_date, 'EEE d MMM yyyy, h:mm a'),
+        venue: event.venue,
+      }]
 
       const isReminder = mode === 'pending'
       const html = await render(

@@ -7,7 +7,6 @@ const createSchema = z.object({
   label: z.string().min(1),
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
-  sub_event_ids: z.array(z.string()).min(1, 'Select at least one sub-event'),
 })
 
 export async function GET(
@@ -24,14 +23,6 @@ export async function GET(
 
   const households = await prisma.guestHousehold.findMany({
     where: { event_id: id },
-    include: {
-      invites: {
-        include: {
-          sub_event: { select: { id: true, name: true, event_date: true } },
-          attendees: true,
-        },
-      },
-    },
     orderBy: { created_at: 'asc' },
   })
   return NextResponse.json(households)
@@ -55,31 +46,13 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid input', issues: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { sub_event_ids, email, ...rest } = parsed.data
-
-  const subEvents = await prisma.subEvent.findMany({
-    where: { id: { in: sub_event_ids }, event_id: id },
-  })
-  if (subEvents.length !== sub_event_ids.length) {
-    return NextResponse.json({ error: 'Invalid sub-event IDs' }, { status: 400 })
-  }
+  const { email, ...rest } = parsed.data
 
   const household = await prisma.guestHousehold.create({
     data: {
       event_id: id,
       ...rest,
       email: email || null,
-      invites: {
-        create: sub_event_ids.map(sub_event_id => ({ sub_event_id })),
-      },
-    },
-    include: {
-      invites: {
-        include: {
-          sub_event: { select: { id: true, name: true, event_date: true } },
-          attendees: true,
-        },
-      },
     },
   })
   return NextResponse.json(household, { status: 201 })
