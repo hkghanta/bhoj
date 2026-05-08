@@ -28,6 +28,10 @@ export const SLUG_TO_VENDOR_TYPE: Record<string, VendorType> = {
   'dessert-vendor':     VendorType.DESSERT_VENDOR,
   lighting:             VendorType.LIGHTING,
   security:             VendorType.SECURITY,
+  venue:                VendorType.VENUE,
+  'event-manager':      VendorType.EVENT_MANAGER,
+  'cake-vendor':        VendorType.CAKE_VENDOR,
+  'favour-gifting':     VendorType.FAVOUR_GIFTING,
 }
 
 // VendorType → canonical URL slug (invert of above)

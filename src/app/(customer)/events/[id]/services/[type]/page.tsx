@@ -1173,6 +1173,8 @@ function slugToVendorType(slug: string): string {
     'dhol-player': 'DHOL_PLAYER', 'live-band': 'LIVE_BAND',
     choreographer: 'CHOREOGRAPHER', 'pandit-officiant': 'PANDIT_OFFICIANT',
     'mc-host': 'MC_HOST', bartender: 'BARTENDER', transport: 'TRANSPORT',
+    venue: 'VENUE', 'event-manager': 'EVENT_MANAGER', security: 'SECURITY',
+    'cake-vendor': 'CAKE_VENDOR', 'favour-gifting': 'FAVOUR_GIFTING',
   }
   return map[slug] ?? slug.toUpperCase()
 }

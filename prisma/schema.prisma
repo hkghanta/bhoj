@@ -896,6 +896,9 @@ enum VendorType {
   SECURITY
   MC_HOST
   EVENT_MANAGER
+  VENUE
+  CAKE_VENDOR
+  FAVOUR_GIFTING
 }
 
 enum VendorTier {
