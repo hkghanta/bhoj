@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   FileText, Loader2, CheckCircle2, XCircle, PenLine,
-  Shield, Clock, AlertTriangle, Plus, Check, X,
+  Shield, Clock, AlertTriangle, Plus, Check, X, Printer,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -30,6 +30,8 @@ type Amendment = {
 type Contract = {
   id: string
   contract_number: string
+  vendor_address: string | null
+  customer_address: string | null
   content: string
   terms_and_conditions: string | null
   status: 'DRAFT' | 'SENT' | 'SIGNED' | 'CANCELLED'
@@ -57,9 +59,9 @@ const AMENDMENT_STATUS_CONFIG: Record<string, { label: string; cls: string }> = 
   REJECTED: { label: 'Rejected', cls: 'bg-red-50 text-red-500 border-red-200' },
 }
 
-type Props = { contractId: string }
+type Props = { contractId: string; role?: 'customer' | 'vendor' }
 
-export default function ContractViewer({ contractId }: Props) {
+export default function ContractViewer({ contractId, role = 'customer' }: Props) {
   const [contract, setContract] = useState<Contract | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -78,6 +80,15 @@ export default function ContractViewer({ contractId }: Props) {
   const [submittingAmend, setSubmittingAmend] = useState(false)
 
   const [actingOnAmendment, setActingOnAmendment] = useState<string | null>(null)
+
+  // Edit mode (vendor only)
+  const [editMode, setEditMode] = useState(false)
+  const [editContent, setEditContent] = useState('')
+  const [editTerms, setEditTerms] = useState('')
+  const [editVendorAddress, setEditVendorAddress] = useState('')
+  const [editCustomerAddress, setEditCustomerAddress] = useState('')
+  const [savingContent, setSavingContent] = useState(false)
+  const [sendingContract, setSendingContract] = useState(false)
 
   const fmt = (n: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n)
@@ -157,6 +168,45 @@ export default function ContractViewer({ contractId }: Props) {
     setActingOnAmendment(null)
   }
 
+  async function handleSaveContent() {
+    setSavingContent(true)
+    try {
+      const res = await fetch(`/api/contracts/${contractId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: editContent,
+          terms_and_conditions: editTerms || null,
+          vendor_address: editVendorAddress || null,
+          customer_address: editCustomerAddress || null,
+        }),
+      })
+      if (res.ok) {
+        setEditMode(false)
+        await fetchContract()
+      }
+    } catch { /* ignore */ }
+    setSavingContent(false)
+  }
+
+  async function handleSendContract() {
+    if (!contract?.vendor_address || !contract?.customer_address) {
+      alert('Both vendor and customer addresses are required before sending. Please edit the contract to add addresses.')
+      return
+    }
+    if (!confirm('Send this contract to the customer? They will be notified.')) return
+    setSendingContract(true)
+    try {
+      const res = await fetch(`/api/contracts/${contractId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'SENT' }),
+      })
+      if (res.ok) await fetchContract()
+    } catch { /* ignore */ }
+    setSendingContract(false)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-text-4 py-8">
@@ -177,7 +227,11 @@ export default function ContractViewer({ contractId }: Props) {
   const statusCfg = STATUS_CONFIG[contract.status] ?? STATUS_CONFIG.DRAFT
   const customerSigned = contract.signatures.some(s => s.signer_role === 'CUSTOMER')
   const vendorSigned = contract.signatures.some(s => s.signer_role === 'VENDOR')
-  const canSign = contract.status === 'SENT' && !customerSigned
+  const myRole = role.toUpperCase() as 'CUSTOMER' | 'VENDOR'
+  const mySigned = myRole === 'CUSTOMER' ? customerSigned : vendorSigned
+  const canSign = (contract.status === 'SENT' || contract.status === 'SIGNED') && !mySigned
+  const canEdit = role === 'vendor' && contract.status === 'DRAFT'
+  const canSend = role === 'vendor' && contract.status === 'DRAFT'
 
   return (
     <div className="space-y-5">
@@ -194,6 +248,16 @@ export default function ContractViewer({ contractId }: Props) {
             </div>
             <p className="text-xs text-text-4 mt-1">#{contract.contract_number}</p>
           </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => window.open(`/contracts/${contractId}`, '_blank')}
+              className="gap-1.5 text-xs"
+            >
+              <Printer className="h-3.5 w-3.5" /> Print / PDF
+            </Button>
+          </div>
           {contract.expires_at && (
             <div className="text-right">
               <p className="text-xs text-text-4">Expires</p>
@@ -209,6 +273,11 @@ export default function ContractViewer({ contractId }: Props) {
           <div className="bg-cream rounded-lg p-3">
             <p className="text-xs text-text-4 mb-1">Vendor</p>
             <p className="text-sm font-medium text-text-1">{contract.vendor.business_name}</p>
+            {contract.vendor_address ? (
+              <p className="text-xs text-text-3 mt-1 whitespace-pre-line">{contract.vendor_address}</p>
+            ) : (
+              <p className="text-xs text-amber-500 mt-1 italic">Address required</p>
+            )}
             <div className="flex items-center gap-1 mt-1">
               {vendorSigned ? (
                 <span className="flex items-center gap-1 text-xs text-green-600">
@@ -222,6 +291,11 @@ export default function ContractViewer({ contractId }: Props) {
           <div className="bg-cream rounded-lg p-3">
             <p className="text-xs text-text-4 mb-1">Customer</p>
             <p className="text-sm font-medium text-text-1">{contract.customer.name}</p>
+            {contract.customer_address ? (
+              <p className="text-xs text-text-3 mt-1 whitespace-pre-line">{contract.customer_address}</p>
+            ) : (
+              <p className="text-xs text-amber-500 mt-1 italic">Address required</p>
+            )}
             <div className="flex items-center gap-1 mt-1">
               {customerSigned ? (
                 <span className="flex items-center gap-1 text-xs text-green-600">
@@ -247,16 +321,98 @@ export default function ContractViewer({ contractId }: Props) {
         )}
       </div>
 
-      {/* Contract content */}
-      <div className="bg-white rounded-xl border p-5">
-        <h3 className="font-semibold text-text-1 mb-3">Contract Details</h3>
-        <div className="prose prose-sm max-w-none text-text-2 whitespace-pre-wrap">
-          {contract.content}
+      {/* Vendor: Edit & Send actions */}
+      {canSend && !editMode && (
+        <div className="bg-amber-50 rounded-xl border border-amber-200 p-5 flex items-center gap-3">
+          <FileText className="h-5 w-5 text-amber-600 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium text-amber-800">This contract is in draft.</p>
+            <p className="text-sm text-amber-600 mt-0.5">Edit the content, then send it to the customer for signing.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => { setEditMode(true); setEditContent(contract.content); setEditTerms(contract.terms_and_conditions ?? ''); setEditVendorAddress(contract.vendor_address ?? ''); setEditCustomerAddress(contract.customer_address ?? '') }} className="gap-1.5">
+              <PenLine className="h-3.5 w-3.5" /> Edit
+            </Button>
+            <Button size="sm" onClick={handleSendContract} disabled={sendingContract || !contract.content} className="bg-brand hover:bg-brand/90 gap-1.5">
+              {sendingContract ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+              {sendingContract ? 'Sending...' : 'Send to Customer'}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Contract content */}
+      {editMode ? (
+        <div className="bg-white rounded-xl border p-5 space-y-4">
+          <h3 className="font-semibold text-text-1">Party Addresses</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-text-2 block mb-1">Vendor Address <span className="text-red-500">*</span></label>
+              <textarea
+                value={editVendorAddress}
+                onChange={e => setEditVendorAddress(e.target.value)}
+                rows={3}
+                className="w-full rounded-lg border border-brand-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-y"
+                placeholder="123 Business St, Suite 100&#10;City, State ZIP"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-text-2 block mb-1">Customer Address <span className="text-red-500">*</span></label>
+              <textarea
+                value={editCustomerAddress}
+                onChange={e => setEditCustomerAddress(e.target.value)}
+                rows={3}
+                className="w-full rounded-lg border border-brand-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-y"
+                placeholder="456 Home Ave&#10;City, State ZIP"
+              />
+            </div>
+          </div>
+          <h3 className="font-semibold text-text-1">Contract Content</h3>
+          <textarea
+            value={editContent}
+            onChange={e => setEditContent(e.target.value)}
+            rows={12}
+            className="w-full rounded-lg border border-brand-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-y"
+            placeholder="Enter the contract details, scope of work, deliverables..."
+          />
+          <h3 className="font-semibold text-text-1">Terms & Conditions</h3>
+          <textarea
+            value={editTerms}
+            onChange={e => setEditTerms(e.target.value)}
+            rows={6}
+            className="w-full rounded-lg border border-brand-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-y"
+            placeholder="Payment terms, cancellation policy, liability..."
+          />
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleSaveContent} disabled={savingContent} className="bg-brand hover:bg-brand/90 gap-1.5">
+              {savingContent ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+              {savingContent ? 'Saving...' : 'Save Changes'}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setEditMode(false)}>Cancel</Button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-text-1">Contract Details</h3>
+            {canEdit && (
+              <Button size="sm" variant="outline" onClick={() => { setEditMode(true); setEditContent(contract.content); setEditTerms(contract.terms_and_conditions ?? ''); setEditVendorAddress(contract.vendor_address ?? ''); setEditCustomerAddress(contract.customer_address ?? '') }} className="gap-1.5">
+                <PenLine className="h-3.5 w-3.5" /> Edit
+              </Button>
+            )}
+          </div>
+          {contract.content ? (
+            <div className="prose prose-sm max-w-none text-text-2 whitespace-pre-wrap">
+              {contract.content}
+            </div>
+          ) : (
+            <p className="text-sm text-text-4 italic">No contract content yet. Click Edit to add details.</p>
+          )}
+        </div>
+      )}
 
       {/* Terms and conditions */}
-      {contract.terms_and_conditions && (
+      {!editMode && contract.terms_and_conditions && (
         <div className="bg-white rounded-xl border p-5">
           <h3 className="font-semibold text-text-1 mb-3">Terms & Conditions</h3>
           <div className="prose prose-sm max-w-none text-text-3 whitespace-pre-wrap">
@@ -448,14 +604,16 @@ export default function ContractViewer({ contractId }: Props) {
           <div className="space-y-3">
             {contract.amendments.map(a => {
               const badge = AMENDMENT_STATUS_CONFIG[a.status] ?? AMENDMENT_STATUS_CONFIG.PROPOSED
-              const isFromVendor = a.proposed_by_role === 'VENDOR'
-              const canRespond = a.status === 'PROPOSED' && isFromVendor
+              const isFromOtherParty = a.proposed_by_role !== myRole
+              const canRespond = a.status === 'PROPOSED' && isFromOtherParty
 
               return (
                 <div key={a.id} className="border rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <span className="text-xs font-medium text-text-4">
-                      {isFromVendor ? contract.vendor.business_name : 'You'}
+                      {isFromOtherParty
+                        ? (a.proposed_by_role === 'VENDOR' ? contract.vendor.business_name : contract.customer.name)
+                        : 'You'}
                     </span>
                     <span className={`text-xs px-1.5 py-0.5 rounded-full border font-medium ${badge.cls}`}>
                       {badge.label}

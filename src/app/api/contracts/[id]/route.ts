@@ -6,6 +6,8 @@ import { z } from 'zod'
 const patchSchema = z.object({
   content: z.string().min(1).optional(),
   terms_and_conditions: z.string().nullable().optional(),
+  vendor_address: z.string().optional(),
+  customer_address: z.string().optional(),
   status: z.enum(['SENT', 'CANCELLED']).optional(),
 })
 
@@ -97,7 +99,7 @@ export async function PATCH(
 
   const contract = await prisma.contract.findUnique({
     where: { id: contractId },
-    select: { id: true, vendor_id: true, status: true },
+    select: { id: true, vendor_id: true, status: true, vendor_address: true, customer_address: true },
   })
 
   if (!contract) {
@@ -107,10 +109,10 @@ export async function PATCH(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { content, terms_and_conditions, status } = parsed.data
+  const { content, terms_and_conditions, vendor_address, customer_address, status } = parsed.data
 
-  // Content edits only allowed in DRAFT
-  if ((content !== undefined || terms_and_conditions !== undefined) && contract.status !== 'DRAFT') {
+  // Content/address edits only allowed in DRAFT
+  if ((content !== undefined || terms_and_conditions !== undefined || vendor_address !== undefined || customer_address !== undefined) && contract.status !== 'DRAFT') {
     return NextResponse.json(
       { error: 'Content can only be edited while contract is in DRAFT status' },
       { status: 400 }
@@ -125,6 +127,18 @@ export async function PATCH(
     )
   }
 
+  // Both addresses are required before sending
+  if (status === 'SENT') {
+    const finalVendorAddr = vendor_address ?? contract.vendor_address
+    const finalCustomerAddr = customer_address ?? contract.customer_address
+    if (!finalVendorAddr || !finalCustomerAddr) {
+      return NextResponse.json(
+        { error: 'Both vendor and customer addresses are required before sending the contract' },
+        { status: 400 }
+      )
+    }
+  }
+
   if (status === 'CANCELLED' && contract.status === 'SIGNED') {
     return NextResponse.json(
       { error: 'Cannot cancel a signed contract' },
@@ -137,6 +151,8 @@ export async function PATCH(
     data: {
       ...(content !== undefined && { content }),
       ...(terms_and_conditions !== undefined && { terms_and_conditions }),
+      ...(vendor_address !== undefined && { vendor_address }),
+      ...(customer_address !== undefined && { customer_address }),
       ...(status !== undefined && { status }),
     },
     include: {

@@ -10,6 +10,7 @@ import {
   CheckCircle2, Clock, XCircle, Eye, ChevronLeft, Plus, Trash2,
   Users, Leaf, UtensilsCrossed, Pencil,
   BookOpen, ChevronDown, ChevronUp, AlertTriangle, Package2, Tag, Search,
+  ScrollText,
 } from 'lucide-react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -78,6 +79,7 @@ type Quote = {
   discount_note: string | null
   menu_items: (Omit<QuoteItem, '_localId'> & { id: string })[]
   tray_lines: { id: string; item_name: string; serves_note: string | null; unit_price: number; qty: number; line_total: number }[]
+  contract: { id: string; status: string; contract_number: string } | null
   match: {
     event_request: {
       event: { event_name: string; guest_count: number; currency: string; city: string; event_date: string }
@@ -267,6 +269,7 @@ export default function MenuBuilderPage() {
   const [menuItems, setMenuItems]     = useState<QuoteItem[]>([])
   const [saving, setSaving]           = useState(false)
   const [sending, setSending]         = useState(false)
+  const [creatingContract, setCreatingContract] = useState(false)
   const [showLibrary, setShowLibrary] = useState(false)
   const [editMode, setEditMode]       = useState(false)
 
@@ -505,6 +508,27 @@ export default function MenuBuilderPage() {
     router.push('/vendor/quotes')
   }
 
+  async function handleCreateContract() {
+    if (!quote) return
+    setCreatingContract(true)
+    try {
+      const res = await fetch('/api/contracts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quote_id: quote.id }),
+      })
+      if (res.ok) {
+        const { contract } = await res.json()
+        router.push(`/vendor/contracts/${contract.id}`)
+      } else {
+        const err = await res.json()
+        alert(err.error ?? 'Failed to create contract')
+      }
+    } finally {
+      setCreatingContract(false)
+    }
+  }
+
   if (!quote) return <div className="text-text-4 p-8">Loading…</div>
 
   const pref = quote.match.event_request.menu_preference
@@ -536,12 +560,26 @@ export default function MenuBuilderPage() {
             </div>
             <p className="text-sm text-text-4 mt-0.5">{event.city} · {format(new Date(event.event_date), 'd MMM yyyy')} · {event.guest_count} guests</p>
           </div>
-          {(quote.status === 'SENT' || quote.status === 'VIEWED') && (
-            <button onClick={() => setEditMode(true)}
-              className="flex items-center gap-1.5 text-sm font-bold text-brand border border-brand-border px-3 py-1.5 rounded-xl hover:bg-cream">
-              <Pencil className="h-3.5 w-3.5" /> Edit quote
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {(quote.status === 'SENT' || quote.status === 'VIEWED') && (
+              <button onClick={() => setEditMode(true)}
+                className="flex items-center gap-1.5 text-sm font-bold text-brand border border-brand-border px-3 py-1.5 rounded-xl hover:bg-cream">
+                <Pencil className="h-3.5 w-3.5" /> Edit quote
+              </button>
+            )}
+            {quote.status === 'ACCEPTED' && !quote.contract && (
+              <button onClick={handleCreateContract} disabled={creatingContract}
+                className="flex items-center gap-1.5 text-sm font-bold text-white bg-brand px-4 py-1.5 rounded-xl hover:bg-brand/90 disabled:opacity-50">
+                <ScrollText className="h-3.5 w-3.5" /> {creatingContract ? 'Creating…' : 'Create Contract'}
+              </button>
+            )}
+            {quote.contract && (
+              <Link href={`/vendor/contracts/${quote.contract.id}`}
+                className="flex items-center gap-1.5 text-sm font-bold text-brand border border-brand-border px-3 py-1.5 rounded-xl hover:bg-cream">
+                <ScrollText className="h-3.5 w-3.5" /> View Contract
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Tray bill or per-head pricing */}

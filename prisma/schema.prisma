@@ -102,6 +102,10 @@ model Vendor {
   calendar_syncs         VendorCalendarSync[]
   pipeline_stages        VendorPipelineEntry[]
   workflows              VendorWorkflow[]
+  avg_response_hrs       Float?
+  avg_rating             Float?
+  total_reviews          Int                   @default(0)
+  total_bookings         Int                   @default(0)
   sustainability_tags    String[]              @default([])
   cancellation_preset_id String?
   cancellation_preset    CancellationPreset?   @relation(fields: [cancellation_preset_id], references: [id])
@@ -198,6 +202,41 @@ model Event {
   invitation_design  EventInvitationDesign?
   event_vendors      EventVendor[]
   plan_items         EventPlanItem[]
+  sub_events         SubEvent[]
+  parent_event_id    String?
+  parent_event       Event?               @relation("SubEventRelation", fields: [parent_event_id], references: [id], onDelete: SetNull)
+  child_events       Event[]              @relation("SubEventRelation")
+}
+
+model SubEvent {
+  id          String    @id @default(cuid())
+  event_id    String
+  name        String
+  event_type  String
+  event_date  DateTime?
+  start_time  String?
+  end_time    String?
+  venue       String?
+  city        String?
+  description String?
+  sort_order  Int       @default(0)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  event       Event     @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@index([event_id])
+}
+
+model EventPlaybook {
+  id          String   @id @default(cuid())
+  event_type  String   @unique
+  name        String
+  description String?
+  checklist   Json     // [{ category, items: [{ name, due_offset_days }] }]
+  sub_events  Json?    // [{ name, type, offset_days }]
+  budget_tips Json?    // { low: { min, max }, mid: { min, max }, high: { min, max } }
+  vendor_types String[] @default([])
+  created_at  DateTime @default(now())
 }
 
 model EventPhoto {
@@ -310,6 +349,10 @@ model GuestHousehold {
   allergens       String[]              @default([])
   rsvp_note       String?
   responded_at    DateTime?
+  invite_sent_at  DateTime?
+  invite_opened_at DateTime?
+  reminder_count  Int                   @default(0)
+  last_reminder_at DateTime?
   created_at      DateTime              @default(now())
   event           Event                 @relation(fields: [event_id], references: [id], onDelete: Cascade)
   @@index([event_id])
@@ -1237,6 +1280,8 @@ model Contract {
   quote_id             String?             @unique
   event_id             String?
   template_id          String?
+  vendor_address       String?
+  customer_address     String?
   content              String              @db.Text
   terms_and_conditions String?             @db.Text
   status               ContractStatus      @default(DRAFT)

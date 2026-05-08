@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import {
   Star, MapPin, ChevronRight, RefreshCw, Sparkles, Plus, X, Zap, FileText,
   Leaf, Shield, ArrowUpDown, ExternalLink, Phone, Globe, UserPlus, CheckCircle2,
+  Filter, Users,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -534,22 +535,29 @@ export default function VendorDiscoveryPage() {
                 </div>
 
                 {activeMatches.length === 0 ? (
-                  <div className="bg-white dark:bg-cream-2 rounded-xl border p-8 text-center text-text-4">
+                  <div className="bg-white dark:bg-cream-2 rounded-xl border p-8 text-center">
                     {hasActiveFilters ? (
                       <>
-                        <p>No vendors match your current filters.</p>
+                        <div className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center mx-auto mb-3">
+                          <Filter className="h-5 w-5 text-text-4/40" />
+                        </div>
+                        <p className="text-sm text-text-3">No vendors match your current filters.</p>
                         <button
                           onClick={() => { setSortBy('score'); setVegOnly(false); setHalalOnly(false) }}
-                          className="mt-3 text-sm text-brand hover:underline"
+                          className="mt-3 text-sm text-brand font-medium hover:underline"
                         >
                           Clear filters
                         </button>
                       </>
                     ) : (
                       <>
-                        <p>No matches found for this service yet.</p>
-                        <button onClick={() => loadMatches(true)} className="mt-3 text-sm text-brand hover:underline">
-                          Refresh
+                        <div className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center mx-auto mb-3">
+                          <Users className="h-5 w-5 text-text-4/40" />
+                        </div>
+                        <p className="text-sm text-text-3 mb-1">No platform matches yet for this service.</p>
+                        <p className="text-xs text-text-4 mb-3">Check the local businesses section below, or try refreshing.</p>
+                        <button onClick={() => loadMatches(true)} className="text-sm text-brand font-medium hover:underline">
+                          Refresh matches
                         </button>
                       </>
                     )}
@@ -563,23 +571,29 @@ export default function VendorDiscoveryPage() {
                       const hasHalal = match.vendor.menu_packages.some(p => p.is_halal)
 
                       return (
-                        <div key={match.id} className="bg-white dark:bg-cream-2 rounded-xl border hover:shadow-sm transition-shadow overflow-hidden">
+                        <div key={match.id} className="bg-white dark:bg-cream-2 rounded-xl border hover:shadow-md transition-all overflow-hidden group">
                           <div className="flex gap-4 p-4">
                             {/* Photo */}
                             <Link
                               href={`/events/${eventId}/vendors/${match.vendor.id}?matchId=${match.id}`}
-                              className="w-28 h-20 rounded-xl overflow-hidden bg-cream-2 flex-shrink-0 block"
+                              className="w-28 h-24 rounded-xl overflow-hidden bg-cream-2 flex-shrink-0 block relative"
                             >
                               {coverUrl(match.vendor) ? (
                                 <Image
                                   src={coverUrl(match.vendor)!}
                                   alt={match.vendor.business_name}
-                                  width={112} height={80}
-                                  className="w-full h-full object-cover hover:scale-105 transition-transform"
+                                  width={112} height={96}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-2xl bg-cream">
                                   {VENDOR_TYPE_EMOJIS[activeType] ?? '🏢'}
+                                </div>
+                              )}
+                              {/* Verification badge overlay */}
+                              {match.vendor.is_verified && (
+                                <div className="absolute top-1.5 left-1.5 bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-sm">
+                                  <Shield className="h-3 w-3 text-blue-500" />
                                 </div>
                               )}
                             </Link>
@@ -598,33 +612,30 @@ export default function VendorDiscoveryPage() {
                                       <Badge className="bg-brand text-white text-xs">{match.vendor.tier}</Badge>
                                     )}
                                     {match.rank === 1 && (
-                                      <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium border border-amber-200">
-                                        ⭐ Best match
-                                      </span>
-                                    )}
-                                    {match.vendor.is_verified && (
-                                      <span className="flex items-center gap-0.5 text-xs text-blue-600">
-                                        <Shield className="h-3 w-3" /> Verified
+                                      <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold border border-amber-200 flex items-center gap-0.5">
+                                        <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500" /> Top Match
                                       </span>
                                     )}
                                   </div>
+
+                                  {/* Rating + Location row */}
                                   <div className="flex items-center gap-3 text-xs text-text-3 mt-1 flex-wrap">
-                                    <span className="flex items-center gap-1">
-                                      <MapPin className="h-3 w-3" />{match.vendor.city}
-                                      {match.distance_miles !== null && (
-                                        <span className="text-text-4">
-                                          · {match.distance_miles < 10
-                                            ? '< 10 mi'
-                                            : `${Math.round(match.distance_miles)} mi away`}
-                                        </span>
-                                      )}
-                                    </span>
                                     {match.vendor.avg_rating && (
-                                      <span className="flex items-center gap-1">
+                                      <span className="flex items-center gap-0.5 font-medium">
                                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                                         {match.vendor.avg_rating.toFixed(1)}
                                       </span>
                                     )}
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />{match.vendor.city}
+                                      {match.distance_miles !== null && (
+                                        <span className="text-text-4">
+                                          ({match.distance_miles < 10
+                                            ? '< 10 mi'
+                                            : `${Math.round(match.distance_miles)} mi`})
+                                        </span>
+                                      )}
+                                    </span>
                                     {hasVeg && (
                                       <span className="flex items-center gap-0.5 text-green-600">
                                         <Leaf className="h-3 w-3" /> Veg
@@ -643,12 +654,12 @@ export default function VendorDiscoveryPage() {
                                       <div className="text-lg font-black text-brand">
                                         {fmtPrice(price, match.vendor)}
                                       </div>
-                                      <div className="text-xs text-text-4">per head</div>
+                                      <div className="text-[10px] text-text-4 font-medium">per head</div>
                                     </>
                                   ) : (
                                     <>
                                       <div className="text-xl font-bold text-brand">{match.score}</div>
-                                      <div className="text-xs text-text-4">match score</div>
+                                      <div className="text-[10px] text-text-4">match score</div>
                                     </>
                                   )}
                                 </div>
@@ -658,39 +669,44 @@ export default function VendorDiscoveryPage() {
                                 <p className="text-xs text-text-3 mt-1.5 line-clamp-1">{match.vendor.description}</p>
                               )}
 
-                              {/* Package pills */}
+                              {/* Package pills + starting price */}
                               {match.vendor.menu_packages.length > 0 && (
                                 <div className="flex gap-1.5 mt-2 flex-wrap">
                                   {match.vendor.menu_packages.slice(0, 3).map((pkg, i) => (
-                                    <span key={i} className="text-xs bg-cream-2 text-text-3 px-2 py-0.5 rounded-full">
-                                      {pkg.name} — {fmtPrice(Number(pkg.price_per_head), match.vendor)}/head
+                                    <span key={i} className="text-[10px] bg-cream-2 text-text-3 px-2 py-0.5 rounded-full border border-brand-border/50">
+                                      {pkg.name} &mdash; {fmtPrice(Number(pkg.price_per_head), match.vendor)}/head
                                     </span>
                                   ))}
+                                  {match.vendor.menu_packages.length > 3 && (
+                                    <span className="text-[10px] text-text-4 px-1.5 py-0.5">
+                                      +{match.vendor.menu_packages.length - 3} more
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </div>
                           </div>
 
                           {/* Action bar */}
-                          <div className="flex items-center gap-2 px-4 py-3 border-t bg-cream flex-wrap">
+                          <div className="flex items-center gap-2 px-4 py-2.5 border-t bg-cream flex-wrap">
                             <Link
                               href={`/events/${eventId}/vendors/${match.vendor.id}?matchId=${match.id}`}
                               className="text-xs text-brand font-medium hover:underline mr-auto"
                             >
-                              View full profile →
+                              View full profile
                             </Link>
                             {isQuoted ? (
                               <Link
                                 href={`/events/${eventId}/quotes`}
-                                className={cn(buttonVariants({ size: 'sm' }), 'bg-green-600 hover:bg-green-700')}
+                                className={cn(buttonVariants({ size: 'sm' }), 'bg-green-600 hover:bg-green-700 text-xs')}
                               >
-                                ✓ View Quote
+                                <CheckCircle2 className="h-3 w-3 mr-1" /> View Quote
                               </Link>
                             ) : (
                               <>
                                 <Link
                                   href={`/quotes/new?matchId=${match.id}`}
-                                  className={cn(buttonVariants({ size: 'sm', variant: 'outline' }))}
+                                  className={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'text-xs')}
                                 >
                                   Request Quote
                                 </Link>
@@ -700,7 +716,7 @@ export default function VendorDiscoveryPage() {
                                   className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50"
                                 >
                                   <Zap className="h-3.5 w-3.5" />
-                                  {estimating === match.id ? 'Estimating…' : 'Get AI Estimate'}
+                                  {estimating === match.id ? 'Estimating...' : 'AI Estimate'}
                                 </button>
                               </>
                             )}
@@ -893,9 +909,14 @@ export default function VendorDiscoveryPage() {
                 )}
               </>
             ) : (
-              <div className="bg-white dark:bg-cream-2 rounded-xl border p-12 text-center text-text-4">
-                <Sparkles className="h-8 w-8 mx-auto mb-3 text-brand" />
-                <p>Select a service category from the left to see matched vendors.</p>
+              <div className="bg-white dark:bg-cream-2 rounded-xl border p-12 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-cream flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="h-7 w-7 text-brand/50" />
+                </div>
+                <h3 className="font-bold text-text-1 mb-1">Select a category</h3>
+                <p className="text-sm text-text-4 max-w-xs mx-auto">
+                  Choose a service type from the left panel to browse matched vendors and local businesses for your event.
+                </p>
               </div>
             )}
           </div>

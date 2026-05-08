@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRef as useFileRef } from 'react'
+import { RsvpDashboard } from '@/components/customer/RsvpDashboard'
 
 type Household = { id: string; label: string; email: string | null; token: string; declined: boolean; rsvp_status: string | null; rsvp_count: number | null; meal_preference: string | null; allergens: string[]; rsvp_note: string | null; responded_at: string | null }
 type EventData = {
@@ -480,6 +481,9 @@ export default function GuestsPage() {
         <ChevronRight className="h-3.5 w-3.5" />
         <span className="text-text-2 font-medium">Guests & Invitations</span>
       </div>
+
+      {/* ── RSVP Tracker ────────────────────────────────────────────────── */}
+      {households.length > 0 && <RsvpDashboard eventId={eventId} />}
 
       {/* ── Invitation Banner ────────────────────────────────────────────── */}
       {(() => {

@@ -256,6 +256,9 @@ function OnesevQuoteRow({
                     className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                       tag === 'Best Price' ? 'bg-green-100 text-green-700' :
                       tag === 'Fastest Response' ? 'bg-blue-100 text-blue-700' :
+                      tag === 'Highest Rated' ? 'bg-amber-100 text-amber-700' :
+                      tag === 'Most Complete' ? 'bg-purple-100 text-purple-700' :
+                      tag === 'Best Value' ? 'bg-emerald-100 text-emerald-700' :
                       'bg-gray-100 text-gray-700'
                     }`}
                   >
@@ -455,6 +458,9 @@ function BoardResponseRow({
                     className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                       tag === 'Best Price' ? 'bg-green-100 text-green-700' :
                       tag === 'Fastest Response' ? 'bg-blue-100 text-blue-700' :
+                      tag === 'Highest Rated' ? 'bg-amber-100 text-amber-700' :
+                      tag === 'Most Complete' ? 'bg-purple-100 text-purple-700' :
+                      tag === 'Best Value' ? 'bg-emerald-100 text-emerald-700' :
                       'bg-gray-100 text-gray-700'
                     }`}
                   >
@@ -695,10 +701,17 @@ type PipelineRow = {
   service: string
   source: 'OneSeva' | 'Board' | 'External'
   price: string
+  priceNumeric: number
+  responseTime: string | null
+  responseMs: number
+  isVerified: boolean
+  vendorBadges: string[]
   status: string
   statusColor: string
   statusBg: string
 }
+
+type PipelineSortOption = 'status' | 'price_asc' | 'price_desc' | 'response_time'
 
 const PIPELINE_STATUS_ORDER: Record<string, number> = {
   Finalized: 0,
@@ -720,6 +733,7 @@ export default function EventQuotesPage() {
   const [tokenMap, setTokenMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [filterType, setFilterType] = useState<string>('all')
+  const [pipelineSort, setPipelineSort] = useState<PipelineSortOption>('status')
   const [highlightTags, setHighlightTags] = useState<Record<string, string[]>>({})
 
   const fetchAll = useCallback(async () => {
@@ -814,6 +828,56 @@ export default function EventQuotesPage() {
           ;(tags[fastestId] ??= []).push('Fastest Response')
         }
       }
+
+      // "Highest Rated" — OneSeva quote with highest match score in group
+      const osevaGroup = quotesByType[vt] ?? []
+      if (osevaGroup.length >= 2) {
+        let highestId: string | null = null
+        let highestScore = -Infinity
+        for (const q of osevaGroup) {
+          const score = q.match?.score ?? 0
+          if (score > highestScore) {
+            highestScore = score
+            highestId = q.id
+          }
+        }
+        if (highestId && highestScore > 0) {
+          ;(tags[highestId] ??= []).push('Highest Rated')
+        }
+      }
+
+      // "Most Complete" — OneSeva quotes with notes, tasting, and full pricing details
+      if (osevaGroup.length >= 2) {
+        for (const q of osevaGroup) {
+          const hasNotes = !!q.notes
+          const hasTasting = q.tasting_offered
+          const hasPricingDetail = q.pricing_type === 'PER_TRAY'
+            ? q.tray_lines.length >= 3
+            : !!q.price_per_head
+          if (hasNotes && hasTasting && hasPricingDetail) {
+            ;(tags[q.id] ??= []).push('Most Complete')
+          }
+        }
+      }
+
+      // "Best Value" — PER_HEAD OneSeva quote with lowest price_per_head + tasting + notes
+      const perHeadQuotes = osevaGroup.filter(
+        q => q.pricing_type === 'PER_HEAD' && q.price_per_head && Number(q.price_per_head) > 0
+      )
+      if (perHeadQuotes.length >= 2) {
+        let bestValueId: string | null = null
+        let lowestPPH = Infinity
+        for (const q of perHeadQuotes) {
+          const pph = Number(q.price_per_head)
+          if (pph < lowestPPH && q.tasting_offered && q.notes) {
+            lowestPPH = pph
+            bestValueId = q.id
+          }
+        }
+        if (bestValueId) {
+          ;(tags[bestValueId] ??= []).push('Best Value')
+        }
+      }
     }
 
     setHighlightTags(tags)
@@ -894,6 +958,7 @@ export default function EventQuotesPage() {
     ...sentOneseva.map(q => {
       const statusCfg = ONESEVA_STATUS[q.status] ?? ONESEVA_STATUS.DRAFT
       const isTray = q.pricing_type === 'PER_TRAY'
+      const priceNum = q.price_per_head ? Number(q.price_per_head) : Number(q.total_estimate)
       return {
         id: `oneseva-${q.id}`,
         name: q.vendor.business_name,
@@ -902,6 +967,11 @@ export default function EventQuotesPage() {
         price: !isTray && q.price_per_head
           ? `${fmt(Number(q.price_per_head), q.currency)}/head`
           : fmt(Number(q.total_estimate), q.currency),
+        priceNumeric: priceNum,
+        responseTime: null,
+        responseMs: 0,
+        isVerified: q.vendor.is_verified,
+        vendorBadges: [],
         status: q.status === 'ACCEPTED' ? 'Finalized' : statusCfg.label,
         statusColor: q.status === 'ACCEPTED' ? 'text-green-700' : statusCfg.text,
         statusBg: q.status === 'ACCEPTED' ? 'bg-green-50' : 'bg-cream',
@@ -912,6 +982,15 @@ export default function EventQuotesPage() {
       const priceUnitLabel: Record<string, string> = {
         per_head: '/head', per_event: '/event', per_hour: '/hr', per_day: '/day',
       }
+      // Calculate response time
+      let responseTime: string | null = null
+      let responseMs = 0
+      if (r.quote_submitted_at) {
+        const diff = new Date(r.quote_submitted_at).getTime() - new Date(r.created_at).getTime()
+        responseMs = diff
+        const hrs = Math.round(diff / (1000 * 60 * 60))
+        responseTime = hrs < 1 ? '< 1 hr' : hrs < 24 ? `${hrs} hr${hrs !== 1 ? 's' : ''}` : `${Math.round(hrs / 24)}d`
+      }
       return {
         id: `board-${r.id}`,
         name: r.name,
@@ -920,12 +999,28 @@ export default function EventQuotesPage() {
         price: r.quoted_price
           ? `$${Number(r.quoted_price).toLocaleString()}${priceUnitLabel[r.price_unit ?? ''] ?? ''}`
           : r.price_note ?? '—',
+        priceNumeric: r.quoted_price ? Number(r.quoted_price) : 0,
+        responseTime,
+        responseMs,
+        isVerified: false,
+        vendorBadges: [],
         status: r.status === 'ACCEPTED_RESPONSE' ? 'Finalized' : statusCfg.label,
         statusColor: r.status === 'ACCEPTED_RESPONSE' ? 'text-green-700' : statusCfg.text,
         statusBg: r.status === 'ACCEPTED_RESPONSE' ? 'bg-green-50' : statusCfg.bg,
       }
     }),
-  ].sort((a, b) => (PIPELINE_STATUS_ORDER[a.status] ?? 99) - (PIPELINE_STATUS_ORDER[b.status] ?? 99))
+  ]
+
+  // Sort pipeline
+  if (pipelineSort === 'price_asc') {
+    pipelineRows.sort((a, b) => (a.priceNumeric || Infinity) - (b.priceNumeric || Infinity))
+  } else if (pipelineSort === 'price_desc') {
+    pipelineRows.sort((a, b) => (b.priceNumeric || 0) - (a.priceNumeric || 0))
+  } else if (pipelineSort === 'response_time') {
+    pipelineRows.sort((a, b) => (a.responseMs || Infinity) - (b.responseMs || Infinity))
+  } else {
+    pipelineRows.sort((a, b) => (PIPELINE_STATUS_ORDER[a.status] ?? 99) - (PIPELINE_STATUS_ORDER[b.status] ?? 99))
+  }
 
   // Filter pipeline rows
   const filteredPipeline = filterType === 'all'
@@ -1015,7 +1110,22 @@ export default function EventQuotesPage() {
         <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border overflow-hidden mb-8 shadow-sm">
           <div className="px-5 py-3 border-b border-brand-border bg-cream flex items-center justify-between">
             <h2 className="text-sm font-black text-text-1 uppercase tracking-wider">Vendor Pipeline</h2>
-            <span className="text-xs text-text-4">{filteredPipeline.length} vendor{filteredPipeline.length !== 1 ? 's' : ''}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-text-4">{filteredPipeline.length} vendor{filteredPipeline.length !== 1 ? 's' : ''}</span>
+              <div className="relative">
+                <select
+                  value={pipelineSort}
+                  onChange={e => setPipelineSort(e.target.value as PipelineSortOption)}
+                  className="text-[10px] pl-6 pr-5 py-1 rounded-lg border border-brand-border bg-white dark:bg-cream-2 text-text-2 appearance-none cursor-pointer focus:outline-none focus:border-brand"
+                >
+                  <option value="status">Sort: Status</option>
+                  <option value="price_asc">Sort: Price low</option>
+                  <option value="price_desc">Sort: Price high</option>
+                  <option value="response_time">Sort: Fastest</option>
+                </select>
+                <ArrowLeftRight className="h-2.5 w-2.5 text-text-4 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -1025,6 +1135,7 @@ export default function EventQuotesPage() {
                   <th className="text-left px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Service</th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Source</th>
                   <th className="text-right px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Price</th>
+                  <th className="text-center px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider hidden sm:table-cell">Response</th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-text-4 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
@@ -1032,7 +1143,19 @@ export default function EventQuotesPage() {
                 {filteredPipeline.map(row => (
                   <tr key={row.id} className={`transition-colors hover:bg-cream/50 ${row.status === 'Finalized' ? 'bg-green-50/30' : ''}`}>
                     <td className="px-5 py-3">
-                      <span className="font-bold text-text-1">{row.name}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-text-1">{row.name}</span>
+                        {row.isVerified && (
+                          <Shield className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      {row.vendorBadges.length > 0 && (
+                        <div className="flex gap-1 mt-0.5">
+                          {row.vendorBadges.map(b => (
+                            <span key={b} className="text-[9px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">{b}</span>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-text-3">{row.service}</td>
                     <td className="px-4 py-3">
@@ -1045,6 +1168,15 @@ export default function EventQuotesPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-text-1">{row.price}</td>
+                    <td className="px-4 py-3 text-center hidden sm:table-cell">
+                      {row.responseTime ? (
+                        <span className="flex items-center justify-center gap-1 text-xs text-text-3">
+                          <Clock className="h-3 w-3" />{row.responseTime}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-text-4">&mdash;</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${row.statusBg} border border-transparent`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${
@@ -1063,10 +1195,72 @@ export default function EventQuotesPage() {
         </div>
       )}
 
+      {/* ── Quick Comparison Summary ──────────────────────────────────── */}
+      {!allEmpty && totalCount >= 2 && (() => {
+        const allPrices = [
+          ...sentOneseva.map(q => Number(q.total_estimate)).filter(p => p > 0),
+          ...boardResponses.filter(r => r.quoted_price).map(r => Number(r.quoted_price!)),
+        ]
+        const tastingCount = sentOneseva.filter(q => q.tasting_offered).length
+        const acceptedOneseva = sentOneseva.filter(q => q.status === 'ACCEPTED')
+        const acceptedBoard = boardResponses.filter(r => r.status === 'ACCEPTED_RESPONSE')
+        const acceptedAll = [
+          ...acceptedOneseva.map(q => ({ name: q.vendor.business_name, price: fmt(Number(q.total_estimate), q.currency) })),
+          ...acceptedBoard.map(r => ({ name: r.name, price: r.quoted_price ? `$${Number(r.quoted_price).toLocaleString()}` : '—' })),
+        ]
+
+        return (
+          <div className="bg-white rounded-2xl border border-brand-border p-5 mb-8 shadow-sm">
+            <h3 className="text-sm font-black text-text-1 uppercase tracking-wider mb-4">Quick Comparison</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <p className="text-xs text-text-4 font-medium mb-1">Total Quotes</p>
+                <p className="text-2xl font-black text-text-1">{totalCount}</p>
+              </div>
+              <div>
+                <p className="text-xs text-text-4 font-medium mb-1">Price Range</p>
+                {allPrices.length >= 2 ? (
+                  <p className="text-sm font-bold text-text-1">
+                    ${Math.min(...allPrices).toLocaleString()} — ${Math.max(...allPrices).toLocaleString()}
+                  </p>
+                ) : allPrices.length === 1 ? (
+                  <p className="text-sm font-bold text-text-1">${allPrices[0].toLocaleString()}</p>
+                ) : (
+                  <p className="text-sm text-text-4">No prices yet</p>
+                )}
+              </div>
+              <div>
+                <p className="text-xs text-text-4 font-medium mb-1">Tastings Offered</p>
+                <p className="text-2xl font-black text-text-1">
+                  {tastingCount}
+                  <span className="text-sm font-normal text-text-4 ml-1">vendor{tastingCount !== 1 ? 's' : ''}</span>
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-text-4 font-medium mb-1">Accepted</p>
+                {acceptedAll.length > 0 ? (
+                  <div className="space-y-1">
+                    {acceptedAll.map(a => (
+                      <p key={a.name} className="text-sm font-bold text-green-700">
+                        {a.name} <span className="text-text-3 font-normal">({a.price})</span>
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-text-4">None yet</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Empty state */}
       {allEmpty && (
         <div className="bg-white dark:bg-cream-2 rounded-3xl border border-brand-border shadow-sm p-16 text-center">
-          <div className="text-6xl mb-4">📬</div>
+          <div className="w-14 h-14 rounded-2xl bg-cream flex items-center justify-center mx-auto mb-4">
+            <MessageSquare className="h-7 w-7 text-text-4/50" />
+          </div>
           <h3 className="text-xl font-black text-text-1 mb-2">No quotes yet</h3>
           <p className="text-text-3 mb-6 max-w-sm mx-auto">
             Start matching with vendors to receive OneSeva quotes, or share your public request board to collect responses directly.

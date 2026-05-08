@@ -3,12 +3,13 @@ import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { format } from 'date-fns'
 import { EventDeleteButton } from '@/components/customer/EventDeleteButton'
+import { PlaybookSuggestion } from '@/components/customer/PlaybookSuggestion'
 import {
   CalendarDays, MapPin, Users, FileText,
   MessageSquare, ChevronRight, Wallet,
   Users2, Gift, LayoutGrid, Clock,
   UtensilsCrossed, CreditCard, UserPlus, Wrench,
-  ArrowRight, Sparkles, ClipboardList,
+  ArrowRight, Sparkles, ClipboardList, Layers,
 } from 'lucide-react'
 import Link from 'next/link'
 import { vendorTypeToSlug } from '@/lib/service-slugs'
@@ -52,6 +53,10 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
   })
 
   const guestHouseholdCount = await prisma.guestHousehold.count({ where: { event_id: id } })
+  const guestRespondedCount = guestHouseholdCount > 0
+    ? await prisma.guestHousehold.count({ where: { event_id: id, responded_at: { not: null } } })
+    : 0
+  const subEventCount = await prisma.subEvent.count({ where: { event_id: id } })
 
   // Spend tracking — vendor breakdown
   const acceptedQuotes = await prisma.quote.findMany({
@@ -288,12 +293,13 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
       </section>
 
       {/* Quick stats */}
-      <section aria-label="Quick statistics" className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <section aria-label="Quick statistics" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
-          { href: `/events/${id}/quotes`, icon: FileText, value: quoteCount, label: 'Quotes received', iconBg: 'bg-purple-50 dark:bg-purple-950/40', iconColor: 'text-purple-600 dark:text-purple-400', badge: 0 },
-          { href: '/messages', icon: MessageSquare, value: unreadCount, label: 'Unread messages', iconBg: 'bg-blue-50 dark:bg-blue-950/40', iconColor: 'text-blue-600 dark:text-blue-400', badge: unreadCount },
-          { href: `/events/${id}/guests`, icon: Users2, value: guestHouseholdCount, label: 'Guest households', iconBg: 'bg-green-50 dark:bg-green-950/40', iconColor: 'text-green-600 dark:text-green-400', badge: 0 },
-          { href: `/events/${id}/services`, icon: Wrench, value: addedServices.length, label: 'Services booked', iconBg: 'bg-amber-50 dark:bg-amber-950/40', iconColor: 'text-amber-600 dark:text-amber-400', badge: 0 },
+          { href: `/events/${id}/quotes`, icon: FileText, value: quoteCount, label: 'Quotes received', iconBg: 'bg-purple-50 dark:bg-purple-950/40', iconColor: 'text-purple-600 dark:text-purple-400', badge: 0, subtitle: '' },
+          { href: '/messages', icon: MessageSquare, value: unreadCount, label: 'Unread messages', iconBg: 'bg-blue-50 dark:bg-blue-950/40', iconColor: 'text-blue-600 dark:text-blue-400', badge: unreadCount, subtitle: '' },
+          { href: `/events/${id}/guests`, icon: Users2, value: guestHouseholdCount, label: 'Guest households', iconBg: 'bg-green-50 dark:bg-green-950/40', iconColor: 'text-green-600 dark:text-green-400', badge: 0, subtitle: guestHouseholdCount > 0 ? `${guestRespondedCount}/${guestHouseholdCount} responded` : '' },
+          { href: `/events/${id}/services`, icon: Wrench, value: addedServices.length, label: 'Services booked', iconBg: 'bg-amber-50 dark:bg-amber-950/40', iconColor: 'text-amber-600 dark:text-amber-400', badge: 0, subtitle: '' },
+          { href: `/events/${id}/sub-events`, icon: Layers, value: subEventCount, label: 'Sub-events', iconBg: 'bg-pink-50 dark:bg-pink-950/40', iconColor: 'text-pink-600 dark:text-pink-400', badge: 0, subtitle: '' },
         ].map(stat => (
           <Link
             key={stat.href}
@@ -306,6 +312,9 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
             </div>
             <div className="text-3xl font-black text-text-1 mb-0.5">{stat.value}</div>
             <div className="text-xs text-text-4 font-medium">{stat.label}</div>
+            {stat.subtitle && (
+              <div className="text-[11px] text-brand font-bold mt-1">{stat.subtitle}</div>
+            )}
             {stat.badge > 0 && (
               <span className="absolute top-4 right-4 bg-blue-600 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {stat.badge}
@@ -339,6 +348,11 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
             ))}
           </div>
         </section>
+      )}
+
+      {/* Playbook suggestion — show when no checklist items exist */}
+      {totalItems === 0 && event.status !== 'CANCELLED' && (
+        <PlaybookSuggestion eventId={id} eventType={event.event_type} />
       )}
 
       {/* Services & Planning */}
@@ -409,8 +423,9 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
         )}
 
         {/* Planning tools grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
           {[
+            { href: `/events/${id}/sub-events`, icon: Layers, label: 'Sub-Events', bg: 'bg-pink-50 dark:bg-pink-950/40', color: 'text-pink-600 dark:text-pink-400' },
             { href: `/events/${id}/planning`, icon: ClipboardList, label: 'Event Plan', bg: 'bg-brand/10 dark:bg-brand/20', color: 'text-brand' },
             { href: `/events/${id}/checklist`, icon: FileText, label: 'Checklist', bg: 'bg-amber-50 dark:bg-amber-950/40', color: 'text-amber-600 dark:text-amber-400' },
             { href: `/events/${id}/timeline`, icon: Clock, label: 'Timeline', bg: 'bg-purple-50 dark:bg-purple-950/40', color: 'text-purple-600 dark:text-purple-400' },

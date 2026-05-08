@@ -28,6 +28,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       vendor: true,
       menu_items: { orderBy: [{ category: 'asc' }, { sort_order: 'asc' }] },
       tray_lines: { orderBy: { sort_order: 'asc' } },
+      contract: { select: { id: true, status: true, contract_number: true } },
       match: {
         include: {
           event_request: {

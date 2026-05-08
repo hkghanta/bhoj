@@ -6,7 +6,7 @@ import {
   ChevronLeft,
   LayoutDashboard, LogOut, User, Mail,
   LayoutGrid, CreditCard, Gift, Search,
-  ClipboardList,
+  ClipboardList, ScrollText, Layers,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -31,12 +31,14 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
   // ── Event-specific navigation ──
   const eventNav = eventId ? [
     { href: `/events/${eventId}`,             label: 'Overview',       icon: CalendarDays },
+    { href: `/events/${eventId}/sub-events`,  label: 'Sub-Events',     icon: Layers },
   ] : []
 
   const vendorNav = eventId ? [
     { href: `/events/${eventId}/services`,    label: 'Requirements',   icon: Store },
     { href: `/events/${eventId}/vendors`,     label: 'Find Vendors',   icon: Search },
     { href: `/events/${eventId}/quotes`,      label: 'Quotes',         icon: FileText },
+    { href: `/events/${eventId}/contracts`,  label: 'Contracts',      icon: ScrollText },
   ] : []
 
   const guestNav = eventId ? [

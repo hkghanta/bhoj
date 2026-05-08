@@ -9,6 +9,8 @@ const createSchema = z.object({
   template_id: z.string().optional(),
   content: z.string().optional(),
   terms_and_conditions: z.string().optional(),
+  vendor_address: z.string().optional(),
+  customer_address: z.string().optional(),
 })
 
 function generateContractNumber(): string {
@@ -75,7 +77,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { quote_id, event_id, template_id, content, terms_and_conditions } = parsed.data
+  const { quote_id, event_id, template_id, content, terms_and_conditions, vendor_address, customer_address } = parsed.data
 
   // Validate quote belongs to this vendor
   const quote = await prisma.quote.findUnique({
@@ -127,9 +129,8 @@ export async function POST(req: Request) {
     }
   }
 
-  if (!templateContent) {
-    return NextResponse.json({ error: 'Contract content is required (provide content or template_id)' }, { status: 400 })
-  }
+  // Allow empty content for DRAFT contracts — vendor can fill in later
+  if (!templateContent) templateContent = ''
 
   const contract = await prisma.contract.create({
     data: {
@@ -139,6 +140,8 @@ export async function POST(req: Request) {
       quote_id: quote_id,
       event_id: resolvedEventId,
       template_id: template_id ?? null,
+      vendor_address: vendor_address ?? null,
+      customer_address: customer_address ?? null,
       content: templateContent,
       terms_and_conditions: templateTerms,
       status: 'DRAFT',
