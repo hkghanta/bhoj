@@ -96,7 +96,7 @@ function CheckCard({
 function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-t-2 border-brand-border/60 pt-5 pb-2">
-      <p className="text-lg font-black text-text-1 mb-4">{title}</p>
+      <p className="text-lg font-extrabold tracking-tight text-text-1 mb-4">{title}</p>
       {children}
     </div>
   )
@@ -111,7 +111,7 @@ function NumberInput({ label, value, onChange, min = 1, max = 50 }: {
       <div className="flex items-center gap-2">
         <button type="button" onClick={() => onChange(Math.max(min, value - 1))}
           className="w-8 h-8 rounded-full border-2 border-brand-border flex items-center justify-center text-text-3 hover:bg-cream-2 font-bold">−</button>
-        <span className="text-base font-black text-text-1 w-6 text-center tabular-nums">{value}</span>
+        <span className="text-base font-extrabold tracking-tight text-text-1 w-6 text-center tabular-nums">{value}</span>
         <button type="button" onClick={() => onChange(Math.min(max, value + 1))}
           className="w-8 h-8 rounded-full border-2 border-brand-border flex items-center justify-center text-text-3 hover:bg-cream-2 font-bold">+</button>
       </div>
@@ -123,7 +123,7 @@ function SaveButton({ saving, onClick, disabled }: { saving: boolean; onClick: (
   return (
     <div className="flex items-center justify-end pt-4">
       <button type="button" onClick={onClick} disabled={saving || disabled}
-        className="flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-black px-5 py-3 rounded-xl transition-colors disabled:opacity-60"
+        className="flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight px-5 py-3 rounded-xl transition-colors disabled:opacity-60"
         style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
         {saving ? (
           <><span className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" /> Saving…</>

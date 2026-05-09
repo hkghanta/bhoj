@@ -102,7 +102,7 @@ export default function OnboardPage() {
     <div className="min-h-screen flex items-center justify-center bg-cream">
       <div className="bg-white rounded-xl shadow p-10 max-w-md text-center">
         <div className="text-5xl mb-4">🎉</div>
-        <h1 className="text-3xl font-black tracking-tight text-text-1 mb-3">You're registered!</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1 mb-3">You're registered!</h1>
         <p className="text-text-3 mb-6">
           Your profile is under review. We'll send you an email once it's approved — usually within 24 hours.
         </p>

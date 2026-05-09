@@ -1070,7 +1070,7 @@ export function SeatingChartEditor({ eventId }: { eventId: string }) {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-auto p-4">
           <div className="bg-white dark:bg-cream-2 rounded-2xl shadow-xl max-w-2xl w-full my-8 print:shadow-none print:rounded-none print:my-0 print:max-w-none">
             <div className="flex items-center justify-between p-6 border-b print:hidden">
-              <h2 className="text-xl font-black text-text-1">Guest Seating Directory</h2>
+              <h2 className="text-xl font-extrabold tracking-tight text-text-1">Guest Seating Directory</h2>
               <div className="flex gap-2">
                 <Button size="sm" onClick={() => window.print()} className="bg-brand hover:bg-brand-hover">
                   <Printer className="h-3.5 w-3.5 mr-1" /> Print
@@ -1081,7 +1081,7 @@ export function SeatingChartEditor({ eventId }: { eventId: string }) {
               </div>
             </div>
             <div className="p-6 print:p-2">
-              <h1 className="text-center text-xl font-black text-text-1 mb-1 hidden print:block">Guest Seating Directory</h1>
+              <h1 className="text-center text-xl font-extrabold tracking-tight text-text-1 mb-1 hidden print:block">Guest Seating Directory</h1>
               <p className="text-center text-xs text-text-4 mb-6 print:mb-4">Find your name below for your table assignment</p>
 
               {(() => {

@@ -43,7 +43,7 @@ export default async function CustomerDashboard() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-1">My Events</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1">My Events</h1>
           <p className="text-sm text-text-4 mt-0.5">
             {events.length === 0 ? 'Start planning your first celebration' :
              `${upcoming.length} upcoming${past.length > 0 ? ` · ${past.length} past` : ''}`}
@@ -63,7 +63,7 @@ export default async function CustomerDashboard() {
             </div>
             <div>
               <div className="text-sm text-text-4">Total Committed</div>
-              <div className="text-2xl font-black text-text-1">{fmtCurrency(overallSpend)}</div>
+              <div className="text-2xl font-extrabold tracking-tight text-text-1">{fmtCurrency(overallSpend)}</div>
             </div>
           </div>
           {overallBudget > 0 && (

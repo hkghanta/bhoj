@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="text-xl font-black text-white mb-3 flex items-center gap-1.5">
+            <div className="text-xl font-extrabold tracking-tight text-white mb-3 flex items-center gap-1.5">
               One<span className="text-brand">Seva</span>
               <span className="w-1.5 h-1.5 rounded-full bg-brand mt-1.5" />
             </div>
@@ -19,7 +19,7 @@ export default function Footer() {
 
           {/* For customers */}
           <div>
-            <div className="text-white/50 font-black mb-4 text-[11px] uppercase tracking-[0.15em]">
+            <div className="text-white/50 font-extrabold tracking-tight mb-4 text-[11px] uppercase tracking-[0.15em]">
               For customers
             </div>
             <div className="flex flex-col gap-2.5">
@@ -31,7 +31,7 @@ export default function Footer() {
 
           {/* For vendors */}
           <div>
-            <div className="text-white/50 font-black mb-4 text-[11px] uppercase tracking-[0.15em]">
+            <div className="text-white/50 font-extrabold tracking-tight mb-4 text-[11px] uppercase tracking-[0.15em]">
               For vendors
             </div>
             <div className="flex flex-col gap-2.5">
@@ -43,7 +43,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <div className="text-white/50 font-black mb-4 text-[11px] uppercase tracking-[0.15em]">
+            <div className="text-white/50 font-extrabold tracking-tight mb-4 text-[11px] uppercase tracking-[0.15em]">
               Company
             </div>
             <div className="flex flex-col gap-2.5">

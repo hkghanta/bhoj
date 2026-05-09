@@ -77,7 +77,7 @@ export function AvailabilityCalendar() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={prevMonth}><ChevronLeft className="h-4 w-4" /></Button>
-          <h2 className="text-xl font-black">{MONTH_NAMES[month]} {year}</h2>
+          <h2 className="text-xl font-bold tracking-tight">{MONTH_NAMES[month]} {year}</h2>
           <Button variant="ghost" size="icon" onClick={nextMonth}><ChevronRight className="h-4 w-4" /></Button>
         </div>
         <div className="flex items-center gap-5">

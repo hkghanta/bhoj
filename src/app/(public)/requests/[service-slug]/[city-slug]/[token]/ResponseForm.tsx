@@ -68,7 +68,7 @@ export function ResponseForm({ token, serviceName, city, vendor }: Props) {
               <CheckCircle2 className="w-7 h-7 text-green-500" />
             </div>
           </div>
-          <h3 className="text-lg font-black text-text-1 mb-2">Response sent!</h3>
+          <h3 className="text-lg font-extrabold tracking-tight text-text-1 mb-2">Response sent!</h3>
           <p className="text-sm text-text-3 leading-relaxed">
             The event host will review your response and reach out if you&apos;re a good fit.
           </p>
@@ -83,7 +83,7 @@ export function ResponseForm({ token, serviceName, city, vendor }: Props) {
       <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden shadow-sm">
         <div className="p-7 flex flex-col gap-5">
           <div>
-            <h3 className="text-base font-black text-text-1 mb-1">Want to respond?</h3>
+            <h3 className="text-base font-extrabold tracking-tight text-text-1 mb-1">Want to respond?</h3>
             <p className="text-sm text-text-3 leading-relaxed">
               Sign in or create a free vendor account — takes 2 minutes, respond immediately.
             </p>
@@ -117,7 +117,7 @@ export function ResponseForm({ token, serviceName, city, vendor }: Props) {
             <AlertTriangle className="w-5 h-5 text-amber-500" />
           </div>
           <div>
-            <h3 className="text-lg font-black text-text-1 mb-1">Verify your account first</h3>
+            <h3 className="text-lg font-extrabold tracking-tight text-text-1 mb-1">Verify your account first</h3>
             <p className="text-sm text-text-3 leading-relaxed">
               You need to verify your {!vendor.emailVerified ? 'email' : 'phone number'} before responding to requests.
             </p>
@@ -138,7 +138,7 @@ export function ResponseForm({ token, serviceName, city, vendor }: Props) {
     <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden shadow-sm">
       <div className="h-1 w-full bg-brand" />
       <div className="p-6">
-        <h3 className="text-base font-black text-text-1 mb-1">I can help with this</h3>
+        <h3 className="text-base font-extrabold tracking-tight text-text-1 mb-1">I can help with this</h3>
         <p className="text-xs text-text-3 mb-5">Responding as <span className="font-semibold text-text-2">{vendor.businessName}</span></p>
 
         {error && (

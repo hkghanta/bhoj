@@ -20,7 +20,7 @@ export default async function VendorReviewsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-text-1">Reviews</h1>
+        <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1">Reviews</h1>
         {avgRating && (
           <p className="text-text-4 mt-1">
             Average: <strong className="text-brand">{avgRating.toFixed(1)}</strong> / 5 ({reviews.length} reviews)

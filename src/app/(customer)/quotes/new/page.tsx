@@ -96,7 +96,7 @@ export default function RequestQuotePage() {
       {done ? (
         <div className="bg-white dark:bg-cream-2 rounded-2xl border p-10 text-center">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
-          <h2 className="text-xl font-black text-text-1">Quote Requested!</h2>
+          <h2 className="text-xl font-extrabold tracking-tight text-text-1">Quote Requested!</h2>
           <p className="text-text-3 mt-1">
             {match.vendor.business_name} has been notified. You'll hear back soon.
           </p>

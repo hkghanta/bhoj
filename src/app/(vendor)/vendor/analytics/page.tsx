@@ -4,7 +4,7 @@ export default function AnalyticsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-text-1">Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1">Analytics</h1>
         <p className="text-text-4 mt-1">
           Track your business performance and key metrics.
         </p>

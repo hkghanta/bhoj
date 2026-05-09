@@ -66,7 +66,7 @@ export function Step1BusinessInfo({ onNext }: Props) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-2xl font-black text-text-1">Tell us about your business</h2>
+      <h2 className="text-2xl font-bold tracking-tight text-text-1">Tell us about your business</h2>
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="space-y-1">

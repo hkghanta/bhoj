@@ -56,7 +56,7 @@ export default function PhotosPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Photos</h1>
+          <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1">Photos</h1>
           <p className="text-text-4 mt-1">Showcase your food and events. First photo is your cover image.</p>
         </div>
         <Button

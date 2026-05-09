@@ -89,7 +89,7 @@ export default function VerifyPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
         <CheckCircle2 className="w-16 h-16 text-green-500" />
-        <h2 className="text-2xl font-black text-text-1">You're verified!</h2>
+        <h2 className="text-2xl font-extrabold tracking-tight text-text-1">You're verified!</h2>
         <p className="text-text-3">Redirecting you now…</p>
       </div>
     )
@@ -114,7 +114,7 @@ export default function VerifyPage() {
         <div className="flex items-center gap-3 mb-6">
           {icon}
           <div>
-            <h1 className="text-xl font-black text-text-1">{title}</h1>
+            <h1 className="text-xl font-extrabold tracking-tight text-text-1">{title}</h1>
             <p className="text-sm text-text-3 mt-0.5">
               {sent ? `We sent a 6-digit code to ${target}` : `Sending code to ${target}…`}
             </p>

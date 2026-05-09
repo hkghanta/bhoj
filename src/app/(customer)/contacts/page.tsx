@@ -164,7 +164,7 @@ export default function ContactsPage() {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <Users className="h-5 w-5 text-brand" />
-            <h1 className="text-2xl sm:text-3xl font-black text-text-1">My Guest Book</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-1">My Guest Book</h1>
           </div>
           <p className="text-sm text-text-3">
             Your master contact list. Import guests into any event from here.
@@ -180,7 +180,7 @@ export default function ContactsPage() {
             <Upload className="h-4 w-4" /> Import CSV
           </button>
           <button onClick={() => openForm()}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight transition-colors"
             style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
             <Plus className="h-4 w-4" /> Add Contact
           </button>
@@ -191,7 +191,7 @@ export default function ContactsPage() {
       {showImportCSV && (
         <div className="mb-6 bg-white dark:bg-cream-2 rounded-2xl border-2 border-brand-border p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-black text-text-1">Import from CSV</h3>
+            <h3 className="text-sm font-extrabold tracking-tight text-text-1">Import from CSV</h3>
             <button onClick={() => { setShowImportCSV(false); setImportResult(null) }} className="p-1 text-text-4 hover:text-text-3">
               <X className="h-4 w-4" />
             </button>
@@ -221,7 +221,7 @@ export default function ContactsPage() {
       {showForm && (
         <div className="mb-6 bg-white dark:bg-cream-2 rounded-2xl border-2 border-brand-border p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-black text-text-1">{editContact ? 'Edit Contact' : 'Add Contact'}</h3>
+            <h3 className="text-lg font-extrabold tracking-tight text-text-1">{editContact ? 'Edit Contact' : 'Add Contact'}</h3>
             <button onClick={() => { setShowForm(false); setEditContact(null) }} className="p-1.5 rounded-lg hover:bg-cream">
               <X className="h-4 w-4 text-text-4" />
             </button>
@@ -268,7 +268,7 @@ export default function ContactsPage() {
                 Cancel
               </button>
               <button type="button" disabled={saving || !label.trim()} onClick={handleSave}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors disabled:opacity-60"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight transition-colors disabled:opacity-60"
                 style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                 {editContact ? 'Update' : 'Add'}

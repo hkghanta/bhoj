@@ -78,7 +78,7 @@ export function EventDeleteButton({
             </div>
 
             <div>
-              <h2 className="text-base font-black text-text-1 mb-1">{action}?</h2>
+              <h2 className="text-base font-extrabold tracking-tight text-text-1 mb-1">{action}?</h2>
               {hasActivity ? (
                 <p className="text-sm text-text-3 leading-relaxed">
                   <span className="font-semibold text-text-2">"{eventName}"</span> has vendor quotes or matches.

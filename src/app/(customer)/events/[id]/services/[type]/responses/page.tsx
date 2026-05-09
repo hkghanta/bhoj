@@ -172,7 +172,7 @@ function ResponseCard({
           ) : (
             <div
               className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
-                          text-base font-black ring-2 ring-brand-border ${avatarBg}`}
+                          text-base font-extrabold tracking-tight ring-2 ring-brand-border ${avatarBg}`}
             >
               {getInitials(name)}
             </div>
@@ -463,7 +463,7 @@ export default function ResponsesPage() {
 
       {/* ── Page heading ── */}
       <div>
-        <h1 className="text-2xl font-black text-text-1 leading-tight">Responses</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-text-1 leading-tight">Responses</h1>
         <p className="text-sm text-text-3 mt-0.5">
           Review and respond to vendors and freelancers who replied to your public request.
         </p>
@@ -473,15 +473,15 @@ export default function ResponsesPage() {
       {responses.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl px-4 py-3 text-center">
-            <p className="text-2xl font-black text-amber-600">{pendingCount}</p>
+            <p className="text-2xl font-extrabold tracking-tight text-amber-600">{pendingCount}</p>
             <p className="text-xs text-text-4 font-medium mt-0.5">Pending</p>
           </div>
           <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl px-4 py-3 text-center">
-            <p className="text-2xl font-black text-green-600">{acceptedCount}</p>
+            <p className="text-2xl font-extrabold tracking-tight text-green-600">{acceptedCount}</p>
             <p className="text-xs text-text-4 font-medium mt-0.5">Accepted</p>
           </div>
           <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl px-4 py-3 text-center">
-            <p className="text-2xl font-black text-text-4">{declinedCount}</p>
+            <p className="text-2xl font-extrabold tracking-tight text-text-4">{declinedCount}</p>
             <p className="text-xs text-text-4 font-medium mt-0.5">Declined</p>
           </div>
         </div>

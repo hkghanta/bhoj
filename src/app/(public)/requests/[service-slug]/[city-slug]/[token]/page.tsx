@@ -337,7 +337,7 @@ export default async function PublicRequestPage({ params }: { params: Promise<Pa
               )}
               <span className="text-xs text-white/40">Posted {postedAgo}</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight mb-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white tracking-tight leading-tight mb-2">
               {service} needed
             </h1>
             <p className="text-white/60 text-base font-medium">
@@ -429,7 +429,7 @@ export default async function PublicRequestPage({ params }: { params: Promise<Pa
                 { step: '3', title: 'Get connected', desc: "If the host likes your response, they'll reach out directly — no middlemen." },
               ].map(s => (
                 <div key={s.step} className="flex gap-3">
-                  <div className="w-7 h-7 rounded-full bg-cream-2 text-text-2 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-full bg-cream-2 text-text-2 text-xs font-extrabold tracking-tight flex items-center justify-center shrink-0 mt-0.5">
                     {s.step}
                   </div>
                   <div>
@@ -474,7 +474,7 @@ export default async function PublicRequestPage({ params }: { params: Promise<Pa
 
       {/* ── Browse more ────────────────────────────────────────── */}
       <div className="bg-cream border border-brand-border rounded-2xl p-8 text-center mt-4">
-        <h2 className="text-lg font-black text-text-1 mb-1.5">Browse more open requests</h2>
+        <h2 className="text-lg font-extrabold tracking-tight text-text-1 mb-1.5">Browse more open requests</h2>
         <p className="text-sm text-text-3 mb-5 max-w-md mx-auto">
           New requests are posted daily. Find events that match your service area and expertise.
         </p>

@@ -65,7 +65,7 @@ export default function StyleQuizPage() {
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="bg-white dark:bg-cream-2 rounded-xl border p-8 shadow-sm text-center">
           <Sparkles className="h-12 w-12 text-brand mx-auto mb-4" />
-          <h2 className="text-2xl font-black text-text-1 mb-4">Your Style Profile</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-text-1 mb-4">Your Style Profile</h2>
           <div className="text-left space-y-4">
             <div>
               <h4 className="text-sm font-medium text-text-2 mb-2">Colors</h4>
@@ -104,7 +104,7 @@ export default function StyleQuizPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-text-1">Style Quiz</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-text-1">Style Quiz</h1>
         <p className="text-text-3 mt-1">Help us understand your event style preferences.</p>
       </div>
 

@@ -27,7 +27,7 @@ export default async function EquipmentPage({ params }: { params: Promise<{ id: 
         </Link>
         <div className="flex items-center gap-2">
           <Package className="h-5 w-5 text-blue-600" />
-          <h1 className="text-2xl font-black text-text-1">Equipment Rental</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-text-1">Equipment Rental</h1>
         </div>
         <span className="text-sm text-text-3">{event.event_name}</span>
       </div>

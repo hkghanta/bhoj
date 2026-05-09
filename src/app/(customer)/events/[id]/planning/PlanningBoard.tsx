@@ -201,7 +201,7 @@ function PlanItemForm({
   return (
     <div className="bg-white dark:bg-cream-2 rounded-2xl border-2 border-brand-border p-6 shadow-sm">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-black text-text-1">{initial ? 'Edit Item' : 'Add to Plan'}</h3>
+        <h3 className="text-lg font-extrabold tracking-tight text-text-1">{initial ? 'Edit Item' : 'Add to Plan'}</h3>
         <button onClick={onCancel} className="p-1.5 rounded-lg hover:bg-cream"><X className="h-4 w-4 text-text-4" /></button>
       </div>
 
@@ -299,7 +299,7 @@ function PlanItemForm({
               notes: notes || null,
             })
           }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight transition-colors disabled:opacity-60"
             style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             {initial ? 'Update' : 'Add'}
@@ -334,7 +334,7 @@ function TaskForm({
   return (
     <div className="bg-white dark:bg-cream-2 rounded-2xl border-2 border-brand-border p-6 shadow-sm mb-6">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-black text-text-1">Add Task</h3>
+        <h3 className="text-lg font-extrabold tracking-tight text-text-1">Add Task</h3>
         <button onClick={onCancel} className="p-1.5 rounded-lg hover:bg-cream"><X className="h-4 w-4 text-text-4" /></button>
       </div>
       <div className="space-y-4">
@@ -387,7 +387,7 @@ function TaskForm({
               linked_plan_item_id: linkedPlanItemId || null,
             })
           }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight transition-colors disabled:opacity-60"
             style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             Add Task
@@ -639,7 +639,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Event Plan</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1">Event Plan</h1>
           <p className="text-text-3 mt-1">Your complete event runsheet — vendors, helpers, and timeline.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -675,7 +675,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                       </>
                     ) : (
                       <div className="p-3">
-                        <p className="text-xs font-black text-text-2 mb-2">Select categories to print:</p>
+                        <p className="text-xs font-extrabold tracking-tight text-text-2 mb-2">Select categories to print:</p>
                         <div className="space-y-1.5 max-h-48 overflow-y-auto">
                           {Array.from(new Set(checklistItems.map(i => i.category || 'Other'))).sort().map(cat => (
                             <label key={cat} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-cream rounded px-1 py-0.5">
@@ -729,7 +729,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
           </div>
           {view !== 'todo' && (
             <button onClick={() => { setEditItem(null); setShowForm(true) }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors print:hidden"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight transition-colors print:hidden"
               style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
               <Plus className="h-4 w-4" /> Add Item
             </button>
@@ -772,7 +772,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
 
       {/* Print header (hidden on screen) */}
       <div ref={printRef} className="hidden print:block mb-4 border-b-2 border-black pb-3">
-        <h1 className="text-2xl font-black">{eventName}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{eventName}</h1>
         <p className="text-sm mt-1">
           {formatDate(eventDate)}
           {venueName && ` · ${venueName}`}
@@ -837,7 +837,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                 {/* Row 1: Title + time + price */}
                 <div className="flex items-baseline justify-between gap-4">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-black">{item.title}</span>
+                    <span className="text-sm font-extrabold tracking-tight">{item.title}</span>
                     <span className="text-[10px] font-bold text-gray-500 uppercase">{st.label}</span>
                     {item.role && <span className="text-[10px] text-gray-500">· {item.role}</span>}
                   </div>
@@ -848,7 +848,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                       </span>
                     )}
                     {item.price && item.currency && (
-                      <span className="font-black">{formatCurrency(item.price, item.currency)}</span>
+                      <span className="font-extrabold tracking-tight">{formatCurrency(item.price, item.currency)}</span>
                     )}
                   </div>
                 </div>
@@ -922,7 +922,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
             </div>
             {!showTaskForm && (
               <button onClick={() => setShowTaskForm(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-black transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight transition-colors"
                 style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}>
                 <Plus className="h-4 w-4" /> Add Task
               </button>
@@ -963,7 +963,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                 .filter(([cat]) => printCategories.size === 0 || printCategories.has(cat))
                 .map(([category, items]) => (
                 <div key={category}>
-                  <h3 className="text-sm font-black text-text-2 mb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold tracking-tight text-text-2 mb-3 flex items-center gap-2">
                     <span>{CHECKLIST_CATEGORIES[category] || '\u{1F4CB}'}</span> {category}
                     <span className="text-xs font-medium text-text-4">
                       ({items.filter(i => i.status === 'FINALIZED').length}/{items.length} done)
@@ -1099,7 +1099,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="font-black text-text-1 text-sm">{activity.title}</h3>
+                                <h3 className="font-extrabold tracking-tight text-text-1 text-sm">{activity.title}</h3>
                                 {activity.role && <span className="text-xs text-text-3">{activity.role}</span>}
                               </div>
                             </div>
@@ -1151,7 +1151,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                     {/* Activities without tasks */}
                     {withoutTasks.length > 0 && (
                       <div>
-                        <h3 className="text-xs font-black text-text-4 uppercase mb-2 print:text-[10px]">No tasks linked yet</h3>
+                        <h3 className="text-xs font-extrabold tracking-tight text-text-4 uppercase mb-2 print:text-[10px]">No tasks linked yet</h3>
                         <div className="space-y-1.5">
                           {withoutTasks.map(activity => {
                             const st = SOURCE_STYLES[activity.source as keyof typeof SOURCE_STYLES] || SOURCE_STYLES.EXTERNAL
@@ -1170,7 +1170,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                     {/* Unlinked tasks */}
                     {unlinked.length > 0 && (
                       <div>
-                        <h3 className="text-xs font-black text-text-4 uppercase mb-2 print:text-[10px]">General Tasks</h3>
+                        <h3 className="text-xs font-extrabold tracking-tight text-text-4 uppercase mb-2 print:text-[10px]">General Tasks</h3>
                         <div className="space-y-2">
                           {unlinked.map(task => {
                             const isDone = task.status === 'FINALIZED'
@@ -1269,7 +1269,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
             return (
               <div className="rounded-2xl border-2 border-brand-border bg-cream p-4 mb-3 print:hidden">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-black text-text-1">{totalReady}/{totalItems} items ready</span>
+                  <span className="text-sm font-extrabold tracking-tight text-text-1">{totalReady}/{totalItems} items ready</span>
                   <span className="text-xs font-bold text-text-3">{pct}%</span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-brand-border/40 overflow-hidden">
@@ -1302,7 +1302,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-black text-text-1 text-base">{item.title}</h3>
+                      <h3 className="font-extrabold tracking-tight text-text-1 text-base">{item.title}</h3>
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${st.badge}`}>{st.label}</span>
                       {item.role && <span className="text-xs font-semibold text-text-3 bg-white/60 px-2 py-0.5 rounded-full">{item.role}</span>}
                       {itemReadiness && (
@@ -1528,7 +1528,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
                     </div>
                     <div className="flex items-start justify-between gap-6">
                       <div className="min-w-0">
-                        <h3 className="font-black text-text-1">{item.title}</h3>
+                        <h3 className="font-extrabold tracking-tight text-text-1">{item.title}</h3>
                         {item.role && <p className="text-sm text-text-3">{item.role}</p>}
                         {item.notes && <p className="text-xs text-text-4 mt-1.5">{item.notes}</p>}
                       </div>
@@ -1549,7 +1549,7 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
           {/* Items without time */}
           {withoutTime.length > 0 && (
             <div className="mt-8">
-              <p className="text-sm font-black text-text-2 mb-3 -ml-8">Other Items (no time set)</p>
+              <p className="text-sm font-extrabold tracking-tight text-text-2 mb-3 -ml-8">Other Items (no time set)</p>
               <div className="space-y-3 -ml-8">
                 {withoutTime.map(item => {
                   const st = SOURCE_STYLES[item.source]
@@ -1576,24 +1576,24 @@ export function PlanningBoard({ eventId, eventName, eventDate, city, venueName, 
           <div className="flex flex-wrap gap-6 text-sm">
             <div>
               <span className="text-text-4 font-medium">Total items</span>
-              <p className="text-lg font-black text-text-1">{sorted.length}</p>
+              <p className="text-lg font-extrabold tracking-tight text-text-1">{sorted.length}</p>
             </div>
             <div>
               <span className="text-text-4 font-medium">Platform vendors</span>
-              <p className="text-lg font-black text-blue-700">{platformVendors.length}</p>
+              <p className="text-lg font-extrabold tracking-tight text-blue-700">{platformVendors.length}</p>
             </div>
             <div>
               <span className="text-text-4 font-medium">External vendors</span>
-              <p className="text-lg font-black text-amber-700">{planItems.filter(p => p.source === 'EXTERNAL').length}</p>
+              <p className="text-lg font-extrabold tracking-tight text-amber-700">{planItems.filter(p => p.source === 'EXTERNAL').length}</p>
             </div>
             <div>
               <span className="text-text-4 font-medium">Personal / helpers</span>
-              <p className="text-lg font-black text-purple-700">{planItems.filter(p => p.source === 'PERSONAL').length}</p>
+              <p className="text-lg font-extrabold tracking-tight text-purple-700">{planItems.filter(p => p.source === 'PERSONAL').length}</p>
             </div>
             {platformVendors.some(pv => pv.quote?.total_estimate) && (
               <div className="ml-auto">
                 <span className="text-text-4 font-medium">Total booked</span>
-                <p className="text-lg font-black text-text-1">
+                <p className="text-lg font-extrabold tracking-tight text-text-1">
                   {formatCurrency(
                     platformVendors.reduce((sum, pv) => sum + (pv.quote?.total_estimate ? parseFloat(pv.quote.total_estimate) : 0), 0),
                     currency

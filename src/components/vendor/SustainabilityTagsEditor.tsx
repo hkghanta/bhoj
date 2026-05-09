@@ -73,7 +73,7 @@ export function SustainabilityTagsEditor() {
     <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-6">
       <div className="flex items-center gap-2 mb-6">
         <Leaf className="h-5 w-5 text-green-600" />
-        <h2 className="text-xl font-black text-text-1">Sustainability Practices</h2>
+        <h2 className="text-xl font-bold tracking-tight text-text-1">Sustainability Practices</h2>
       </div>
       <p className="text-sm text-text-4 mb-6">
         Select the sustainability practices your business follows. These badges appear on your public profile.

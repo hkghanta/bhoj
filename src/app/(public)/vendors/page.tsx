@@ -81,7 +81,7 @@ export default function VendorsPage() {
       {/* ── Hero + Search ─────────────────────────────────────────────── */}
       <section className="-mx-6 -mt-8 px-6 pt-12 pb-14 bg-gradient-to-b from-cream to-transparent">
         <div className="max-w-2xl mx-auto text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-black text-text-1 tracking-tight leading-[1.1] mb-4">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight leading-[1.1] mb-4">
             Find the perfect vendor
             <br />
             <span className="text-brand">for your event</span>
@@ -98,7 +98,7 @@ export default function VendorsPage() {
 
       {/* ── Top categories ────────────────────────────────────────────── */}
       <section className="mt-10 mb-14">
-        <h2 className="text-xl font-black text-text-1 mb-6">Popular services</h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-6">Popular services</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {TOP_SERVICES.map(svc => {
             const Icon = svc.icon
@@ -121,7 +121,7 @@ export default function VendorsPage() {
 
       {/* ── Browse by city ────────────────────────────────────────────── */}
       <section className="mb-14">
-        <h2 className="text-xl font-black text-text-1 mb-2">Browse by city</h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-2">Browse by city</h2>
         <p className="text-sm text-text-3 mb-5">Find vendors in the largest Indian communities across the US.</p>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
           {POPULAR_CITIES.map(city => (
@@ -138,7 +138,7 @@ export default function VendorsPage() {
 
       {/* ── All services (SEO links) ──────────────────────────────────── */}
       <section className="mb-14">
-        <h2 className="text-xl font-black text-text-1 mb-5">All services</h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-5">All services</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-2">
           {ALL_SERVICES.map(svc => (
             <Link
@@ -190,7 +190,7 @@ export default function VendorsPage() {
       {/* ── CTA ───────────────────────────────────────────────────────── */}
       <section className="mb-8 bg-cream border border-brand-border rounded-2xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
-          <h3 className="text-xl font-black text-text-1 mb-1.5">Don&apos;t want to search?</h3>
+          <h3 className="text-xl font-extrabold tracking-tight text-text-1 mb-1.5">Don&apos;t want to search?</h3>
           <p className="text-text-3 max-w-md leading-relaxed">
             Post your event requirements and let vendors come to you with personalized quotes. Free, no obligation.
           </p>

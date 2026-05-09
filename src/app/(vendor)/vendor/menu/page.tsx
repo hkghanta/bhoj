@@ -262,7 +262,7 @@ export default function MenuPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Dish Library</h1>
+          <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1">Dish Library</h1>
           <p className="text-text-4 mt-1">Add dishes to your library. Search the global catalogue when adding a new dish.</p>
         </div>
         <Button onClick={() => { setShowForm(v => !v); setForm(EMPTY_FORM); setFilledFromLibrary(false) }} className="bg-brand hover:bg-brand-hover">

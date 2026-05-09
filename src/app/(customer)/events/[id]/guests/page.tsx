@@ -217,7 +217,7 @@ export default function GuestsPage() {
       setMealPrefOn(opts.length > 0)
       setDietaryOpts(opts)
       setCollectAllergens(ev.collect_allergens ?? false)
-      setHouseholds(h)
+      setHouseholds(Array.isArray(h) ? h : h.households ?? [])
     }).finally(() => setLoading(false))
   }, [eventId])
 
@@ -574,7 +574,7 @@ export default function GuestsPage() {
                   )}
 
                   {/* Event details */}
-                  {event && (
+                  {event && event.event_date && (
                     <div className="flex flex-wrap gap-4 mb-5">
                       <div className="flex items-center gap-2 text-white/70 text-sm">
                         <CalendarDays className={`h-4 w-4 shrink-0 ${theme.accent}`} />

@@ -203,7 +203,7 @@ export default function VendorProfilePage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h1 className="text-xl font-black text-text-1">{vendor.business_name}</h1>
+                    <h1 className="text-xl font-extrabold tracking-tight text-text-1">{vendor.business_name}</h1>
                     {vendor.is_verified && (
                       <span className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">
                         <Shield className="h-3 w-3" /> Verified
@@ -229,7 +229,7 @@ export default function VendorProfilePage() {
                 </div>
                 {hasMatch && vendor.match && (
                   <div className="flex-shrink-0 text-center bg-cream rounded-xl px-4 py-2.5 border border-brand-border">
-                    <div className="text-2xl font-black text-brand">{vendor.match.score}</div>
+                    <div className="text-2xl font-extrabold tracking-tight text-brand">{vendor.match.score}</div>
                     <div className="text-xs text-text-3">match score</div>
                     {vendor.match.rank === 1 && (
                       <div className="text-xs text-amber-700 font-semibold mt-0.5">⭐ #1 match</div>
@@ -304,7 +304,7 @@ export default function VendorProfilePage() {
                               )}
                             </div>
                             <div className="text-right">
-                              <div className="text-lg font-black text-brand">
+                              <div className="text-lg font-extrabold tracking-tight text-brand">
                                 {fmt(Number(pkg.price_per_head), pkg.currency)}
                               </div>
                               <div className="text-xs text-text-4">per head</div>
@@ -357,7 +357,7 @@ export default function VendorProfilePage() {
                   ) : (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 pb-4 border-b">
-                        <div className="text-4xl font-black text-text-1">{vendor.avg_rating?.toFixed(1)}</div>
+                        <div className="text-4xl font-extrabold tracking-tight text-text-1">{vendor.avg_rating?.toFixed(1)}</div>
                         <div>
                           <div className="flex gap-0.5">
                             {[1,2,3,4,5].map(s => (
@@ -400,7 +400,7 @@ export default function VendorProfilePage() {
           {lowestPkg && (
             <div className="bg-white dark:bg-cream-2 rounded-2xl border p-5">
               <p className="text-xs text-text-4 uppercase tracking-wide font-medium mb-1">Starting from</p>
-              <div className="text-3xl font-black text-brand mb-0.5">
+              <div className="text-3xl font-extrabold tracking-tight text-brand mb-0.5">
                 {fmt(Number(lowestPkg.price_per_head), lowestPkg.currency)}
               </div>
               <p className="text-sm text-text-3">per person · {lowestPkg.name}</p>

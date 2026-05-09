@@ -36,7 +36,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ id: 
       </nav>
 
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-black tracking-tight text-text-1">Planning Checklist</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight tracking-tight text-text-1">Planning Checklist</h1>
         <AddChecklistItemDialog eventId={id} />
       </div>
 

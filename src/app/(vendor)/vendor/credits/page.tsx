@@ -39,7 +39,7 @@ export default function VendorCreditsPage() {
   return (
     <div className="max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-text-1">Lead Credits</h1>
+        <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1">Lead Credits</h1>
         <p className="text-text-4 mt-1">
           OneSeva charges a small fee per lead — only when you receive a real customer enquiry.
           No monthly subscription. No charge if no leads come in.
@@ -65,19 +65,19 @@ export default function VendorCreditsPage() {
         <div className="grid grid-cols-3 gap-6 mb-8">
           <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-6 text-center">
             <Coins className="h-6 w-6 text-brand mx-auto mb-2" />
-            <div className="text-3xl font-black text-text-1">
+            <div className="text-3xl font-bold tracking-tight text-text-1">
               {data.credits_live ? (data.balance ?? 0) : '∞'}
             </div>
             <div className="text-sm text-text-4 mt-1">Credits available</div>
           </div>
           <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-6 text-center">
             <TrendingUp className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-            <div className="text-3xl font-black text-text-1">{data.total_spent}</div>
+            <div className="text-3xl font-bold tracking-tight text-text-1">{data.total_spent}</div>
             <div className="text-sm text-text-4 mt-1">Leads received</div>
           </div>
           <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-6 text-center">
             <Clock className="h-6 w-6 text-text-4 mx-auto mb-2" />
-            <div className="text-3xl font-black text-text-1">{data.total_bought}</div>
+            <div className="text-3xl font-bold tracking-tight text-text-1">{data.total_bought}</div>
             <div className="text-sm text-text-4 mt-1">Credits ever granted</div>
           </div>
         </div>

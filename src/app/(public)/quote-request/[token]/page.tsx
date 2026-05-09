@@ -45,7 +45,7 @@ function StatusScreen({ icon, title, subtitle, cta }: {
     <div className="min-h-screen bg-gradient-to-br from-cream via-white to-cream-2 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white dark:bg-cream-2 rounded-3xl border border-brand-border shadow-xl p-10 text-center">
         <div className="text-6xl mb-5">{icon}</div>
-        <h2 className="text-3xl font-black tracking-tight text-text-1 mb-2">{title}</h2>
+        <h2 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1 mb-2">{title}</h2>
         <p className="text-text-3 leading-relaxed mb-6">{subtitle}</p>
         {cta}
       </div>
@@ -198,7 +198,7 @@ export default function QuoteRequestPage() {
           <div className="inline-flex items-center gap-2 bg-cream border border-brand-border text-brand text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             <span>📋</span> Quote Request
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-text-1 mb-2">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-1 mb-2">
             Hi {responder_name}!
           </h1>
           <p className="text-text-3 text-lg">

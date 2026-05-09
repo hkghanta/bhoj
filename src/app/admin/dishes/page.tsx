@@ -200,7 +200,7 @@ export default function AdminDishesPage() {
     <div className="min-h-screen bg-cream">
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Dish Library</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-text-1">Dish Library</h1>
           <p className="text-sm text-text-4 mt-1">Manage the global dish catalogue used for vendor autocomplete.</p>
         </div>
 

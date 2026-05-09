@@ -42,7 +42,7 @@ export default function CustomerRegisterPage() {
     <div className="min-h-screen bg-cream bg-dot-grid flex flex-col">
       {/* Nav */}
       <nav className="bg-white border-b border-brand-border flex items-center justify-between px-8 py-0 h-[62px]">
-        <Link href="/" className="text-xl font-black tracking-tight text-text-1">
+        <Link href="/" className="text-xl font-extrabold tracking-tight tracking-tight text-text-1">
           One<span className="text-brand">Seva</span>
         </Link>
         <p className="text-sm text-text-4">
@@ -55,7 +55,7 @@ export default function CustomerRegisterPage() {
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md bg-white border border-brand-border rounded-2xl shadow-md p-8 flex flex-col gap-5">
           <div className="text-center">
-            <h1 className="text-2xl font-black text-text-1">Plan your celebration</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-text-1">Plan your celebration</h1>
             <p className="text-sm text-text-4 mt-1">Create a free account to start organising your perfect Indian event</p>
           </div>
 
@@ -139,7 +139,7 @@ export default function CustomerRegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand hover:bg-brand-hover text-white text-sm font-black py-3.5 rounded-xl transition-colors disabled:opacity-60"
+              className="w-full bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight py-3.5 rounded-xl transition-colors disabled:opacity-60"
               style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}
             >
               {loading ? 'Creating account…' : 'Create free account →'}

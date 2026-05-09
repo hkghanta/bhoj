@@ -217,7 +217,7 @@ export default function QuoteDetailPage() {
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-black text-text-1">{quote.vendor.business_name}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-text-1">{quote.vendor.business_name}</h1>
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusCfg.cls}`}>
               {statusCfg.label}
             </span>
@@ -293,7 +293,7 @@ export default function QuoteDetailPage() {
                 <div className="flex items-center justify-center gap-1 text-xs text-brand font-medium mb-1">
                   <Users className="h-3.5 w-3.5" /> Per head
                 </div>
-                <div className="text-3xl font-black text-brand">
+                <div className="text-3xl font-extrabold tracking-tight text-brand">
                   {quote.price_per_head ? fmt(Number(quote.price_per_head)) : '—'}
                 </div>
               </div>
@@ -302,13 +302,13 @@ export default function QuoteDetailPage() {
               <div className="flex items-center justify-center gap-1 text-xs text-brand font-medium mb-1">
                 <Banknote className="h-3.5 w-3.5" /> {isTrayPricing ? 'Order total' : 'Total'}
               </div>
-              <div className="text-3xl font-black text-brand">{fmt(Number(quote.total_estimate))}</div>
+              <div className="text-3xl font-extrabold tracking-tight text-brand">{fmt(Number(quote.total_estimate))}</div>
               {!isTrayPricing && <div className="text-xs text-brand mt-0.5">{event.guest_count} guests</div>}
             </div>
             {quote.tasting_offered && (
               <div className="bg-green-50 rounded-xl p-5 text-center">
                 <div className="text-xs text-green-600 font-medium mb-1">Tasting</div>
-                <div className="text-2xl font-black text-green-700">
+                <div className="text-2xl font-extrabold tracking-tight text-green-700">
                   {Number(quote.tasting_cost) === 0 ? 'Free' : quote.tasting_cost ? fmt(Number(quote.tasting_cost)) : 'Available'}
                 </div>
                 {quote.tasting_location && (
@@ -375,7 +375,7 @@ export default function QuoteDetailPage() {
                 <tr className="bg-cream/60">
                   <td colSpan={3} className="hidden sm:table-cell" />
                   <td className="px-3 py-4 text-right font-bold text-text-1">Total</td>
-                  <td className="px-5 py-4 text-right text-xl font-black text-brand">{fmt(trayTotal)}</td>
+                  <td className="px-5 py-4 text-right text-xl font-extrabold tracking-tight text-brand">{fmt(trayTotal)}</td>
                 </tr>
               </tfoot>
             </table>

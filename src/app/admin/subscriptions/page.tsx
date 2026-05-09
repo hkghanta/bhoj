@@ -47,7 +47,7 @@ export default function AdminSubscriptionsPage() {
     <div className="min-h-screen bg-cream">
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Subscriptions</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-text-1">Subscriptions</h1>
         </div>
 
         {stats && (
@@ -60,7 +60,7 @@ export default function AdminSubscriptionsPage() {
               { label: 'Premium', value: stats.by_tier.PREMIUM },
             ].map(s => (
               <div key={s.label} className="bg-white rounded-xl border p-4 text-center">
-                <p className="text-3xl font-black tracking-tight text-text-1">{s.value}</p>
+                <p className="text-3xl font-bold tracking-tight text-text-1">{s.value}</p>
                 <p className="text-xs text-text-4 mt-1">{s.label}</p>
               </div>
             ))}

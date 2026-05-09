@@ -159,7 +159,7 @@ export default async function ExternalVendorPage({
           </div>
 
           {/* Vendor name */}
-          <h1 className="text-3xl sm:text-4xl font-black text-text-1 tracking-tight leading-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-1 tracking-tight leading-tight mb-3">
             {vendor.name}
           </h1>
 
@@ -168,7 +168,7 @@ export default async function ExternalVendorPage({
             {vendor.rating && (
               <div className="flex items-center gap-1.5">
                 <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                <span className="text-lg font-black text-text-1">{vendor.rating.toFixed(1)}</span>
+                <span className="text-lg font-extrabold tracking-tight text-text-1">{vendor.rating.toFixed(1)}</span>
                 <span className="text-sm text-text-3">({vendor.total_ratings.toLocaleString()} reviews)</span>
               </div>
             )}
@@ -189,7 +189,7 @@ export default async function ExternalVendorPage({
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {vendor.rating && (
               <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 text-center">
-                <div className="text-3xl font-black text-text-1 mb-1">{vendor.rating.toFixed(1)}</div>
+                <div className="text-3xl font-extrabold tracking-tight text-text-1 mb-1">{vendor.rating.toFixed(1)}</div>
                 <div className="flex items-center justify-center gap-0.5 mb-1">
                   {[1,2,3,4,5].map(n => (
                     <Star key={n} className={`w-3.5 h-3.5 ${n <= Math.round(vendor.rating!) ? 'text-amber-500 fill-amber-500' : 'text-brand-border'}`} />
@@ -200,12 +200,12 @@ export default async function ExternalVendorPage({
             )}
             {vendor.price_level != null && vendor.price_level > 0 && (
               <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 text-center">
-                <div className="text-3xl font-black text-text-1 mb-1">{PRICE_LABELS[vendor.price_level]}</div>
+                <div className="text-3xl font-extrabold tracking-tight text-text-1 mb-1">{PRICE_LABELS[vendor.price_level]}</div>
                 <div className="text-xs text-text-4 font-medium">Price range</div>
               </div>
             )}
             <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 text-center">
-              <div className="text-3xl font-black text-brand mb-1">
+              <div className="text-3xl font-extrabold tracking-tight text-brand mb-1">
                 <Navigation className="w-7 h-7 mx-auto" />
               </div>
               <a href={vendor.maps_url} target="_blank" rel="noopener noreferrer" className="text-xs text-brand font-bold hover:underline">
@@ -216,7 +216,7 @@ export default async function ExternalVendorPage({
 
           {/* Location */}
           <section>
-            <h2 className="text-xl font-black text-text-1 mb-4">Location</h2>
+            <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-4">Location</h2>
             <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-6">
               <p className="text-base text-text-2 leading-relaxed mb-4">{vendor.address}</p>
               <a
@@ -234,7 +234,7 @@ export default async function ExternalVendorPage({
           {/* Business hours */}
           {sortedHours.length > 0 && (
             <section>
-              <h2 className="text-xl font-black text-text-1 mb-4 flex items-center gap-2">
+              <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-4 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-text-3" />
                 Business Hours
               </h2>
@@ -259,7 +259,7 @@ export default async function ExternalVendorPage({
           {/* Additional photos */}
           {vendor.photo_urls.length > 5 && (
             <section>
-              <h2 className="text-xl font-black text-text-1 mb-4">More Photos</h2>
+              <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-4">More Photos</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded-2xl overflow-hidden">
                 {vendor.photo_urls.slice(5).map((url, i) => (
                   <div key={i} className="aspect-square relative overflow-hidden group rounded-xl">
@@ -280,7 +280,7 @@ export default async function ExternalVendorPage({
 
           {/* Contact card — sticky */}
           <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-6 lg:sticky lg:top-20">
-            <h2 className="text-xl font-black text-text-1 mb-5">Get in touch</h2>
+            <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-5">Get in touch</h2>
 
             <div className="space-y-3 mb-6">
               {vendor.phone && (

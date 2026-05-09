@@ -149,7 +149,7 @@ export default function SearchPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-black tracking-tight text-text-1">Find Vendors</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1">Find Vendors</h1>
         <p className="text-text-4 mt-1">Search and filter vendors for your events.</p>
       </div>
 

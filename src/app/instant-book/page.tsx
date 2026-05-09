@@ -58,7 +58,7 @@ export default function InstantBookBrowsePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-black tracking-tight text-text-1 flex items-center gap-2">
+        <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1 flex items-center gap-2">
           <Zap className="h-6 w-6 text-brand" /> Instant Book
         </h1>
         <p className="text-text-4 mt-1">Browse and book vendor packages instantly.</p>

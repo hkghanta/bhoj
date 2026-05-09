@@ -551,7 +551,7 @@ export default function MenuBuilderPage() {
           </Link>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black text-text-1">{event.event_name}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-text-1">{event.event_name}</h1>
               {statusMeta && (
                 <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusMeta.color}`}>
                   {statusMeta.icon} {statusMeta.label}
@@ -592,12 +592,12 @@ export default function MenuBuilderPage() {
                 {quote.price_per_head && (
                   <div className="bg-cream rounded-xl p-5 text-center flex-1">
                     <div className="text-xs text-brand font-medium mb-1">Per head</div>
-                    <div className="text-2xl font-black text-brand">{quote.currency} {Number(quote.price_per_head).toFixed(0)}</div>
+                    <div className="text-2xl font-bold tracking-tight text-brand">{quote.currency} {Number(quote.price_per_head).toFixed(0)}</div>
                   </div>
                 )}
                 <div className="bg-cream rounded-xl p-5 text-center flex-1">
                   <div className="text-xs text-brand font-medium mb-1">Total estimate</div>
-                  <div className="text-2xl font-black text-brand">{quote.currency} {Number(quote.total_estimate).toLocaleString()}</div>
+                  <div className="text-2xl font-bold tracking-tight text-brand">{quote.currency} {Number(quote.total_estimate).toLocaleString()}</div>
                   <div className="text-xs text-brand mt-0.5">{event.guest_count} guests</div>
                 </div>
                 {quote.tasting_offered && (
@@ -703,7 +703,7 @@ export default function MenuBuilderPage() {
           <ChevronLeft className="h-5 w-5" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-black text-text-1">{editMode ? 'Edit quote' : 'Build quote'}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-text-1">{editMode ? 'Edit quote' : 'Build quote'}</h1>
           <p className="text-sm text-text-4 mt-0.5">
             {event.event_name} · {event.city} · <span className="font-medium text-brand">{event.guest_count} guests</span> · {format(new Date(event.event_date), 'd MMM yyyy')}
           </p>

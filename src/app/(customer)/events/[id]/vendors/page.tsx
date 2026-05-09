@@ -355,7 +355,7 @@ export default function VendorDiscoveryPage() {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <Sparkles className="h-5 w-5 text-brand" />
-            <h1 className="text-2xl sm:text-3xl font-black text-text-1">Your Vendor Matches</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-1">Your Vendor Matches</h1>
           </div>
           <p className="text-sm text-text-3">
             {loading ? 'Finding the best vendors for your event…' :
@@ -604,7 +604,7 @@ export default function VendorDiscoveryPage() {
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <Link
                                       href={`/events/${eventId}/vendors/${match.vendor.id}?matchId=${match.id}`}
-                                      className="font-black text-text-1 hover:text-brand transition-colors"
+                                      className="font-extrabold tracking-tight text-text-1 hover:text-brand transition-colors"
                                     >
                                       {match.vendor.business_name}
                                     </Link>
@@ -651,7 +651,7 @@ export default function VendorDiscoveryPage() {
                                 <div className="text-right flex-shrink-0">
                                   {price !== null ? (
                                     <>
-                                      <div className="text-lg font-black text-brand">
+                                      <div className="text-lg font-extrabold tracking-tight text-brand">
                                         {fmtPrice(price, match.vendor)}
                                       </div>
                                       <div className="text-[10px] text-text-4 font-medium">per head</div>
@@ -731,7 +731,7 @@ export default function VendorDiscoveryPage() {
                 {eventCity && (
                   <div className="mt-8">
                     <div className="mb-4">
-                      <h3 className="text-lg font-black text-text-1">
+                      <h3 className="text-lg font-extrabold tracking-tight text-text-1">
                         Local Businesses near {eventCity}
                       </h3>
                       <p className="text-sm text-text-3 mt-0.5">
@@ -776,7 +776,7 @@ export default function VendorDiscoveryPage() {
 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-sm font-black text-text-1 truncate">{biz.name}</span>
+                                    <span className="text-sm font-extrabold tracking-tight text-text-1 truncate">{biz.name}</span>
                                     {biz.rating != null && (
                                       <span className="flex items-center gap-0.5 text-xs text-text-3">
                                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />

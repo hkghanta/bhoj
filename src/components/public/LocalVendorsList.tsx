@@ -95,7 +95,7 @@ export default function LocalVendorsList({
           <>
             <div className="flex items-center gap-3 mb-2">
               <Loader2 className="w-5 h-5 text-brand animate-spin" />
-              <h2 className="text-xl font-black text-text-1">
+              <h2 className="text-xl font-extrabold tracking-tight text-text-1">
                 Discovering {serviceLabel.toLowerCase()} in {city}...
               </h2>
             </div>
@@ -129,7 +129,7 @@ export default function LocalVendorsList({
   return (
     <section className="my-10">
       <div className="flex items-start justify-between gap-4 mb-1">
-        <h2 className="text-xl font-black text-text-1">
+        <h2 className="text-xl font-extrabold tracking-tight text-text-1">
           Local {serviceLabel.toLowerCase()} in {city}
         </h2>
         <span className="text-xs font-medium text-text-4 bg-cream-2 px-2.5 py-1 rounded-full whitespace-nowrap mt-1">
@@ -157,7 +157,7 @@ export default function LocalVendorsList({
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-5xl font-black text-brand/10">
+                  <span className="text-5xl font-extrabold tracking-tight text-brand/10">
                     {biz.name.charAt(0)}
                   </span>
                 </div>

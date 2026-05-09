@@ -43,7 +43,7 @@ export function Step2Services({ onNext, onBack }: Props) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-2xl font-black text-text-1">What services do you offer?</h2>
+      <h2 className="text-2xl font-bold tracking-tight text-text-1">What services do you offer?</h2>
       <p className="text-text-4 text-sm">Select all that apply. You can edit these later.</p>
 
       <div className="flex flex-wrap gap-2">

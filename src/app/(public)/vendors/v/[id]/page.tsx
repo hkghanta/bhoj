@@ -309,7 +309,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
                   )
                 })}
               </div>
-              <h1 className="text-3xl sm:text-4xl font-black text-white mb-2 leading-tight">{displayName}</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2 leading-tight">{displayName}</h1>
               <div className="flex items-center gap-3 text-brand/80 text-sm flex-wrap">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5" />
@@ -349,7 +349,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
             {/* About */}
             {vendor.description && (
               <section className="bg-white dark:bg-cream-2 rounded-2xl p-8 shadow-sm border border-brand-border">
-                <h2 className="text-xl font-black text-text-1 mb-4">About</h2>
+                <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-4">About</h2>
                 <p className="text-text-3 leading-relaxed whitespace-pre-line">{vendor.description}</p>
               </section>
             )}
@@ -357,7 +357,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
             {/* Sustainability tags */}
             {vendor.sustainability_tags?.length > 0 && (
               <section className="bg-white dark:bg-cream-2 rounded-2xl p-8 shadow-sm border border-brand-border">
-                <h2 className="text-xl font-black text-text-1 mb-4">Sustainability</h2>
+                <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-4">Sustainability</h2>
                 <div className="flex flex-wrap gap-2">
                   {vendor.sustainability_tags.map(tag => {
                     const cfg = SUSTAINABILITY_LABELS[tag]
@@ -374,7 +374,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
             {/* Live stations */}
             {vendor.stations?.length > 0 && (
               <section className="bg-white dark:bg-cream-2 rounded-2xl p-8 shadow-sm border border-brand-border">
-                <h2 className="text-xl font-black text-text-1 mb-4">Live Stations</h2>
+                <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-4">Live Stations</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {vendor.stations.map(station => (
                     <div key={station.id} className="flex items-center gap-3 p-4 rounded-xl bg-cream border border-brand-border">
@@ -396,7 +396,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
             {/* Photo gallery */}
             {vendor.photos.length > 1 && (
               <section className="bg-white dark:bg-cream-2 rounded-2xl p-8 shadow-sm border border-brand-border">
-                <h2 className="text-xl font-black text-text-1 mb-5">Gallery</h2>
+                <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-5">Gallery</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {vendor.photos.slice(0, 6).map(photo => (
                     <div key={photo.id} className="aspect-square rounded-xl overflow-hidden bg-cream-2 group">
@@ -416,7 +416,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
             {/* Packages */}
             {vendor.menu_packages.length > 0 && (
               <section className="bg-white dark:bg-cream-2 rounded-2xl p-8 shadow-sm border border-brand-border">
-                <h2 className="text-xl font-black text-text-1 mb-1">Packages</h2>
+                <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-1">Packages</h2>
                 <p className="text-sm text-text-4 mb-6">All packages are customizable — request a quote for your event.</p>
                 <div className="space-y-4">
                   {vendor.menu_packages.map(pkg => (
@@ -426,13 +426,13 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
                     >
                       <div className="flex items-start justify-between gap-4 mb-3">
                         <div>
-                          <h3 className="font-black text-text-1 text-base">{pkg.name}</h3>
+                          <h3 className="font-extrabold tracking-tight text-text-1 text-base">{pkg.name}</h3>
                           {pkg.cuisine_type && (
                             <p className="text-sm text-text-4 mt-0.5">{pkg.cuisine_type}</p>
                           )}
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <div className="text-2xl font-black text-text-1">
+                          <div className="text-2xl font-extrabold tracking-tight text-text-1">
                             {formatPrice(pkg.price_per_head, pkg.currency)}
                           </div>
                           <div className="text-xs text-text-4">per person</div>
@@ -496,13 +496,13 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
             {vendor.reviews.length > 0 && (
               <section className="bg-white dark:bg-cream-2 rounded-2xl p-8 shadow-sm border border-brand-border">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-black text-text-1">
+                  <h2 className="text-xl font-extrabold tracking-tight text-text-1">
                     Reviews
                     <span className="ml-2 text-sm font-normal text-text-4">({vendor.review_count})</span>
                   </h2>
                   {vendor.avg_rating && (
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl font-black text-text-1">{vendor.avg_rating.toFixed(1)}</span>
+                      <span className="text-2xl font-extrabold tracking-tight text-text-1">{vendor.avg_rating.toFixed(1)}</span>
                       <StarRating rating={vendor.avg_rating} size="md" />
                     </div>
                   )}
@@ -517,7 +517,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
                               {(review.customer.name ?? 'A').charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-black text-text-1">{review.customer.name ?? 'Anonymous'}</p>
+                              <p className="font-extrabold tracking-tight text-text-1">{review.customer.name ?? 'Anonymous'}</p>
                               {review.event_type && (
                                 <p className="text-xs text-text-4">{review.event_type}</p>
                               )}
@@ -548,7 +548,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
           <div className="space-y-5">
             {/* Quick stats */}
             <div className="bg-white dark:bg-cream-2 rounded-2xl p-6 shadow-sm border border-brand-border">
-              <h3 className="text-lg font-black text-text-1 mb-5">Quick Info</h3>
+              <h3 className="text-lg font-extrabold tracking-tight text-text-1 mb-5">Quick Info</h3>
               <div className="space-y-4">
                 {vendor.avg_rating && (
                   <div className="flex items-center justify-between">
@@ -614,7 +614,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
 
             {/* CTA card */}
             <div className="bg-gradient-to-br from-[#1a0904] to-[#3d1f10] rounded-2xl p-6 shadow-sm text-white">
-              <h3 className="font-black text-lg mb-1">Ready to book?</h3>
+              <h3 className="font-extrabold tracking-tight text-lg mb-1">Ready to book?</h3>
               <p className="text-brand/80 text-sm mb-5 leading-relaxed">
                 Get a free, personalized quote for your event. No commitment required.
               </p>
@@ -632,7 +632,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
             {/* Package pricing summary */}
             {vendor.menu_packages.length > 0 && (
               <div className="bg-white dark:bg-cream-2 rounded-2xl p-6 shadow-sm border border-brand-border">
-                <h3 className="text-lg font-black text-text-1 mb-4">Pricing</h3>
+                <h3 className="text-lg font-extrabold tracking-tight text-text-1 mb-4">Pricing</h3>
                 <div className="space-y-3">
                   {vendor.menu_packages.slice(0, 4).map(pkg => (
                     <div key={pkg.id} className="flex items-center justify-between">

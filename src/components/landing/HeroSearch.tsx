@@ -41,7 +41,7 @@ export default function HeroSearch() {
       onSubmit={handleSearch}
       className="bg-cream border border-brand-border rounded-2xl p-7 shadow-md flex flex-col gap-3"
     >
-      <div className="text-base font-black text-text-1 mb-1">Tell us about your event</div>
+      <div className="text-base font-extrabold tracking-tight text-text-1 mb-1">Tell us about your event</div>
 
       {/* City */}
       <CityInput
@@ -100,7 +100,7 @@ export default function HeroSearch() {
       {/* CTA */}
       <button
         type="submit"
-        className="mt-1 w-full bg-brand text-white text-sm font-black py-4 rounded-xl hover:bg-brand-hover transition-colors shadow-sm"
+        className="mt-1 w-full bg-brand text-white text-sm font-extrabold tracking-tight py-4 rounded-xl hover:bg-brand-hover transition-colors shadow-sm"
         style={{ boxShadow: "0 4px 16px rgba(232,85,16,0.28)" }}
       >
         Find vendors for my event →

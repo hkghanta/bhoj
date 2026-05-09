@@ -181,7 +181,7 @@ export function VendorPipeline() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-md relative">
             <button onClick={() => setDetailCard(null)} className="absolute right-4 top-4 opacity-70 hover:opacity-100"><X className="h-4 w-4" /></button>
-            <h3 className="text-xl font-black text-text-1 mb-1">{detailCard.customer_name}</h3>
+            <h3 className="text-xl font-bold tracking-tight text-text-1 mb-1">{detailCard.customer_name}</h3>
             {detailCard.event_name && <p className="text-sm text-text-4 mb-4">{detailCard.event_name}</p>}
             <div className="space-y-5">
               <div>

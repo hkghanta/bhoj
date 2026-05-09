@@ -69,7 +69,7 @@ export function VendorAnalyticsDashboard() {
               </div>
               <div>
                 <p className="text-xs text-text-4">{stat.label}</p>
-                <p className="text-xl font-black text-text-1">{stat.value}</p>
+                <p className="text-xl font-bold tracking-tight text-text-1">{stat.value}</p>
               </div>
             </div>
           </div>

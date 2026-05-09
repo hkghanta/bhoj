@@ -239,7 +239,7 @@ function VendorCard({ vendor }: { vendor: BrowseVendor }) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-5xl font-black text-brand/20">
+            <span className="text-5xl font-extrabold tracking-tight text-brand/20">
               {name.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -296,7 +296,7 @@ function VendorCard({ vendor }: { vendor: BrowseVendor }) {
           {vendor.starting_price ? (
             <div>
               <span className="text-xs text-text-4">From </span>
-              <span className="text-lg font-black text-text-1">
+              <span className="text-lg font-extrabold tracking-tight text-text-1">
                 {formatPrice(vendor.starting_price, vendor.currency)}
               </span>
               <span className="text-xs text-text-4">/pp</span>
@@ -407,7 +407,7 @@ export default async function BrowsePage({
       <header className="bg-gradient-to-br from-[#1a0904] to-[#3d1f10] rounded-2xl px-8 py-10 sm:px-12 sm:py-14 mb-10">
         <div className="flex items-center gap-4 mb-3">
           <span className="text-4xl">{emoji}</span>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white tracking-tight">
             {serviceLabel} in {cityName}
           </h1>
         </div>
@@ -422,7 +422,7 @@ export default async function BrowsePage({
       {vendors.length > 0 && (
         <section className="mb-16">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-black text-text-1">
+            <h2 className="text-xl font-extrabold tracking-tight text-text-1">
               OneSeva vendors
               <span className="ml-2 text-sm font-medium text-text-4">({vendors.length})</span>
             </h2>
@@ -444,7 +444,7 @@ export default async function BrowsePage({
           <div className="w-16 h-16 bg-cream rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">{emoji}</span>
           </div>
-          <h2 className="text-xl font-black text-text-1 mb-2">
+          <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-2">
             Be the first {serviceLabel.toLowerCase()} vendor in {cityName}
           </h2>
           <p className="text-text-3 max-w-md mx-auto mb-6 leading-relaxed">
@@ -462,7 +462,7 @@ export default async function BrowsePage({
 
       {/* ── How it works ──────────────────────────────────────────────────── */}
       <section className="my-16">
-        <h2 className="text-xl font-black text-text-1 mb-6">How it works</h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-6">How it works</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { step: '1', title: 'Browse & compare', desc: `View profiles, packages, reviews, and pricing from ${serviceLabel.toLowerCase()} vendors in ${cityName}.` },
@@ -470,7 +470,7 @@ export default async function BrowsePage({
             { step: '3', title: 'Book with confidence', desc: 'Compare quotes side by side, check cancellation policies, and book the perfect vendor.' },
           ].map(item => (
             <div key={item.step} className="bg-white dark:bg-cream-2 rounded-xl border border-brand-border p-8">
-              <div className="w-11 h-11 rounded-full bg-brand/10 flex items-center justify-center text-base font-black text-brand mb-4">
+              <div className="w-11 h-11 rounded-full bg-brand/10 flex items-center justify-center text-base font-extrabold tracking-tight text-brand mb-4">
                 {item.step}
               </div>
               <h3 className="text-lg font-bold text-text-1 mb-2">{item.title}</h3>
@@ -482,7 +482,7 @@ export default async function BrowsePage({
 
       {/* ── FAQ ────────────────────────────────────────────────────────────── */}
       <section className="my-16">
-        <h2 className="text-xl font-black text-text-1 mb-6">Frequently asked questions</h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-6">Frequently asked questions</h2>
         <div className="space-y-3">
           {faqs.map((faq, i) => (
             <details key={i} className="group bg-white dark:bg-cream-2 rounded-xl border border-brand-border">
@@ -501,7 +501,7 @@ export default async function BrowsePage({
       {/* ── Related services ──────────────────────────────────────────────── */}
       {related.length > 0 && (
         <section className="my-16">
-          <h2 className="text-xl font-black text-text-1 mb-1.5">You might also need</h2>
+          <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-1.5">You might also need</h2>
           <p className="text-text-3 text-sm mb-5">Planning an event in {cityName}? These services pair well with {serviceLabel.toLowerCase()}.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {related.map(slug => (
@@ -523,7 +523,7 @@ export default async function BrowsePage({
 
       {/* ── Bottom CTA ────────────────────────────────────────────────────── */}
       <section className="my-16 bg-cream border border-brand-border rounded-2xl p-10 sm:p-14 text-center">
-        <h2 className="text-2xl font-black text-text-1 mb-2">
+        <h2 className="text-2xl font-extrabold tracking-tight text-text-1 mb-2">
           {isIndividual
             ? `Are you a ${serviceLabel.toLowerCase().replace(/s$/, '')} in ${cityName}?`
             : `Offer ${serviceLabel.toLowerCase()} in ${cityName}?`}

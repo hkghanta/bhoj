@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { resolveMetro } from '@/lib/geo/resolve-metro'
+import { addDays } from 'date-fns'
 
 const createSchema = z.object({
   event_name: z.string().min(2),
@@ -52,16 +53,62 @@ export async function POST(req: NextRequest) {
 
   const metro = await resolveMetro(rest.city, rest.state, rest.country)
 
+  const eventDate = new Date(event_date)
+
   const event = await prisma.event.create({
     data: {
       ...rest,
-      event_date: new Date(event_date),
+      event_date: eventDate,
       customer_id: customerId,
       metro_city: metro?.metro_city ?? null,
       metro_state: metro?.metro_state ?? null,
     },
+  })
+
+  // Auto-apply playbook: create checklist items + sub-events based on event type
+  const playbook = await prisma.eventPlaybook.findUnique({
+    where: { event_type: rest.event_type },
+  })
+
+  if (playbook) {
+    const checklistData = playbook.checklist as Array<{
+      category: string
+      items: Array<{ name: string; due_offset_days: number }>
+    }>
+    if (checklistData?.length) {
+      await prisma.eventChecklistItem.createMany({
+        data: checklistData.flatMap(cat =>
+          cat.items.map(item => ({
+            event_id: event.id,
+            category: cat.category,
+            item_name: item.name,
+            due_date: addDays(eventDate, item.due_offset_days),
+          })),
+        ),
+      })
+    }
+
+    const subEventsData = playbook.sub_events as Array<{
+      name: string; type: string; offset_days: number
+    }> | null
+    if (subEventsData?.length) {
+      await prisma.subEvent.createMany({
+        data: subEventsData.map((se, idx) => ({
+          event_id: event.id,
+          name: se.name,
+          event_type: se.type,
+          event_date: addDays(eventDate, se.offset_days),
+          sort_order: idx,
+        })),
+      })
+    }
+  }
+
+  // Re-fetch with checklist items included
+  const full = await prisma.event.findUnique({
+    where: { id: event.id },
     include: { checklist_items: true },
   })
 
-  return NextResponse.json(event, { status: 201 })
+  return NextResponse.json(full, { status: 201 })
 }

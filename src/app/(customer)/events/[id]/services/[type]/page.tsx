@@ -323,7 +323,7 @@ function CollapsibleSection({ title, defaultOpen = true, children }: {
         className="w-full flex items-center justify-between py-5 text-left group hover:bg-cream/30 -mx-1 px-1 rounded-lg transition-colors"
         aria-expanded={open}
       >
-        <span className="text-lg font-black text-text-1">{title}</span>
+        <span className="text-lg font-extrabold tracking-tight text-text-1">{title}</span>
         <span className={`flex items-center justify-center w-7 h-7 rounded-full border-2 border-brand-border transition-all ${open ? 'bg-cream-2 rotate-180' : ''}`}>
           <svg
             className="h-4 w-4 text-text-3"
@@ -339,7 +339,7 @@ function CollapsibleSection({ title, defaultOpen = true, children }: {
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
-  return <p className="text-lg font-black text-text-1 mb-4">{children}</p>
+  return <p className="text-lg font-extrabold tracking-tight text-text-1 mb-4">{children}</p>
 }
 
 function SectionDivider() {
@@ -364,7 +364,7 @@ function CourseCountInput({
           onClick={() => onChange(String(Math.max(0, n - 1)))}
           className="w-7 h-7 rounded-full border-2 border-brand-border flex items-center justify-center text-text-3 hover:bg-cream-2 text-sm font-bold"
         >−</button>
-        <span className="text-base font-black text-text-1 w-5 text-center tabular-nums">
+        <span className="text-base font-extrabold tracking-tight text-text-1 w-5 text-center tabular-nums">
           {n > 0 ? n : '—'}
         </span>
         <button
@@ -1010,7 +1010,7 @@ function CateringForm({
           type="button"
           onClick={() => onSave(buildSummary(f), buildCateringPrefs(f))}
           disabled={saving}
-          className="flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-black px-5 py-3 rounded-xl transition-colors disabled:opacity-60"
+          className="flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-extrabold tracking-tight px-5 py-3 rounded-xl transition-colors disabled:opacity-60"
           style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}
         >
           {saving ? (
@@ -1217,7 +1217,7 @@ function ResponseCard({
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-start gap-3 p-5 text-left"
       >
-        <div className="w-9 h-9 rounded-xl bg-cream-2 flex items-center justify-center flex-shrink-0 text-sm font-black text-text-3">
+        <div className="w-9 h-9 rounded-xl bg-cream-2 flex items-center justify-center flex-shrink-0 text-sm font-extrabold tracking-tight text-text-3">
           {resp.name.slice(0, 1).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
@@ -1422,7 +1422,7 @@ export default function ServicePage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <AlertCircle className="h-10 w-10 text-text-4 mx-auto mb-4" />
-        <h2 className="text-xl font-black text-text-1 mb-1">Service unavailable</h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-1">Service unavailable</h2>
         <p className="text-sm text-text-3 mb-6">This service isn't enabled or could not be loaded.</p>
         <Link href={`/events/${eventId}`} className="text-sm text-brand font-semibold hover:underline">← Back to event</Link>
       </div>
@@ -1464,7 +1464,7 @@ export default function ServicePage() {
           <div className="flex items-center gap-3">
             <span className="text-3xl leading-none">{svc.icon}</span>
             <div>
-              <h1 className="text-2xl font-black text-text-1 leading-tight">{svc.label}</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight text-text-1 leading-tight">{svc.label}</h1>
               <p className="text-xs text-text-4 mt-0.5">
                 {hasReq ? 'Your request is live — vendors pitch to you.' : 'Tell us what you need and vendors will pitch to you.'}
               </p>
@@ -1530,7 +1530,7 @@ export default function ServicePage() {
           {hasReq && (
             <section>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-black text-text-1 flex items-center gap-2">
+                <h2 className="text-sm font-extrabold tracking-tight text-text-1 flex items-center gap-2">
                   Pitches received
                   {responses.length > 0 && (
                     <span className="text-xs font-semibold text-brand bg-brand/10 rounded-full px-2 py-0.5">{responses.length}</span>
@@ -1598,14 +1598,14 @@ export default function ServicePage() {
           {/* Tips card — only before first save */}
           {!hasReq && (
             <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 space-y-4">
-              <p className="text-xs font-black text-text-1 uppercase tracking-wider">How it works</p>
+              <p className="text-xs font-extrabold tracking-tight text-text-1 uppercase tracking-wider">How it works</p>
               {[
                 { n: '1', t: 'Set your requirements', d: "Fill in what you need — the more detail, the better pitches you'll get." },
                 { n: '2', t: 'Vendors pitch to you', d: 'Your request goes live on our board. Vendors reach out with quotes.' },
                 { n: '3', t: 'Pick the best fit', d: 'Review pitches and connect directly — no commission, no middlemen.' },
               ].map(s => (
                 <div key={s.n} className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-black flex items-center justify-center shrink-0 mt-0.5">{s.n}</div>
+                  <div className="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-extrabold tracking-tight flex items-center justify-center shrink-0 mt-0.5">{s.n}</div>
                   <div>
                     <p className="text-xs font-bold text-text-1">{s.t}</p>
                     <p className="text-xs text-text-4 mt-0.5 leading-relaxed">{s.d}</p>

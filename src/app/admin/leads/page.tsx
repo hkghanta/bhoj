@@ -325,7 +325,7 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Vendor Leads</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-text-1">Vendor Leads</h1>
           <p className="text-sm text-text-4 mt-0.5">Prospect database — South Asian vendor outreach</p>
         </div>
         <Button onClick={() => setShowAdd(true)} className="bg-brand hover:bg-brand-hover">

@@ -177,7 +177,7 @@ const DECOR: Record<string, ThemeDecor> = {
     ornamentTop: '👑',
     ornamentDivider: '—— ◆ ——',
     titleSize: 'text-3xl',
-    titleWeight: 'font-black',
+    titleWeight: 'font-extrabold tracking-tight',
     subtitleSize: 'text-sm',
     overlayOpacity: 0.6,
     spacingClass: 'px-8 py-12',

@@ -10,6 +10,32 @@ function fmt(n: number, currency: string) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n)
 }
 
+// Workflow templates — auto-created as checklist items when a vendor is booked
+const SERVICE_WORKFLOW_TEMPLATES: Record<string, string[]> = {
+  CATERER: ['Sign contract', 'Pay deposit', 'Confirm final menu & headcount', 'Final payment'],
+  DECORATOR: ['Share theme & mood board', 'Confirm setup plan', 'Pay deposit', 'Final walkthrough'],
+  PHOTOGRAPHER: ['Sign contract', 'Share shot list', 'Pay deposit', 'Pre-event meeting'],
+  VIDEOGRAPHER: ['Sign contract', 'Share shot list', 'Pay deposit', 'Pre-event meeting'],
+  DJ: ['Share song preferences', 'Confirm equipment needs', 'Pay deposit'],
+  LIVE_BAND: ['Share song preferences', 'Confirm equipment needs', 'Pay deposit'],
+  MEHENDI_ARTIST: ['Confirm designs', 'Pay deposit'],
+  MAKEUP_HAIR: ['Book trial', 'Share outfit photos', 'Confirm schedule', 'Pay deposit'],
+  FLORIST: ['Confirm arrangements', 'Pay deposit'],
+  PANDIT_OFFICIANT: ['Discuss ceremony details', 'Share rituals list'],
+  MC_HOST: ['Share event flow & script', 'Pre-event rehearsal'],
+  TRANSPORT: ['Confirm routes & timing', 'Pay deposit'],
+  VENUE: ['Sign contract', 'Pay deposit', 'Final walkthrough', 'Confirm layout & setup'],
+  TENT_MARQUEE: ['Confirm layout', 'Pay deposit', 'Setup walkthrough'],
+  LIGHTING: ['Confirm lighting plan', 'Pay deposit'],
+  CAKE_VENDOR: ['Confirm design & flavors', 'Pay deposit'],
+  DESSERT_VENDOR: ['Confirm menu', 'Pay deposit'],
+  BARTENDER: ['Confirm drink menu', 'Pay deposit'],
+  CHOREOGRAPHER: ['Confirm dance selection', 'Schedule rehearsals'],
+  INVITATION_DESIGNER: ['Approve design proof', 'Confirm print quantity', 'Pay balance'],
+  EVENT_MANAGER: ['Share event plan', 'Pre-event walkthrough'],
+}
+const DEFAULT_WORKFLOW = ['Sign contract', 'Pay deposit', 'Confirm details']
+
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -140,11 +166,38 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           },
         })
 
-        // Auto-finalize any checklist item for this vendor type
+        // Auto-finalize any existing checklist item for this vendor type (e.g. "Book caterer")
         await prisma.eventChecklistItem.updateMany({
           where: { event_id: eventId, category: roleLabel, status: { in: ['PENDING', 'SEARCHING', 'SHORTLISTED'] } },
           data: { status: 'FINALIZED', finalized_price: fullQuote.total_estimate, completed_at: new Date() },
         })
+
+        // Auto-create workflow checklist items for the booked vendor
+        const planItem = await prisma.eventPlanItem.findUnique({
+          where: { event_id_vendor_id: { event_id: eventId, vendor_id: vendorId } },
+          select: { id: true },
+        })
+        if (planItem) {
+          const steps = SERVICE_WORKFLOW_TEMPLATES[vendorType] ?? DEFAULT_WORKFLOW
+          const existing = await prisma.eventChecklistItem.findMany({
+            where: { event_id: eventId, linked_plan_item_id: planItem.id },
+            select: { item_name: true },
+          })
+          const existingNames = new Set(existing.map(e => e.item_name))
+          const newSteps = steps.filter(s => !existingNames.has(s))
+          if (newSteps.length > 0) {
+            await prisma.eventChecklistItem.createMany({
+              data: newSteps.map(step => ({
+                event_id: eventId,
+                category: roleLabel,
+                item_name: step,
+                status: 'PENDING' as const,
+                linked_plan_item_id: planItem.id,
+                vendor_type: vendorType as any,
+              })),
+            })
+          }
+        }
       }
     }
 

@@ -419,7 +419,7 @@ export default function BoardPage() {
                 <span className="text-xs font-medium text-white/40 bg-white/10 px-2.5 py-0.5 rounded-full">{totalCount} open</span>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">Open requests</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white tracking-tight mb-2">Open requests</h1>
             <p className="text-sm text-white/50 leading-relaxed max-w-lg">
               Event hosts looking for vendors right now. Browse, respond, and win new business — free, no commission.
             </p>
@@ -454,7 +454,7 @@ export default function BoardPage() {
           <div className="sticky top-20">
             <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 max-h-[calc(100vh-6rem)] overflow-y-auto">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-sm font-black text-text-1 uppercase tracking-wide flex items-center gap-2">
+                <h2 className="text-sm font-extrabold tracking-tight text-text-1 uppercase tracking-wide flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4" />
                   Filters
                   {activeCount > 0 && (
@@ -560,7 +560,7 @@ export default function BoardPage() {
           {/* Bottom vendor CTA */}
           {!loading && items.length > 0 && (
             <div className="mt-12 bg-cream border border-brand-border rounded-2xl p-8 text-center">
-              <h2 className="text-lg font-black text-text-1 mb-1.5">Want requests like these sent to you?</h2>
+              <h2 className="text-lg font-extrabold tracking-tight text-text-1 mb-1.5">Want requests like these sent to you?</h2>
               <p className="text-sm text-text-3 mb-5 max-w-md mx-auto">
                 Create your free vendor profile and get notified when new requests match your service area.
               </p>
@@ -579,7 +579,7 @@ export default function BoardPage() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileFiltersOpen(false)} />
           <div className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-cream-2 shadow-xl flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-brand-border">
-              <h2 className="text-base font-black text-text-1 flex items-center gap-2">
+              <h2 className="text-base font-extrabold tracking-tight text-text-1 flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4" /> Filters
                 {activeCount > 0 && (
                   <span className="text-[11px] bg-brand text-white rounded-full w-5 h-5 flex items-center justify-center font-bold">{activeCount}</span>
@@ -692,7 +692,7 @@ function BoardCard({ item }: { item: BoardItem }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <h3 className="text-[15px] font-black text-text-1 group-hover:text-text-2 transition-colors">
+              <h3 className="text-[15px] font-extrabold tracking-tight text-text-1 group-hover:text-text-2 transition-colors">
                 {meta.label} for {eventLabel}
               </h3>
               {fresh && (

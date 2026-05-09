@@ -58,7 +58,7 @@ export default function AdminServicesPage() {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
           <Settings className="h-5 w-5 text-brand" />
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Service Catalogue</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-text-1">Service Catalogue</h1>
         </div>
         <p className="text-sm text-text-4 ml-8">
           {enabled.length} of {configs.length} service types visible to customers.
@@ -122,7 +122,7 @@ export default function AdminServicesPage() {
           { label: 'Individual services', value: configs.filter(c => c.service_class === 'INDIVIDUAL').length, color: 'text-indigo-600' },
         ].map(stat => (
           <div key={stat.label} className="bg-white rounded-xl border border-brand-border px-5 py-4">
-            <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
+            <p className={`text-2xl font-bold tracking-tight ${stat.color}`}>{stat.value}</p>
             <p className="text-xs text-text-4 mt-0.5">{stat.label}</p>
           </div>
         ))}
