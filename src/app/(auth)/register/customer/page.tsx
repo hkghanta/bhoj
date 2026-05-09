@@ -42,7 +42,7 @@ export default function CustomerRegisterPage() {
     <div className="min-h-screen bg-cream bg-dot-grid flex flex-col">
       {/* Nav */}
       <nav className="bg-white border-b border-brand-border flex items-center justify-between px-8 py-0 h-[62px]">
-        <Link href="/" className="text-xl font-extrabold tracking-tight tracking-tight text-text-1">
+        <Link href="/" className="text-xl font-extrabold tracking-tight text-text-1">
           One<span className="text-brand">Seva</span>
         </Link>
         <p className="text-sm text-text-4">

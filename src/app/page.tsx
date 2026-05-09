@@ -169,7 +169,7 @@ export default function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-6 sm:px-12 pt-20 pb-24 sm:pt-28 sm:pb-32 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           <div>
-            <div className="inline-flex items-center gap-2.5 text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 bg-cream/80 backdrop-blur border border-brand-border rounded-full px-5 py-2 mb-8">
+            <div className="inline-flex items-center gap-2.5 text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 bg-cream/80 backdrop-blur border border-brand-border rounded-full px-5 py-2 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
               Find · Compare · Book
             </div>
@@ -207,7 +207,7 @@ export default function HomePage() {
       {/* ── EVENT TYPES ── */}
       <section className="bg-white py-20 px-6 border-b border-brand-border">
         <div className="max-w-7xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-4 mb-6 block">Every celebration, every occasion</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-4 mb-6 block">Every celebration, every occasion</span>
           <div className="flex flex-wrap justify-center gap-3">
             {EVENT_TYPES.map(({ emoji, label }) => (
               <Link key={label} href="/register/customer" className="group block">
@@ -224,7 +224,7 @@ export default function HomePage() {
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" className="bg-white py-24 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">How it works</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">How it works</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-4">Plan in 4 simple steps</h2>
           <p className="text-text-3 text-base mb-16 max-w-lg mx-auto">From anywhere in the world to fully booked — without cold calls or juggling 10 tabs.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
@@ -234,10 +234,10 @@ export default function HomePage() {
               { n: "3", emoji: "💬", title: "Compare & negotiate", desc: "Receive detailed quotes with menus. Compare side by side, message vendors, negotiate the best deal." },
               { n: "4", emoji: "🤝", title: "Confirm your team", desc: "Accept quotes, manage guests and RSVPs — track everything in one place." },
             ].map(({ n, emoji, title, desc }) => (
-              <div key={n} className="relative bg-cream border border-brand-border rounded-2xl p-7 text-left group hover:border-brand/20 hover:shadow-lg hover:shadow-brand/5 transition-all duration-200">
+              <div key={n} className="relative bg-cream border border-brand-border rounded-2xl p-7 text-left group hover:border-brand/20 hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5 transition-all duration-200">
                 <div className="absolute -top-3.5 left-6 w-7 h-7 rounded-full bg-brand text-white text-xs font-extrabold tracking-tight flex items-center justify-center shadow-md shadow-brand/20">{n}</div>
-                <span className="text-4xl block mb-4 mt-2">{emoji}</span>
-                <h3 className="font-extrabold tracking-tight text-text-1 mb-2 text-[15px]">{title}</h3>
+                <span className="text-4xl block mb-4 mt-2 group-hover:scale-110 transition-transform duration-200">{emoji}</span>
+                <h3 className="font-extrabold tracking-tight text-text-1 mb-2 text-[15px] group-hover:text-brand transition-colors duration-200">{title}</h3>
                 <p className="text-sm text-text-3 leading-relaxed">{desc}</p>
               </div>
             ))}
@@ -251,7 +251,7 @@ export default function HomePage() {
       {/* ── VENDOR CARDS ── */}
       <section className="bg-cream py-24 px-6 border-t border-brand-border">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Featured vendors</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Featured vendors</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-4">Top-matched vendors this week</h2>
           <p className="text-text-3 text-base mb-12 max-w-lg mx-auto">Ranked by your city, event type, dietary needs and availability.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -282,7 +282,7 @@ export default function HomePage() {
       <section className="bg-white py-24 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div>
-            <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Compare & Save</span>
+            <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Compare & Save</span>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight leading-[1.05] mb-5">Small gathering or big.<br />Always the best value.</h2>
             <p className="text-base text-text-3 leading-relaxed mb-8">20 guests or 500 — send your requirements once and multiple vendors compete for your event. Compare prices, menus and ratings side by side.</p>
             <div className="flex flex-col gap-4 mb-10">
@@ -380,8 +380,8 @@ export default function HomePage() {
               { n: "100%", label: "Verified vendors", accent: false },
               { n: "Free", label: "Right now", accent: false },
             ].map(({ n, label, accent }) => (
-              <div key={label} className="bg-white border border-brand-border rounded-2xl p-8 hover:shadow-lg hover:shadow-black/5 transition-all duration-200">
-                <div className={`text-4xl sm:text-5xl font-extrabold tracking-tight tracking-tight leading-none mb-2 ${accent ? "text-brand" : "text-text-1"}`}>{n}</div>
+              <div key={label} className="bg-white border border-brand-border rounded-2xl p-8 hover:shadow-md hover:-translate-y-0.5 hover:shadow-black/5 transition-all duration-200">
+                <div className={`text-4xl sm:text-5xl font-extrabold tracking-tight leading-none mb-2 ${accent ? "text-brand" : "text-text-1"}`}>{n}</div>
                 <div className="text-sm text-text-3">{label}</div>
               </div>
             ))}
@@ -392,14 +392,14 @@ export default function HomePage() {
       {/* ── PERKS ── */}
       <section className="bg-white py-24 px-6 border-t border-brand-border">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Why OneSeva</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Why OneSeva</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-4">Everything in one place</h2>
           <p className="text-text-3 text-base mb-16 max-w-lg mx-auto">No more cold calls, no more juggling spreadsheets. One platform for your entire celebration.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {PERKS.map(({ icon, title, desc }) => (
-              <div key={title} className="bg-cream border border-brand-border rounded-2xl p-7 text-left group hover:border-brand/20 hover:shadow-lg hover:shadow-brand/5 transition-all duration-200">
+              <div key={title} className="bg-cream border border-brand-border rounded-2xl p-7 text-left group hover:border-brand/20 hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5 transition-all duration-200">
                 <span className="text-3xl block mb-4 group-hover:scale-110 transition-transform duration-200">{icon}</span>
-                <div className="font-extrabold tracking-tight text-text-1 mb-2 text-[15px]">{title}</div>
+                <div className="font-extrabold tracking-tight text-text-1 mb-2 text-[15px] group-hover:text-brand transition-colors duration-200">{title}</div>
                 <p className="text-sm text-text-3 leading-relaxed">{desc}</p>
               </div>
             ))}
@@ -412,7 +412,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2">
           {/* Customer */}
           <div className="bg-white border-r border-brand-border px-8 sm:px-14 py-20">
-            <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Planning an event?</span>
+            <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Planning an event?</span>
             <h3 className="text-3xl font-extrabold tracking-tight text-text-1 tracking-tight mb-4">Your full celebration platform</h3>
             <p className="text-base text-text-3 leading-relaxed mb-8">From vendor matching to guest RSVPs — manage everything in one place, wherever you are.</p>
             <div className="flex flex-col gap-3.5 mb-10">
@@ -439,7 +439,7 @@ export default function HomePage() {
 
           {/* Vendor */}
           <div className="px-8 sm:px-14 py-20" style={{ background: "linear-gradient(165deg, #1e0f07, #2a1810)" }}>
-            <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase block mb-4" style={{ color: "rgba(255,255,255,0.35)" }}>Running a business?</span>
+            <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase block mb-4" style={{ color: "rgba(255,255,255,0.35)" }}>Running a business?</span>
             <h3 className="text-3xl font-extrabold tracking-tight text-white tracking-tight mb-4">More leads. Zero missed orders.</h3>
             <p className="text-base leading-relaxed mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>Events matching your specialty come to you. You decide what to quote, when to respond, and what you take on.</p>
             <div className="flex flex-col gap-3.5 mb-10">
@@ -466,7 +466,7 @@ export default function HomePage() {
       {/* ── TESTIMONIALS ── */}
       <section className="bg-cream py-24 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Real stories</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Real stories</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-4">Trusted by families across the US</h2>
           <p className="text-text-3 text-base mb-14 max-w-lg mx-auto">From first match to a celebration that went perfectly.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

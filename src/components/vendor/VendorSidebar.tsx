@@ -68,7 +68,7 @@ export function VendorSidebar() {
     <aside className="hidden md:flex w-52 min-h-screen bg-white dark:bg-cream-2 border-r border-brand-border flex-col">
       <div className="px-5 py-4 border-b border-brand-border">
         <div className="flex items-center gap-2">
-          <Link href="/vendor/dashboard" className="text-lg font-extrabold tracking-tight tracking-tight text-text-1">
+          <Link href="/vendor/dashboard" className="text-lg font-extrabold tracking-tight text-text-1">
             One<span className="text-brand">Seva</span>
           </Link>
           <span className="text-[9px] font-semibold uppercase tracking-wider text-brand bg-brand/8 px-1.5 py-0.5 rounded-full leading-none">Pro</span>

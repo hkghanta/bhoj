@@ -43,7 +43,7 @@ export default async function CustomerDashboard() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1">My Events</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-1">My Events</h1>
           <p className="text-sm text-text-4 mt-0.5">
             {events.length === 0 ? 'Start planning your first celebration' :
              `${upcoming.length} upcoming${past.length > 0 ? ` · ${past.length} past` : ''}`}
@@ -144,7 +144,7 @@ function EventCard({ event, past = false }: {
   return (
     <Link href={`/events/${event.id}`}>
       <div className={cn(
-        'bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-5 hover:shadow-md hover:border-brand transition-all group',
+        'bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-5 hover:shadow-lg hover:shadow-brand/5 hover:border-brand hover:-translate-y-0.5 transition-all duration-200 group',
         past && 'opacity-70'
       )}>
         {/* Top accent */}

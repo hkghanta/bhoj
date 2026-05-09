@@ -166,7 +166,7 @@ export default async function VendorDashboardPage() {
             <Link
               key={item.text}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-2.5 bg-white dark:bg-cream-2 border border-brand-border border-l-[3px] border-l-brand rounded-lg text-sm text-text-2 hover:bg-cream/50 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 bg-white dark:bg-cream-2 border border-brand-border border-l-[3px] border-l-brand rounded-lg text-sm text-text-2 hover:bg-cream/50 hover:shadow-sm transition-all duration-200"
             >
               <AlertCircle className="h-4 w-4 shrink-0 text-text-4" />
               <span className="font-medium">{item.text}</span>
@@ -181,7 +181,7 @@ export default async function VendorDashboardPage() {
         {stats.map((stat) => {
           const Icon = stat.icon
           const inner = (
-            <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl p-4">
+            <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
               <div className="flex items-center gap-1.5 mb-1">
                 <Icon className="h-3.5 w-3.5 text-text-4" />
                 <span className="text-[11px] text-text-4 font-medium uppercase tracking-wide">{stat.label}</span>
@@ -192,7 +192,7 @@ export default async function VendorDashboardPage() {
           )
           if ('href' in stat && stat.href) {
             return (
-              <Link key={stat.label} href={stat.href} className="hover:opacity-80 transition-opacity">
+              <Link key={stat.label} href={stat.href} className="hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                 {inner}
               </Link>
             )
@@ -227,7 +227,7 @@ export default async function VendorDashboardPage() {
               return (
                 <div
                   key={booking.id}
-                  className="bg-white dark:bg-cream-2 border border-brand-border rounded-lg px-4 py-3 flex items-center justify-between hover:bg-cream/30 transition-colors"
+                  className="bg-white dark:bg-cream-2 border border-brand-border rounded-lg px-4 py-3 flex items-center justify-between hover:bg-cream/50 hover:shadow-sm transition-all duration-200"
                 >
                   <div>
                     <div className="font-semibold text-text-1 text-sm">{event.event_name}</div>

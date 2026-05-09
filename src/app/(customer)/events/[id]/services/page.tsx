@@ -172,7 +172,7 @@ export default async function ServicePickerPage({ params }: { params: Promise<{ 
       </nav>
 
       <div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight tracking-tight text-text-1">Requirements</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-1">Requirements</h1>
         <p className="text-sm text-text-3 mt-1">
           {addedCount > 0
             ? `${addedCount} service${addedCount > 1 ? 's' : ''} posted — tap any to update requirements or find vendors`

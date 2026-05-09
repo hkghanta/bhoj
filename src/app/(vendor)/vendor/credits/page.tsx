@@ -39,7 +39,7 @@ export default function VendorCreditsPage() {
   return (
     <div className="max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1">Lead Credits</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-text-1">Lead Credits</h1>
         <p className="text-text-4 mt-1">
           OneSeva charges a small fee per lead — only when you receive a real customer enquiry.
           No monthly subscription. No charge if no leads come in.

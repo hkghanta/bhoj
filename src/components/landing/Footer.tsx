@@ -23,9 +23,9 @@ export default function Footer() {
               For customers
             </div>
             <div className="flex flex-col gap-2.5">
-              <Link href="/register/customer" className="hover:text-white transition-colors">Plan an event</Link>
-              <Link href="/#how-it-works" className="hover:text-white transition-colors">How it works</Link>
-              <Link href="/#categories" className="hover:text-white transition-colors">Browse categories</Link>
+              <Link href="/register/customer" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">Plan an event</Link>
+              <Link href="/#how-it-works" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">How it works</Link>
+              <Link href="/#categories" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">Browse categories</Link>
             </div>
           </div>
 
@@ -35,9 +35,9 @@ export default function Footer() {
               For vendors
             </div>
             <div className="flex flex-col gap-2.5">
-              <Link href="/register/vendor" className="hover:text-white transition-colors">List your business</Link>
-              <Link href="/for-vendors" className="hover:text-white transition-colors">Why OneSeva</Link>
-              <Link href="/for-vendors#verified" className="hover:text-white transition-colors">Get verified</Link>
+              <Link href="/register/vendor" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">List your business</Link>
+              <Link href="/for-vendors" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">Why OneSeva</Link>
+              <Link href="/for-vendors#verified" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">Get verified</Link>
             </div>
           </div>
 
@@ -47,14 +47,14 @@ export default function Footer() {
               Company
             </div>
             <div className="flex flex-col gap-2.5">
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-              <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+              <Link href="/privacy" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">Privacy</Link>
+              <Link href="/terms" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">Terms</Link>
+              <Link href="/contact" className="hover:text-white hover:translate-x-0.5 transition-all duration-200">Contact</Link>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-white/8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <span className="text-white/25 text-xs">© {new Date().getFullYear()} OneSeva. All rights reserved.</span>
           <span className="text-white/25 text-xs">Made in the USA</span>
         </div>

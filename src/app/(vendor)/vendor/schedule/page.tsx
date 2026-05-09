@@ -126,7 +126,7 @@ export default function SchedulePage() {
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1 mb-1">Event Availability</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-text-1 mb-1">Event Availability</h1>
         <p className="text-text-4 text-sm">
           Which days you're available to take event bookings. Caterers often work evenings, weekends, and holidays —
           mark any day you can accept a booking.

@@ -304,7 +304,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
           <Link
             key={stat.href}
             href={stat.href}
-            className="group bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm p-5 sm:p-6 hover:border-brand hover:shadow-md transition-all duration-200 relative"
+            className="group bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm p-5 sm:p-6 hover:border-brand hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 relative"
             aria-label={`${stat.value} ${stat.label}`}
           >
             <div className={`w-10 h-10 rounded-xl ${stat.iconBg} flex items-center justify-center mb-3`} aria-hidden="true">
@@ -337,7 +337,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
               <Link
                 key={i}
                 href={step.href}
-                className={`group flex items-center gap-3 text-sm rounded-xl px-4 py-3 hover:bg-cream transition-all border-l-[3px] ${
+                className={`group flex items-center gap-3 text-sm rounded-xl px-4 py-3 hover:bg-cream/60 transition-all border-l-[3px] ${
                   step.priority === 'high' ? 'border-l-brand' : step.priority === 'medium' ? 'border-l-amber-400' : 'border-l-brand-border'
                 }`}
               >
@@ -386,7 +386,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
                 <Link
                   key={svc.vendor_type}
                   href={`/events/${id}/services/${slug}`}
-                  className="group relative flex items-start gap-4 rounded-2xl border bg-white dark:bg-cream-2 border-brand-border shadow-sm p-5 transition-all duration-200 hover:border-brand hover:shadow-md"
+                  className="group relative flex items-start gap-4 rounded-2xl border bg-white dark:bg-cream-2 border-brand-border shadow-sm p-5 transition-all duration-200 hover:border-brand hover:shadow-md hover:-translate-y-0.5"
                   aria-label={`${svc.label} service${hasVendors ? `, ${req.matchCount} vendor matches` : ''}`}
                 >
                   <div className="w-12 h-12 rounded-xl bg-cream flex items-center justify-center text-2xl flex-shrink-0" aria-hidden="true">
@@ -441,7 +441,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
             <Link
               key={tool.href}
               href={tool.href}
-              className="group flex flex-col items-center gap-2.5 rounded-2xl border border-brand-border bg-white dark:bg-cream-2 shadow-sm p-4 sm:p-5 text-center hover:bg-cream hover:border-brand hover:shadow-md transition-all duration-200"
+              className="group flex flex-col items-center gap-2.5 rounded-2xl border border-brand-border bg-white dark:bg-cream-2 shadow-sm p-4 sm:p-5 text-center hover:bg-cream hover:border-brand hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
               aria-label={tool.label}
             >
               <div className={`w-12 h-12 rounded-xl ${tool.bg} flex items-center justify-center`} aria-hidden="true">

@@ -38,7 +38,7 @@ export default async function VendorQuotesPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1 mb-8">Quotes</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-text-1 mb-8">Quotes</h1>
       {quotes.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed rounded-xl">
           <p className="text-text-4">No quotes yet. Create a quote from your leads page.</p>

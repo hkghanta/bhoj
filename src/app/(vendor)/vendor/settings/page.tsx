@@ -9,7 +9,7 @@ export default async function VendorSettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1">Settings</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-text-1">Settings</h1>
       <SustainabilityTagsEditor />
       <NotificationPrefsForm role="vendor" />
     </div>

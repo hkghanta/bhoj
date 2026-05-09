@@ -162,7 +162,7 @@ export default function ForVendorsPage() {
 
         <div className="relative max-w-7xl mx-auto px-6 sm:px-12 pt-20 pb-24 sm:pt-28 sm:pb-32 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           <div>
-            <div className="inline-flex items-center gap-2.5 text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 bg-cream/80 backdrop-blur border border-brand-border rounded-full px-5 py-2 mb-8">
+            <div className="inline-flex items-center gap-2.5 text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 bg-cream/80 backdrop-blur border border-brand-border rounded-full px-5 py-2 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
               For vendors
             </div>
@@ -242,7 +242,7 @@ export default function ForVendorsPage() {
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" className="bg-cream py-24 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">How it works for vendors</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">How it works for vendors</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-4">Go from listed to booked in 4 steps</h2>
           <p className="text-text-3 text-base mb-16">No cold outreach. No missed leads. Every match comes to you automatically.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -261,7 +261,7 @@ export default function ForVendorsPage() {
       {/* ── BENEFITS ── */}
       <section className="bg-white py-24 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Why vendors choose OneSeva</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Why vendors choose OneSeva</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-4">Everything you need to grow</h2>
           <p className="text-text-3 text-base mb-16">Built by vendors, for vendors. Every feature is designed to help you close more events, faster.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -280,7 +280,7 @@ export default function ForVendorsPage() {
       <section id="verified" className="bg-cream py-24 px-6 border-t border-brand-border">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div>
-            <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Trust & compliance</span>
+            <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Trust & compliance</span>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-5">The OneSeva<br />Verified Badge</h2>
             <p className="text-base text-text-3 leading-relaxed mb-8">
               Customers only see verified vendors. To earn the badge, we check your business licence, insurance, and for food vendors — health inspection and food safety certifications. It takes 2–3 business days.
@@ -314,7 +314,7 @@ export default function ForVendorsPage() {
       {/* ── TESTIMONIALS ── */}
       <section className="bg-white py-24 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Vendor stories</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Vendor stories</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-14">Trusted by vendors across the US</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {TESTIMONIALS.map(({ text, name, detail, avatar }) => (
@@ -337,7 +337,7 @@ export default function ForVendorsPage() {
       {/* ── FAQ ── */}
       <section className="bg-cream py-24 px-6 border-t border-brand-border">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="text-[11px] font-extrabold tracking-tight tracking-[0.2em] uppercase text-text-3 mb-4 block">Questions & answers</span>
+          <span className="text-[11px] font-extrabold tracking-[0.2em] uppercase text-text-3 mb-4 block">Questions & answers</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight mb-4">Frequently asked questions</h2>
           <p className="text-text-3 text-base mb-14">Everything you need to know before listing your business.</p>
           <VendorFaq />
@@ -347,7 +347,7 @@ export default function ForVendorsPage() {
       {/* ── FINAL CTA ── */}
       <section className="py-24 px-6 text-center text-white" style={{ background: "linear-gradient(165deg, #1e0f07, #2a1810)" }}>
         <p className="font-script text-3xl sm:text-4xl text-white/40 mb-2">Ready to grow your business?</p>
-        <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight tracking-tight mb-5">
+        <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-5">
           List free. Get matched.<br />
           <em className="not-italic text-brand">Start growing.</em>
         </h2>

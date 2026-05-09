@@ -8,9 +8,9 @@ interface NavProps {
 
 export default function Nav({ vendorPage = false }: NavProps) {
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 dark:bg-cream-2/90 backdrop-blur-xl border-b border-brand-border/60 flex items-center justify-between px-4 sm:px-12 py-0 h-[64px]">
+    <nav className="sticky top-0 z-50 bg-white/95 dark:bg-cream-2/95 backdrop-blur-xl border-b border-brand-border/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center justify-between px-4 sm:px-12 py-0 h-[56px]">
       {/* Logo */}
-      <Link href="/" className="text-xl font-extrabold tracking-tight tracking-tight text-text-1 flex items-center gap-1.5">
+      <Link href="/" className="text-xl font-extrabold tracking-tight text-text-1 flex items-center gap-1.5">
         One<span className="text-brand">Seva</span>
         <span className="w-1.5 h-1.5 rounded-full bg-brand mt-2" />
       </Link>

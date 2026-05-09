@@ -71,7 +71,7 @@ export default function ConciergePage() {
       <div className="min-h-screen bg-cream flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl border border-brand-border p-10 max-w-md w-full text-center">
           <CheckCircle2 className="h-14 w-14 text-green-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1 mb-2">Request received!</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-1 mb-2">Request received!</h1>
           <p className="text-text-2 mb-6">
             We'll personally curate 3–5 vetted vendors for your event and be in touch within 24 hours.
           </p>

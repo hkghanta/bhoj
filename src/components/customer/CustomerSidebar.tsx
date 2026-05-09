@@ -77,7 +77,7 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
     <aside className="hidden md:flex w-56 min-h-screen bg-white dark:bg-cream-2 border-r border-brand-border/60 flex-col flex-shrink-0 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-brand-border">
       {/* Logo */}
       <div className="px-4 py-4 border-b border-brand-border/40">
-        <Link href="/dashboard" className="text-[22px] font-extrabold tracking-tight tracking-[-0.03em] text-text-1">
+        <Link href="/dashboard" className="text-[22px] font-extrabold tracking-[-0.03em] text-text-1">
           One<span className="text-brand">Seva</span>
         </Link>
         <p className="text-[10px] text-text-4/60 mt-0.5 font-medium tracking-[0.08em] uppercase">Event Planner</p>

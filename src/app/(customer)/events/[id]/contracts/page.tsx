@@ -50,7 +50,7 @@ export default async function ContractsPage({ params }: { params: Promise<{ id: 
       </div>
 
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1">Contracts</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-text-1">Contracts</h1>
         <p className="text-text-4 text-sm mt-1">Review and sign contracts from your vendors.</p>
       </div>
 

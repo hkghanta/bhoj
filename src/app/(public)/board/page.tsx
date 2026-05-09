@@ -452,7 +452,7 @@ export default function BoardPage() {
         {/* Left sidebar — desktop only */}
         <aside className="hidden lg:block w-64 shrink-0">
           <div className="sticky top-20">
-            <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 max-h-[calc(100vh-6rem)] overflow-y-auto">
+            <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-5 shadow-sm max-h-[calc(100vh-6rem)] overflow-y-auto">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-sm font-extrabold tracking-tight text-text-1 uppercase tracking-wide flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4" />
@@ -550,7 +550,7 @@ export default function BoardPage() {
           {hasMore && !loading && (
             <div className="flex justify-center mt-8">
               <button onClick={loadMore} disabled={loadingMore}
-                className="flex items-center gap-2 px-8 py-3 bg-white dark:bg-cream-2 border border-brand-border rounded-xl text-sm font-bold text-text-1 hover:bg-cream hover:border-brand/30 transition-all disabled:opacity-50">
+                className="flex items-center gap-2 px-8 py-3 bg-white dark:bg-cream-2 border border-brand-border rounded-xl text-sm font-bold text-text-1 hover:bg-cream hover:border-brand/30 hover:shadow-md transition-all duration-200 disabled:opacity-50">
                 {loadingMore && <Loader2 className="w-4 h-4 animate-spin" />}
                 {loadingMore ? 'Loading...' : 'Show more requests'}
               </button>
@@ -559,7 +559,7 @@ export default function BoardPage() {
 
           {/* Bottom vendor CTA */}
           {!loading && items.length > 0 && (
-            <div className="mt-12 bg-cream border border-brand-border rounded-2xl p-8 text-center">
+            <div className="mt-12 bg-cream border border-brand-border rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-all duration-200">
               <h2 className="text-lg font-extrabold tracking-tight text-text-1 mb-1.5">Want requests like these sent to you?</h2>
               <p className="text-sm text-text-3 mb-5 max-w-md mx-auto">
                 Create your free vendor profile and get notified when new requests match your service area.
@@ -683,7 +683,7 @@ function BoardCard({ item }: { item: BoardItem }) {
 
   return (
     <a href={href} target="_blank" rel="noopener noreferrer"
-      className="group relative bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden hover:shadow-lg hover:border-text-3/30 transition-all duration-200 block">
+      className="group relative bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20 transition-all duration-200 block">
       <div className="p-5 sm:p-6">
         {/* Row 1: Icon + Title */}
         <div className="flex items-start gap-3.5 mb-3">

@@ -24,7 +24,7 @@ export default async function TimelinePage({ params }: { params: Promise<{ id: s
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1">Event Timeline</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-text-1">Event Timeline</h1>
         <p className="text-text-3 mt-1">
           Plan the full schedule across all your event days.
         </p>

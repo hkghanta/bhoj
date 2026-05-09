@@ -169,7 +169,7 @@ export default function RSVPPage() {
               <Image src={event.invite_image_url} alt="Invitation" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-5">
-                <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-white">{event.event_name}</h1>
+                <h1 className="text-3xl font-extrabold tracking-tight text-white">{event.event_name}</h1>
                 <p className="text-white/80 text-sm mt-0.5 flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" />
                   {event.city}{event.venue ? ` \u00B7 ${event.venue}` : ''}

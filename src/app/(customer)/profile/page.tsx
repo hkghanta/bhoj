@@ -32,7 +32,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-3xl font-extrabold tracking-tight tracking-tight text-text-1 mb-8">My Profile</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-text-1 mb-8">My Profile</h1>
       <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>

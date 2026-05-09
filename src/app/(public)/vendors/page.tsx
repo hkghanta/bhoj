@@ -79,15 +79,16 @@ export default function VendorsPage() {
       />
 
       {/* ── Hero + Search ─────────────────────────────────────────────── */}
-      <section className="-mx-6 -mt-8 px-6 pt-12 pb-14 bg-gradient-to-b from-cream to-transparent">
-        <div className="max-w-2xl mx-auto text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 tracking-tight leading-[1.1] mb-4">
+      <section className="-mx-6 -mt-8 px-6 pt-14 pb-16 bg-gradient-to-b from-cream via-cream/60 to-transparent">
+        <div className="max-w-2xl mx-auto text-center mb-10">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-1 leading-[1.1] mb-4">
             Find the perfect vendor
             <br />
             <span className="text-brand">for your event</span>
           </h1>
-          <p className="text-text-3 text-lg leading-relaxed">
-            Search thousands of Indian caterers, photographers, decorators and more — read reviews, compare prices, and book.
+          <p className="text-text-3 text-lg leading-relaxed max-w-lg mx-auto">
+            Search thousands of Indian caterers, photographers, decorators and more —
+            read reviews, compare prices, and book.
           </p>
         </div>
 
@@ -97,8 +98,8 @@ export default function VendorsPage() {
       </section>
 
       {/* ── Top categories ────────────────────────────────────────────── */}
-      <section className="mt-10 mb-14">
-        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-6">Popular services</h2>
+      <section className="mt-12 mb-16">
+        <h2 className="text-2xl font-extrabold tracking-tight text-text-1 mb-6">Popular services</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {TOP_SERVICES.map(svc => {
             const Icon = svc.icon
@@ -106,13 +107,13 @@ export default function VendorsPage() {
               <Link
                 key={svc.slug}
                 href={`/vendors/${svc.slug}/pittsburgh`}
-                className="group bg-white dark:bg-cream-2 border border-brand-border rounded-xl p-5 hover:border-brand hover:shadow-md transition-all"
+                className="group bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-6 hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5 transition-all duration-200"
               >
-                <div className="w-10 h-10 rounded-xl bg-brand/8 flex items-center justify-center mb-3 group-hover:bg-brand/15 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-brand/[0.07] flex items-center justify-center mb-4 group-hover:bg-brand/[0.12] transition-colors">
                   <Icon className="w-5 h-5 text-brand" />
                 </div>
                 <h3 className="font-bold text-text-1 group-hover:text-brand transition-colors">{svc.label}</h3>
-                <p className="text-xs text-text-4 mt-0.5">{svc.desc}</p>
+                <p className="text-xs text-text-4 mt-1">{svc.desc}</p>
               </Link>
             )
           })}
@@ -120,31 +121,31 @@ export default function VendorsPage() {
       </section>
 
       {/* ── Browse by city ────────────────────────────────────────────── */}
-      <section className="mb-14">
-        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-2">Browse by city</h2>
-        <p className="text-sm text-text-3 mb-5">Find vendors in the largest Indian communities across the US.</p>
+      <section className="mb-16">
+        <h2 className="text-2xl font-extrabold tracking-tight text-text-1 mb-2">Browse by city</h2>
+        <p className="text-sm text-text-3 mb-6">Find vendors in the largest Indian communities across the US.</p>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
           {POPULAR_CITIES.map(city => (
             <Link
               key={city.slug}
               href={`/vendors/catering/${city.slug}`}
-              className="group text-center bg-white dark:bg-cream-2 border border-brand-border rounded-xl p-4 hover:border-brand hover:shadow-sm transition-all"
+              className="group text-center bg-white dark:bg-cream-2 border border-brand-border rounded-xl px-4 py-3.5 hover:border-brand/30 hover:shadow-md hover:shadow-brand/5 hover:-translate-y-0.5 transition-all duration-200"
             >
-              <div className="text-base font-semibold text-text-1 group-hover:text-brand transition-colors">{city.label}</div>
+              <div className="text-sm font-semibold text-text-1 group-hover:text-brand transition-colors">{city.label}</div>
             </Link>
           ))}
         </div>
       </section>
 
       {/* ── All services (SEO links) ──────────────────────────────────── */}
-      <section className="mb-14">
-        <h2 className="text-xl font-extrabold tracking-tight text-text-1 mb-5">All services</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-2">
+      <section className="mb-16">
+        <h2 className="text-2xl font-extrabold tracking-tight text-text-1 mb-6">All services</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-1">
           {ALL_SERVICES.map(svc => (
             <Link
               key={svc.slug}
               href={`/vendors/${svc.slug}/pittsburgh`}
-              className="text-sm text-text-2 hover:text-brand font-medium py-1.5 transition-colors"
+              className="text-sm text-text-2 hover:text-brand font-medium py-2 transition-colors"
             >
               {svc.label}
             </Link>
@@ -153,28 +154,28 @@ export default function VendorsPage() {
       </section>
 
       {/* ── Cross-link grid: service x city (SEO) ─────────────────────── */}
-      <section className="mb-14">
-        <h2 className="text-lg font-bold text-text-1 mb-4">Vendors by city</h2>
-        <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl overflow-hidden">
+      <section className="mb-16">
+        <h2 className="text-xl font-bold text-text-1 mb-5">Vendors by city</h2>
+        <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-brand-border bg-cream/50">
-                  <th className="text-left px-4 py-3 font-semibold text-text-2">City</th>
-                  <th className="text-left px-4 py-3 font-semibold text-text-2">Catering</th>
-                  <th className="text-left px-4 py-3 font-semibold text-text-2">Photography</th>
-                  <th className="text-left px-4 py-3 font-semibold text-text-2">Decoration</th>
-                  <th className="text-left px-4 py-3 font-semibold text-text-2">DJ</th>
-                  <th className="text-left px-4 py-3 font-semibold text-text-2">Mehendi</th>
+                <tr className="border-b border-brand-border">
+                  <th className="text-left px-5 py-3.5 font-semibold text-[11px] uppercase tracking-[0.1em] text-text-3">City</th>
+                  <th className="text-left px-5 py-3.5 font-semibold text-[11px] uppercase tracking-[0.1em] text-text-3">Catering</th>
+                  <th className="text-left px-5 py-3.5 font-semibold text-[11px] uppercase tracking-[0.1em] text-text-3">Photography</th>
+                  <th className="text-left px-5 py-3.5 font-semibold text-[11px] uppercase tracking-[0.1em] text-text-3">Decoration</th>
+                  <th className="text-left px-5 py-3.5 font-semibold text-[11px] uppercase tracking-[0.1em] text-text-3">DJ</th>
+                  <th className="text-left px-5 py-3.5 font-semibold text-[11px] uppercase tracking-[0.1em] text-text-3">Mehendi</th>
                 </tr>
               </thead>
               <tbody>
-                {POPULAR_CITIES.slice(0, 8).map(city => (
-                  <tr key={city.slug} className="border-b border-brand-border last:border-0 hover:bg-cream/30 transition-colors">
-                    <td className="px-4 py-2.5 font-medium text-text-1">{city.label}</td>
+                {POPULAR_CITIES.slice(0, 8).map((city, i) => (
+                  <tr key={city.slug} className={`border-b border-brand-border/60 last:border-0 hover:bg-cream/40 transition-colors ${i % 2 === 0 ? 'bg-cream/20' : ''}`}>
+                    <td className="px-5 py-3 font-semibold text-text-1">{city.label}</td>
                     {['catering', 'photographer', 'decorator', 'dj', 'mehendi-artist'].map(svc => (
-                      <td key={svc} className="px-4 py-2.5">
-                        <Link href={`/vendors/${svc}/${city.slug}`} className="text-brand hover:text-brand-hover text-xs font-medium transition-colors">
+                      <td key={svc} className="px-5 py-3">
+                        <Link href={`/vendors/${svc}/${city.slug}`} className="text-brand hover:text-brand-hover text-xs font-semibold transition-colors hover:underline underline-offset-2">
                           View
                         </Link>
                       </td>
@@ -188,16 +189,16 @@ export default function VendorsPage() {
       </section>
 
       {/* ── CTA ───────────────────────────────────────────────────────── */}
-      <section className="mb-8 bg-cream border border-brand-border rounded-2xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <section className="mb-10 bg-gradient-to-br from-cream to-cream/60 border border-brand-border rounded-2xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
         <div>
-          <h3 className="text-xl font-extrabold tracking-tight text-text-1 mb-1.5">Don&apos;t want to search?</h3>
+          <h3 className="text-xl font-extrabold tracking-tight text-text-1 mb-2">Don&apos;t want to search?</h3>
           <p className="text-text-3 max-w-md leading-relaxed">
             Post your event requirements and let vendors come to you with personalized quotes. Free, no obligation.
           </p>
         </div>
         <Link
           href="/register/customer"
-          className="inline-flex items-center gap-2 bg-brand text-white font-bold px-6 py-3 rounded-xl hover:bg-brand-hover transition-colors whitespace-nowrap"
+          className="inline-flex items-center gap-2 bg-brand text-white font-bold px-7 py-3.5 rounded-xl hover:bg-brand-hover transition-all duration-200 whitespace-nowrap shadow-md shadow-brand/15 hover:shadow-lg hover:shadow-brand/25"
         >
           Post my requirements <ArrowRight className="w-4 h-4" />
         </Link>

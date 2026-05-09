@@ -58,7 +58,7 @@ export default function VendorBillingPage() {
     <div>
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight tracking-tight text-text-1">Billing</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-text-1">Billing</h1>
           {subscription && (
             <p className="text-text-4 mt-1">
               Current plan: <strong className="text-brand">{subscription.tier}</strong>
