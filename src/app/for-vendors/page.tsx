@@ -147,7 +147,7 @@ function VerifiedBadge() {
 export default function ForVendorsPage() {
   return (
     <main className="min-h-screen bg-white font-sans overflow-x-hidden">
-      <Nav vendorPage />
+      <Nav />
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden">
