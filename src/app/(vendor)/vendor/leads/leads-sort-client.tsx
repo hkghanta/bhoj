@@ -19,7 +19,7 @@ export function LeadsSortClient() {
       <select
         value={sort}
         onChange={e => handleSort(e.target.value)}
-        className="text-xs pl-7 pr-6 py-1.5 rounded-xl border border-brand-border bg-white dark:bg-cream-2 text-text-2 appearance-none cursor-pointer hover:border-brand-border focus:outline-none focus:border-brand"
+        className="text-[11px] font-medium pl-7 pr-6 py-1.5 rounded-lg border border-brand-border bg-white dark:bg-cream-2 text-text-2 appearance-none cursor-pointer hover:border-brand transition-colors focus:outline-none focus:ring-1 focus:ring-brand/20 focus:border-brand"
       >
         <option value="newest">Newest first</option>
         <option value="event_date">Event date</option>

@@ -19,10 +19,10 @@ type ContractSummary = {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  DRAFT:     { bg: 'bg-cream-2',  text: 'text-text-2',   label: 'Draft' },
-  SENT:      { bg: 'bg-blue-50',  text: 'text-blue-700', label: 'Sent' },
-  SIGNED:    { bg: 'bg-green-50', text: 'text-green-700', label: 'Signed' },
-  CANCELLED: { bg: 'bg-red-50',  text: 'text-red-600',  label: 'Cancelled' },
+  DRAFT:     { bg: 'bg-gray-50',   text: 'text-gray-600',  label: 'Draft' },
+  SENT:      { bg: 'bg-blue-50/60',  text: 'text-blue-600', label: 'Sent' },
+  SIGNED:    { bg: 'bg-green-50/60', text: 'text-green-600', label: 'Signed' },
+  CANCELLED: { bg: 'bg-red-50/60',  text: 'text-red-500',  label: 'Cancelled' },
 }
 
 export default function ContractsPage() {
@@ -40,7 +40,7 @@ export default function ContractsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-black tracking-tight text-text-1">Contracts</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-text-1">Contracts</h1>
         <p className="text-text-4 mt-1">Manage contracts with your customers.</p>
       </div>
 
@@ -69,7 +69,7 @@ export default function ContractsPage() {
           {loading ? (
             <div className="text-text-4 text-sm py-8 text-center">Loading contracts...</div>
           ) : contracts.length === 0 ? (
-            <div className="border-2 border-dashed border-brand-border rounded-2xl py-16 text-center">
+            <div className="border border-dashed border-brand-border rounded-xl py-16 text-center">
               <ScrollText className="h-10 w-10 text-text-4 mx-auto mb-3" />
               <p className="text-text-4 mb-1">No contracts yet.</p>
               <p className="text-xs text-text-4">
@@ -87,7 +87,7 @@ export default function ContractsPage() {
                   <Link
                     key={c.id}
                     href={`/vendor/contracts/${c.id}`}
-                    className="block bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-6 hover:bg-cream hover:border-brand transition-colors"
+                    className="block bg-white dark:bg-cream-2 rounded-xl border border-brand-border p-5 hover:bg-cream/50 hover:border-brand transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
@@ -96,7 +96,7 @@ export default function ContractsPage() {
                           <span className="font-bold text-text-1 text-sm truncate">
                             {c.customer?.name ?? 'Customer'}
                           </span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${style.bg} ${style.text}`}>
+                          <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${style.bg} ${style.text}`}>
                             {style.label}
                           </span>
                         </div>

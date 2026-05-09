@@ -84,7 +84,7 @@ export function RsvpDashboard({ eventId }: { eventId: string }) {
   ]
 
   return (
-    <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl overflow-hidden">
+    <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl shadow-sm overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setCollapsed(!collapsed)}
@@ -95,7 +95,7 @@ export function RsvpDashboard({ eventId }: { eventId: string }) {
             <Bell className="h-5 w-5 text-brand" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-text-1">RSVP Tracker</h2>
+            <h2 className="text-lg font-extrabold tracking-tight text-text-1">RSVP Tracker</h2>
             <p className="text-xs text-text-4 mt-0.5">
               {stats.attending} attending &middot; {stats.total_guests} total guests &middot; {stats.pending} pending
             </p>
@@ -128,7 +128,7 @@ export function RsvpDashboard({ eventId }: { eventId: string }) {
                         <span className="text-text-4 ml-1.5">({percentage}%)</span>
                       </span>
                     </div>
-                    <div className="h-2 bg-cream-2 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-cream-2 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${step.color}`}
                         style={{ width: `${Math.max(percentage, 2)}%` }}
@@ -143,15 +143,15 @@ export function RsvpDashboard({ eventId }: { eventId: string }) {
           {/* Declined + Total guests row */}
           <div className="flex gap-3">
             <div className="flex-1 bg-cream rounded-xl px-4 py-3 text-center">
-              <div className="text-xl font-black text-text-1">{stats.declined}</div>
+              <div className="text-xl font-extrabold tracking-tight text-text-1">{stats.declined}</div>
               <div className="text-xs text-text-4 font-medium">Declined</div>
             </div>
             <div className="flex-1 bg-cream rounded-xl px-4 py-3 text-center">
-              <div className="text-xl font-black text-text-1">{stats.total_guests}</div>
+              <div className="text-xl font-extrabold tracking-tight text-text-1">{stats.total_guests}</div>
               <div className="text-xs text-text-4 font-medium">Total guests</div>
             </div>
             <div className="flex-1 bg-cream rounded-xl px-4 py-3 text-center">
-              <div className="text-xl font-black text-text-1">{stats.missing_meal}</div>
+              <div className="text-xl font-extrabold tracking-tight text-text-1">{stats.missing_meal}</div>
               <div className="text-xs text-text-4 font-medium">Missing meal</div>
             </div>
           </div>

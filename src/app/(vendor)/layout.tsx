@@ -8,17 +8,14 @@ export default async function VendorLayout({ children }: { children: React.React
   if ((session.user as any).role !== 'vendor') redirect('/dashboard')
 
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex min-h-screen bg-cream/50">
       <VendorSidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white dark:bg-cream-2 border-b border-brand-border px-4 sm:px-8 py-4 flex items-center justify-between">
-          <div />
-          <div className="flex items-center gap-3 text-sm text-text-3">
-            <span>{session.user?.name}</span>
-            <a href="/api/auth/signout" className="text-brand hover:underline text-sm">Sign out</a>
-          </div>
+        <header className="bg-white dark:bg-cream-2 border-b border-brand-border/80 px-4 sm:px-8 py-3 flex items-center justify-between">
+          <h1 className="text-sm font-semibold text-text-1 tracking-tight">{session.user?.name}</h1>
+          <a href="/api/auth/signout" className="text-xs text-text-4 hover:text-text-2 transition-colors px-2.5 py-1 rounded-md hover:bg-cream/80">Sign out</a>
         </header>
-        <main className="flex-1 px-4 sm:px-8 py-6 pb-20 md:pb-6 mx-auto max-w-6xl w-full">{children}</main>
+        <main className="flex-1 px-4 sm:px-8 py-5 pb-20 md:pb-5 mx-auto max-w-7xl w-full">{children}</main>
       </div>
     </div>
   )

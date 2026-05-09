@@ -6,7 +6,7 @@ import { StatusBadge } from '@/components/ui/status-badge'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import { Users, CalendarDays, MapPin, Inbox, Send, Leaf, AlertTriangle } from 'lucide-react'
+import { Users, CalendarDays, MapPin, Inbox, Send, Leaf } from 'lucide-react'
 import { VendorBadges } from '@/components/vendor/VendorBadges'
 import { LeadsSortClient } from './leads-sort-client'
 
@@ -53,7 +53,7 @@ export default async function VendorLeadsPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Leads</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-text-1">Leads</h1>
           {matches.length > 0 && (
             <p className="text-sm text-text-4 mt-1">
               {pendingCount} new &middot; {quotedCount} quoted
@@ -70,7 +70,7 @@ export default async function VendorLeadsPage() {
       )}
 
       {matches.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-brand-border rounded-2xl bg-white dark:bg-cream-2">
+        <div className="text-center py-16 border border-dashed border-brand-border rounded-xl bg-white dark:bg-cream-2">
           <Inbox className="h-10 w-10 text-text-4/40 mx-auto mb-3" />
           <h3 className="font-bold text-text-1 mb-1">No leads yet</h3>
           <p className="text-sm text-text-4 max-w-sm mx-auto mb-4">
@@ -84,9 +84,9 @@ export default async function VendorLeadsPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-cream-2 rounded-xl border border-brand-border overflow-hidden">
           {/* Table header */}
-          <div className="hidden sm:grid grid-cols-[1fr_100px_90px_130px_130px] gap-3 px-5 py-2.5 border-b border-brand-border bg-cream text-[10px] font-bold uppercase tracking-widest text-text-4">
+          <div className="hidden sm:grid grid-cols-[1fr_100px_90px_130px_130px] gap-3 px-5 py-2 border-b border-brand-border text-[10px] font-semibold uppercase tracking-widest text-text-4">
             <span>Event</span>
             <span className="text-center">Urgency</span>
             <span className="text-center">Score</span>
@@ -103,7 +103,7 @@ export default async function VendorLeadsPage() {
               const scoreWidth = Math.min(100, Math.max(0, (match.score / 100) * 100))
 
               return (
-                <div key={match.id} className="px-5 py-4 hover:bg-cream/30 transition-colors">
+                <div key={match.id} className="px-5 py-3 hover:bg-cream/30 transition-colors">
                   {/* Desktop: table-like row */}
                   <div className="hidden sm:grid grid-cols-[1fr_100px_90px_130px_130px] gap-3 items-center">
                     {/* Event info */}
@@ -151,9 +151,8 @@ export default async function VendorLeadsPage() {
                         <span className="text-xs text-text-4">Past</span>
                       ) : (
                         <div className="flex flex-col items-center gap-0.5">
-                          {daysUntil <= 14 && <AlertTriangle className="h-3 w-3 text-amber-500" />}
                           <span className={cn(
-                            'text-xs font-bold',
+                            'text-xs font-semibold tabular-nums',
                             daysUntil <= 7 ? 'text-red-600' :
                             daysUntil <= 30 ? 'text-amber-600' :
                             'text-text-3'
@@ -167,8 +166,8 @@ export default async function VendorLeadsPage() {
 
                     {/* Match score bar */}
                     <div className="flex flex-col items-center gap-1">
-                      <span className="text-sm font-bold text-text-1">{match.score}</span>
-                      <div className="w-full h-1.5 bg-cream rounded-full overflow-hidden">
+                      <span className="text-xs font-semibold text-text-2 tabular-nums">{match.score}</span>
+                      <div className="w-full h-1 bg-cream rounded-full overflow-hidden">
                         <div
                           className="h-full bg-brand rounded-full transition-all"
                           style={{ width: `${scoreWidth}%` }}

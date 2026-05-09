@@ -22,13 +22,13 @@ export default async function CustomerLayout({ children }: { children: React.Rea
       <CustomerSidebar userName={session.user?.name ?? 'You'} />
       <main className="flex-1 px-4 sm:px-8 py-6 pb-20 md:pb-6 min-w-0 mx-auto max-w-6xl">
         {needsVerification && (
-          <div className="mb-6 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <div className="mb-6 flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-lg px-4 py-2.5">
             <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
             <p className="text-sm text-amber-800 flex-1">
               Please verify your {!customer?.email_verified ? 'email' : 'phone'} to post event requests.
             </p>
-            <Link href="/verify" className="text-sm font-bold text-amber-700 hover:text-amber-900 whitespace-nowrap">
-              Verify now →
+            <Link href="/verify" className="text-sm font-semibold text-amber-700 hover:text-amber-900 whitespace-nowrap transition-colors">
+              Verify now &rarr;
             </Link>
           </div>
         )}

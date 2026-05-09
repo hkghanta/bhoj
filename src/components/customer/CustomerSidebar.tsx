@@ -61,89 +61,104 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
   const navLink = (href: string, label: string, Icon: React.ComponentType<{ className?: string }>, active: boolean) => (
     <Link key={href} href={href}
       className={cn(
-        'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
+        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150',
         active
-          ? 'bg-brand text-white'
-          : 'text-text-3 hover:bg-cream hover:text-text-1'
+          ? 'bg-brand/10 text-brand font-semibold border-l-2 border-brand'
+          : 'text-text-3 hover:bg-cream-2 hover:text-text-2'
       )}
     >
-      <Icon className="h-4 w-4 flex-shrink-0" />
+      <Icon className={cn("h-4 w-4 flex-shrink-0", active ? "opacity-100" : "opacity-70")} />
       {label}
     </Link>
   )
 
   return (
     <>
-    <aside className="hidden md:flex w-56 min-h-screen bg-white dark:bg-cream-2 border-r border-brand-border flex-col flex-shrink-0">
+    <aside className="hidden md:flex w-56 min-h-screen bg-white dark:bg-cream-2 border-r border-brand-border/60 flex-col flex-shrink-0 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-brand-border">
       {/* Logo */}
-      <div className="px-5 py-4 border-b border-brand-border">
-        <Link href="/dashboard" className="text-xl font-black tracking-tight text-text-1">
+      <div className="px-4 py-4 border-b border-brand-border/40">
+        <Link href="/dashboard" className="text-[22px] font-black tracking-[-0.03em] text-text-1">
           One<span className="text-brand">Seva</span>
         </Link>
-        <p className="text-xs text-text-4 mt-0.5 font-medium tracking-wide">Indian Event Planner</p>
+        <p className="text-[10px] text-text-4/60 mt-0.5 font-medium tracking-[0.08em] uppercase">Event Planner</p>
       </div>
 
       {/* Top nav */}
-      <nav className="px-3 pt-4 pb-2 space-y-0.5">
-        {topNav.map(({ href, label, icon: Icon }) => (
-          <Link key={href} href={href}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
-              pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
-                ? 'bg-cream text-brand'
-                : 'text-text-3 hover:bg-cream hover:text-text-1'
-            )}
-          >
-            <Icon className="h-4 w-4 flex-shrink-0" />
-            {label}
-          </Link>
-        ))}
+      <nav className="px-3 pt-4 pb-2 space-y-1">
+        {topNav.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+          return (
+            <Link key={href} href={href}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150',
+                active
+                  ? 'bg-brand/10 text-brand font-semibold border-l-2 border-brand'
+                  : 'text-text-3 hover:bg-cream-2 hover:text-text-2'
+              )}
+            >
+              <Icon className={cn("h-4 w-4 flex-shrink-0", active ? "opacity-100" : "opacity-70")} />
+              {label}
+            </Link>
+          )
+        })}
       </nav>
 
       {/* Event-specific nav */}
       {eventId && (
         <>
           <div className="mx-3 my-2 border-t border-brand-border" />
-          <div className="px-5 mb-1">
+          <div className="px-4 mb-1">
             <Link href="/dashboard"
               className="flex items-center gap-1 text-xs text-text-4 hover:text-brand transition-colors mb-2">
               <ChevronLeft className="h-3 w-3" /> All events
             </Link>
-            <p className="text-xs font-black text-text-2 uppercase tracking-wide truncate">This Event</p>
+            <p className="flex items-center gap-2 text-[10px] font-semibold text-text-4/70 uppercase tracking-[0.15em] truncate">
+              <span className="w-0.5 h-3 rounded-full bg-brand inline-block flex-shrink-0" />
+              This Event
+            </p>
           </div>
 
           {/* Overview */}
-          <nav className="px-3 pb-1 space-y-0.5">
+          <nav className="px-3 pb-1 space-y-1">
             {eventNav.map(({ href, label, icon: Icon }) =>
               navLink(href, label, Icon, isActive(href))
             )}
           </nav>
 
           {/* Vendors & Quotes */}
-          <div className="px-5 mt-3 mb-1">
-            <p className="text-[10px] font-bold text-text-4 uppercase tracking-wider">Vendors</p>
+          <div className="px-4 mt-4 mb-1">
+            <p className="flex items-center gap-2 text-[10px] font-semibold text-text-4/70 uppercase tracking-[0.15em]">
+              <span className="w-0.5 h-3 rounded-full bg-brand inline-block flex-shrink-0" />
+              Vendors
+            </p>
           </div>
-          <nav className="px-3 pb-1 space-y-0.5">
+          <nav className="px-3 pb-1 space-y-1">
             {vendorNav.map(({ href, label, icon: Icon }) =>
               navLink(href, label, Icon, isActive(href))
             )}
           </nav>
 
           {/* Guests & Events */}
-          <div className="px-5 mt-3 mb-1">
-            <p className="text-[10px] font-bold text-text-4 uppercase tracking-wider">Guests</p>
+          <div className="px-4 mt-4 mb-1">
+            <p className="flex items-center gap-2 text-[10px] font-semibold text-text-4/70 uppercase tracking-[0.15em]">
+              <span className="w-0.5 h-3 rounded-full bg-brand inline-block flex-shrink-0" />
+              Guests
+            </p>
           </div>
-          <nav className="px-3 pb-1 space-y-0.5">
+          <nav className="px-3 pb-1 space-y-1">
             {guestNav.map(({ href, label, icon: Icon }) =>
               navLink(href, label, Icon, isActive(href))
             )}
           </nav>
 
           {/* Planning */}
-          <div className="px-5 mt-3 mb-1">
-            <p className="text-[10px] font-bold text-text-4 uppercase tracking-wider">Planning</p>
+          <div className="px-4 mt-4 mb-1">
+            <p className="flex items-center gap-2 text-[10px] font-semibold text-text-4/70 uppercase tracking-[0.15em]">
+              <span className="w-0.5 h-3 rounded-full bg-brand inline-block flex-shrink-0" />
+              Planning
+            </p>
           </div>
-          <nav className="px-3 pb-1 space-y-0.5">
+          <nav className="px-3 pb-1 space-y-1">
             {planningNav.map(({ href, label, icon: Icon }) =>
               navLink(href, label, Icon, isActive(href))
             )}
@@ -155,7 +170,7 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
       <div className="flex-1" />
 
       {/* User + sign out */}
-      <div className="border-t border-brand-border px-4 py-4">
+      <div className="border-t border-brand-border/40 px-4 py-4">
         <p className="text-sm font-semibold text-text-2 truncate mb-2">{userName}</p>
         <a href="/api/auth/signout"
           className="flex items-center gap-2 text-sm text-text-4 hover:text-brand transition-colors">
@@ -166,7 +181,7 @@ export function CustomerSidebar({ userName }: CustomerSidebarProps) {
     </aside>
 
     {/* Mobile bottom nav */}
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-cream-2 border-t border-brand-border flex items-center justify-around px-2 py-2 safe-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-cream-2 border-t border-brand-border shadow-[0_-2px_8px_rgba(0,0,0,0.04)] flex items-center justify-around px-2 py-2 safe-bottom">
       {[
         { href: '/dashboard', label: 'Events', icon: LayoutDashboard },
         { href: '/messages', label: 'Messages', icon: MessageSquare },

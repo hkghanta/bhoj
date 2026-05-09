@@ -191,7 +191,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <h1 className="text-4xl font-black tracking-tight text-text-1 leading-tight">{event.event_name}</h1>
+                  <h1 className="text-4xl font-extrabold tracking-tight text-text-1 leading-tight">{event.event_name}</h1>
                   <span className={`text-xs px-3 py-1 rounded-full font-bold ${status.bg} ${status.text}`}>
                     {status.label}
                   </span>
@@ -244,12 +244,12 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
                     strokeLinecap="round"
                   />
                 </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-sm font-black text-text-1">
+                <span className="absolute inset-0 flex items-center justify-center text-sm font-extrabold tracking-tight text-text-1">
                   {progressPct}%
                 </span>
               </div>
               <div>
-                <div className="text-lg font-black text-text-1">{doneCount}/{totalItems}</div>
+                <div className="text-lg font-extrabold tracking-tight text-text-1">{doneCount}/{totalItems}</div>
                 <div className="text-xs text-text-4 font-medium">tasks done</div>
               </div>
             </div>
@@ -304,13 +304,13 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
           <Link
             key={stat.href}
             href={stat.href}
-            className="group bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-5 sm:p-6 hover:border-brand hover:shadow-sm transition-all relative"
+            className="group bg-white dark:bg-cream-2 rounded-2xl border border-brand-border shadow-sm p-5 sm:p-6 hover:border-brand hover:shadow-md transition-all duration-200 relative"
             aria-label={`${stat.value} ${stat.label}`}
           >
             <div className={`w-10 h-10 rounded-xl ${stat.iconBg} flex items-center justify-center mb-3`} aria-hidden="true">
               <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
             </div>
-            <div className="text-3xl font-black text-text-1 mb-0.5">{stat.value}</div>
+            <div className="text-3xl font-extrabold tracking-tight text-text-1 mb-0.5">{stat.value}</div>
             <div className="text-xs text-text-4 font-medium">{stat.label}</div>
             {stat.subtitle && (
               <div className="text-[11px] text-brand font-bold mt-1">{stat.subtitle}</div>
@@ -328,20 +328,19 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
       {/* Next Steps / Suggestions */}
       {nextSteps.length > 0 && (
         <section aria-label="Suggested next steps" className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-6">
-          <h2 className="text-lg font-black text-text-1 mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-extrabold tracking-tight text-text-1 mb-4 flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-brand" aria-hidden="true" />
             What to do next
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {nextSteps.slice(0, 4).map((step, i) => (
               <Link
                 key={i}
                 href={step.href}
-                className="group flex items-center gap-3 text-sm hover:text-brand transition-colors"
+                className={`group flex items-center gap-3 text-sm rounded-xl px-4 py-3 hover:bg-cream transition-all border-l-[3px] ${
+                  step.priority === 'high' ? 'border-l-brand' : step.priority === 'medium' ? 'border-l-amber-400' : 'border-l-brand-border'
+                }`}
               >
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                  step.priority === 'high' ? 'bg-brand' : step.priority === 'medium' ? 'bg-amber-500' : 'bg-text-4'
-                }`} aria-hidden="true" />
                 <span className="text-text-2 group-hover:text-brand transition-colors flex-1">{step.text}</span>
                 <ArrowRight className="h-4 w-4 text-text-4 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" aria-hidden="true" />
               </Link>
@@ -358,7 +357,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
       {/* Services & Planning */}
       <section aria-label="Services and planning">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-2xl font-black text-text-1">Services & Planning</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-text-1">Services & Planning</h2>
           <Link href={`/events/${id}/services`} className="text-sm text-brand font-bold hover:underline flex items-center gap-1">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             Add service
@@ -371,7 +370,9 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
             href={`/events/${id}/services`}
             className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-brand-border bg-white dark:bg-cream-2 p-10 text-center hover:border-brand hover:bg-cream transition-colors group mb-6"
           >
-            <span className="text-4xl" aria-hidden="true">🎉</span>
+            <div className="w-14 h-14 rounded-2xl bg-cream flex items-center justify-center" aria-hidden="true">
+              <Sparkles className="h-7 w-7 text-brand" />
+            </div>
             <div className="text-base font-bold text-text-2 group-hover:text-brand transition-colors">Add your first service</div>
             <div className="text-sm text-text-4">Catering, photography, DJ and more</div>
           </Link>
@@ -385,7 +386,7 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
                 <Link
                   key={svc.vendor_type}
                   href={`/events/${id}/services/${slug}`}
-                  className="group relative flex items-start gap-4 rounded-2xl border bg-white dark:bg-cream-2 border-brand-border p-5 transition-all hover:border-brand hover:shadow-sm"
+                  className="group relative flex items-start gap-4 rounded-2xl border bg-white dark:bg-cream-2 border-brand-border shadow-sm p-5 transition-all duration-200 hover:border-brand hover:shadow-md"
                   aria-label={`${svc.label} service${hasVendors ? `, ${req.matchCount} vendor matches` : ''}`}
                 >
                   <div className="w-12 h-12 rounded-xl bg-cream flex items-center justify-center text-2xl flex-shrink-0" aria-hidden="true">
@@ -440,11 +441,11 @@ export default async function EventDashboardPage({ params }: { params: Promise<{
             <Link
               key={tool.href}
               href={tool.href}
-              className="group flex flex-col items-center gap-2.5 rounded-2xl border border-brand-border bg-white dark:bg-cream-2 p-4 sm:p-5 text-center hover:bg-cream hover:border-brand hover:shadow-sm transition-all"
+              className="group flex flex-col items-center gap-2.5 rounded-2xl border border-brand-border bg-white dark:bg-cream-2 shadow-sm p-4 sm:p-5 text-center hover:bg-cream hover:border-brand hover:shadow-md transition-all duration-200"
               aria-label={tool.label}
             >
-              <div className={`w-11 h-11 rounded-xl ${tool.bg} flex items-center justify-center`} aria-hidden="true">
-                <tool.icon className={`h-5 w-5 ${tool.color}`} />
+              <div className={`w-12 h-12 rounded-xl ${tool.bg} flex items-center justify-center`} aria-hidden="true">
+                <tool.icon className={`h-6 w-6 ${tool.color}`} />
               </div>
               <span className="text-xs font-bold text-text-2 group-hover:text-brand transition-colors">{tool.label}</span>
             </Link>

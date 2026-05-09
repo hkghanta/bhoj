@@ -169,7 +169,7 @@ function TrayBill({ lines, discountType, discountValue, discountNote, currency }
           <tr className="bg-cream">
             <td colSpan={3} className="hidden sm:table-cell" />
             <td className="px-3 py-3 text-right text-sm font-bold text-text-1">Total</td>
-            <td className="px-4 py-3 text-right text-base font-black text-text-1">{fmt(total, currency)}</td>
+            <td className="px-4 py-3 text-right text-base font-extrabold text-text-1">{fmt(total, currency)}</td>
           </tr>
         </tfoot>
       </table>
@@ -253,13 +253,13 @@ function OnesevQuoteRow({
                 {highlightTags.map(tag => (
                   <span
                     key={tag}
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      tag === 'Best Price' ? 'bg-green-100 text-green-700' :
-                      tag === 'Fastest Response' ? 'bg-blue-100 text-blue-700' :
-                      tag === 'Highest Rated' ? 'bg-amber-100 text-amber-700' :
-                      tag === 'Most Complete' ? 'bg-purple-100 text-purple-700' :
-                      tag === 'Best Value' ? 'bg-emerald-100 text-emerald-700' :
-                      'bg-gray-100 text-gray-700'
+                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
+                      tag === 'Best Price' ? 'bg-green-50 text-green-600 border-green-200' :
+                      tag === 'Fastest Response' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                      tag === 'Highest Rated' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                      tag === 'Most Complete' ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                      tag === 'Best Value' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                      'bg-gray-50 text-gray-600 border-gray-200'
                     }`}
                   >
                     {tag}
@@ -279,14 +279,14 @@ function OnesevQuoteRow({
           <div className="text-right flex-shrink-0">
             {!isTray && quote.price_per_head ? (
               <div>
-                <div className="text-xl font-black text-text-1">
+                <div className="text-xl font-extrabold tracking-tight text-text-1">
                   {fmt(Number(quote.price_per_head), currency)}
                   <span className="text-xs font-normal text-text-4">/head</span>
                 </div>
                 <div className="text-xs text-text-4">Total: {fmt(Number(quote.total_estimate), currency)}</div>
               </div>
             ) : (
-              <div className="text-xl font-black text-text-1">
+              <div className="text-xl font-extrabold tracking-tight text-text-1">
                 {fmt(Number(quote.total_estimate), currency)}
                 <div className="text-xs text-text-4 font-normal">tray order</div>
               </div>
@@ -325,7 +325,7 @@ function OnesevQuoteRow({
             <div className="bg-cream rounded-xl p-5 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-brand uppercase tracking-wider mb-0.5">Price per head</p>
-                <p className="text-2xl font-black text-text-1">{fmt(Number(quote.price_per_head), currency)}</p>
+                <p className="text-2xl font-extrabold tracking-tight text-text-1">{fmt(Number(quote.price_per_head), currency)}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm font-bold text-text-4 uppercase tracking-wider mb-0.5">Total estimate</p>
@@ -455,13 +455,13 @@ function BoardResponseRow({
                 {highlightTags.map(tag => (
                   <span
                     key={tag}
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      tag === 'Best Price' ? 'bg-green-100 text-green-700' :
-                      tag === 'Fastest Response' ? 'bg-blue-100 text-blue-700' :
-                      tag === 'Highest Rated' ? 'bg-amber-100 text-amber-700' :
-                      tag === 'Most Complete' ? 'bg-purple-100 text-purple-700' :
-                      tag === 'Best Value' ? 'bg-emerald-100 text-emerald-700' :
-                      'bg-gray-100 text-gray-700'
+                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
+                      tag === 'Best Price' ? 'bg-green-50 text-green-600 border-green-200' :
+                      tag === 'Fastest Response' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                      tag === 'Highest Rated' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                      tag === 'Most Complete' ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                      tag === 'Best Value' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                      'bg-gray-50 text-gray-600 border-gray-200'
                     }`}
                   >
                     {tag}
@@ -493,7 +493,7 @@ function BoardResponseRow({
           <div className="text-right flex-shrink-0">
             {response.quoted_price ? (
               <div>
-                <div className="text-xl font-black text-purple-700">
+                <div className="text-xl font-extrabold tracking-tight text-purple-700">
                   {new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Number(response.quoted_price))}
                   <span className="text-xs font-normal text-text-4">
                     {priceUnitLabel[response.price_unit ?? ''] ?? ''}
@@ -544,7 +544,7 @@ function BoardResponseRow({
               <div className="bg-purple-50 border border-purple-100 rounded-xl p-5 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold text-purple-500 uppercase tracking-wider mb-0.5">Quoted Price</p>
-                  <p className="text-2xl font-black text-purple-700">
+                  <p className="text-2xl font-extrabold tracking-tight text-purple-700">
                     {new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Number(response.quoted_price))}
                     <span className="text-sm font-normal text-purple-400 ml-1">
                       {priceUnitLabel[response.price_unit ?? ''] ?? ''}
@@ -1075,7 +1075,7 @@ export default function EventQuotesPage() {
       {/* Page header */}
       <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-text-1 tracking-tight">Quotes & Responses</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-text-1 tracking-tight">Quotes & Responses</h1>
           <p className="text-text-3 mt-1">
             {totalCount} total
             {finalizedCount > 0 && <> · <span className="text-green-600 font-bold">{finalizedCount} finalized</span></>}
@@ -1109,7 +1109,7 @@ export default function EventQuotesPage() {
       {!allEmpty && filteredPipeline.length > 0 && (
         <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border overflow-hidden mb-8 shadow-sm">
           <div className="px-5 py-3 border-b border-brand-border bg-cream flex items-center justify-between">
-            <h2 className="text-sm font-black text-text-1 uppercase tracking-wider">Vendor Pipeline</h2>
+            <h2 className="text-sm font-extrabold text-text-1 uppercase tracking-wider">Vendor Pipeline</h2>
             <div className="flex items-center gap-3">
               <span className="text-xs text-text-4">{filteredPipeline.length} vendor{filteredPipeline.length !== 1 ? 's' : ''}</span>
               <div className="relative">
@@ -1210,12 +1210,12 @@ export default function EventQuotesPage() {
         ]
 
         return (
-          <div className="bg-white rounded-2xl border border-brand-border p-5 mb-8 shadow-sm">
-            <h3 className="text-sm font-black text-text-1 uppercase tracking-wider mb-4">Quick Comparison</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white dark:bg-cream-2 rounded-2xl border border-brand-border p-6 mb-8 shadow-sm">
+            <h3 className="text-sm font-extrabold tracking-tight text-text-1 uppercase tracking-wider mb-5">Quick Comparison</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
               <div>
                 <p className="text-xs text-text-4 font-medium mb-1">Total Quotes</p>
-                <p className="text-2xl font-black text-text-1">{totalCount}</p>
+                <p className="text-2xl font-extrabold tracking-tight text-text-1">{totalCount}</p>
               </div>
               <div>
                 <p className="text-xs text-text-4 font-medium mb-1">Price Range</p>
@@ -1231,7 +1231,7 @@ export default function EventQuotesPage() {
               </div>
               <div>
                 <p className="text-xs text-text-4 font-medium mb-1">Tastings Offered</p>
-                <p className="text-2xl font-black text-text-1">
+                <p className="text-2xl font-extrabold tracking-tight text-text-1">
                   {tastingCount}
                   <span className="text-sm font-normal text-text-4 ml-1">vendor{tastingCount !== 1 ? 's' : ''}</span>
                 </p>
@@ -1261,7 +1261,7 @@ export default function EventQuotesPage() {
           <div className="w-14 h-14 rounded-2xl bg-cream flex items-center justify-center mx-auto mb-4">
             <MessageSquare className="h-7 w-7 text-text-4/50" />
           </div>
-          <h3 className="text-xl font-black text-text-1 mb-2">No quotes yet</h3>
+          <h3 className="text-xl font-extrabold tracking-tight text-text-1 mb-2">No quotes yet</h3>
           <p className="text-text-3 mb-6 max-w-sm mx-auto">
             Start matching with vendors to receive OneSeva quotes, or share your public request board to collect responses directly.
           </p>

@@ -48,7 +48,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-cream bg-dot-grid flex flex-col">
       {/* Nav */}
       <nav className="bg-white border-b border-brand-border flex items-center justify-between px-8 py-0 h-[62px]">
-        <Link href="/" className="text-xl font-black tracking-tight text-text-1">
+        <Link href="/" className="text-xl font-extrabold tracking-tight text-text-1">
           One<span className="text-brand">Seva</span>
         </Link>
         <p className="text-sm text-text-4">
@@ -59,21 +59,21 @@ export default function LoginPage() {
 
       {/* Card */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-white border border-brand-border rounded-2xl shadow-md p-8 flex flex-col gap-5">
+        <div className="w-full max-w-md bg-white border border-brand-border rounded-2xl shadow-lg p-8 flex flex-col gap-6">
           <div className="text-center">
-            <h1 className="text-2xl font-black text-text-1">Sign in to OneSeva</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-text-1">Sign in to OneSeva</h1>
             <p className="text-sm text-text-4 mt-1">Plan your celebration or manage your business</p>
           </div>
 
           {/* Demo accounts */}
-          <div className="rounded-xl border border-brand-border bg-cream p-3">
-            <p className="text-xs font-semibold text-text-3 mb-2">Try a demo account</p>
-            <div className="flex gap-2">
+          <div className="rounded-xl border border-brand-border/60 bg-gradient-to-b from-cream/60 to-white p-4">
+            <p className="text-xs font-medium text-text-4 mb-2.5 uppercase tracking-wide">Try a demo account</p>
+            <div className="flex gap-2.5">
               <button
                 type="button"
                 onClick={() => signInAsDemo('customer')}
                 disabled={loading}
-                className="flex-1 text-xs bg-white border border-brand-border hover:bg-cream-2 text-brand font-semibold py-2 rounded-lg transition-colors disabled:opacity-50"
+                className="flex-1 text-xs bg-white border border-brand-border/80 hover:border-brand/40 hover:shadow-sm text-text-2 font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50"
               >
                 Customer — Priya
               </button>
@@ -81,7 +81,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => signInAsDemo('vendor')}
                 disabled={loading}
-                className="flex-1 text-xs bg-white border border-brand-border hover:bg-cream-2 text-brand font-semibold py-2 rounded-lg transition-colors disabled:opacity-50"
+                className="flex-1 text-xs bg-white border border-brand-border/80 hover:border-brand/40 hover:shadow-sm text-text-2 font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50"
               >
                 Vendor — Spice Route
               </button>
@@ -89,15 +89,15 @@ export default function LoginPage() {
           </div>
 
           {/* Role toggle */}
-          <div className="flex rounded-xl border border-brand-border overflow-hidden">
+          <div className="flex rounded-xl bg-cream p-1 gap-1">
             <button
               type="button"
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === 'customer' ? 'bg-brand text-white' : 'bg-white text-text-3 hover:bg-cream'}`}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'customer' ? 'bg-white text-text-1 shadow-sm' : 'text-text-4 hover:text-text-2'}`}
               onClick={() => setRole('customer')}
             >Customer</button>
             <button
               type="button"
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === 'vendor' ? 'bg-brand text-white' : 'bg-white text-text-3 hover:bg-cream'}`}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'vendor' ? 'bg-white text-text-1 shadow-sm' : 'text-text-4 hover:text-text-2'}`}
               onClick={() => setRole('vendor')}
             >Vendor</button>
           </div>
@@ -115,7 +115,7 @@ export default function LoginPage() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-4"
+                className="border border-brand-border rounded-xl px-4 h-11 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/30 transition-shadow placeholder:text-text-4"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -127,16 +127,16 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="border border-brand-border rounded-xl px-4 py-3 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-4"
+                className="border border-brand-border rounded-xl px-4 h-11 text-sm text-text-1 bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/30 transition-shadow placeholder:text-text-4"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand hover:bg-brand-hover text-white text-sm font-black py-3.5 rounded-xl transition-colors disabled:opacity-60"
-              style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.28)' }}
+              className="w-full bg-brand hover:bg-brand-hover text-white text-sm font-extrabold py-3.5 h-12 rounded-xl transition-colors disabled:opacity-60"
+              style={{ boxShadow: '0 4px 16px rgba(232,85,16,0.22)' }}
             >
-              {loading ? 'Signing in…' : 'Sign in →'}
+              {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
 

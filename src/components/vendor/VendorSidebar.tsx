@@ -65,20 +65,22 @@ export function VendorSidebar() {
 
   return (
     <>
-    <aside className="hidden md:flex w-56 min-h-screen bg-white dark:bg-cream-2 border-r border-brand-border flex-col">
-      <div className="px-6 py-5 border-b border-brand-border">
-        <Link href="/vendor/dashboard" className="text-xl font-black tracking-tight text-text-1">
-          One<span className="text-brand">Seva</span>
-        </Link>
-        <p className="text-xs text-text-4 mt-0.5">Vendor Portal</p>
+    <aside className="hidden md:flex w-52 min-h-screen bg-white dark:bg-cream-2 border-r border-brand-border flex-col">
+      <div className="px-5 py-4 border-b border-brand-border">
+        <div className="flex items-center gap-2">
+          <Link href="/vendor/dashboard" className="text-lg font-black tracking-tight text-text-1">
+            One<span className="text-brand">Seva</span>
+          </Link>
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-brand bg-brand/8 px-1.5 py-0.5 rounded-full leading-none">Pro</span>
+        </div>
       </div>
-      <nav className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
-        {navSections.map(section => (
-          <div key={section.title}>
-            <p className="px-3 mb-1 text-[10px] font-bold uppercase tracking-widest text-text-4/60">
+      <nav className="flex-1 px-2.5 py-2 overflow-y-auto">
+        {navSections.map((section, sectionIdx) => (
+          <div key={section.title} className={cn(sectionIdx > 0 && 'mt-5 pt-4 border-t border-brand-border/50')}>
+            <p className="px-2.5 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-text-4/60">
               {section.title}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-px">
               {section.items.map(({ href, label, icon: Icon }) => {
                 const isActive = pathname.startsWith(href)
                 return (
@@ -86,13 +88,13 @@ export function VendorSidebar() {
                     key={href}
                     href={href}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
+                      'flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150',
                       isActive
-                        ? 'bg-brand text-white shadow-sm'
-                        : 'text-text-3 hover:bg-cream hover:text-text-1'
+                        ? 'bg-cream text-brand font-semibold border-l-2 border-brand'
+                        : 'text-text-3 hover:bg-cream/60 hover:text-text-2'
                     )}
                   >
-                    <Icon className={cn('h-4 w-4 flex-shrink-0', isActive && 'text-white/80')} />
+                    <Icon className={cn('h-4 w-4 flex-shrink-0', isActive ? 'text-brand' : 'text-text-4')} />
                     {label}
                   </Link>
                 )
@@ -104,17 +106,17 @@ export function VendorSidebar() {
     </aside>
 
     {/* Mobile bottom nav */}
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-cream-2 border-t border-brand-border flex items-center justify-around px-2 py-2 safe-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-cream-2 border-t border-brand-border flex items-center justify-around px-1 py-1.5 safe-bottom">
       {mobileNav.map(({ href, label, icon: Icon }) => (
         <Link key={href} href={href}
           className={cn(
-            'flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-[10px] font-medium transition-colors min-w-[56px]',
+            'flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg text-[10px] font-medium transition-all duration-150 min-w-[48px]',
             pathname.startsWith(href)
-              ? 'text-brand'
+              ? 'text-brand font-semibold'
               : 'text-text-4'
           )}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className={cn('h-[18px] w-[18px]', pathname.startsWith(href) ? 'text-brand' : 'text-text-4')} />
           {label}
         </Link>
       ))}

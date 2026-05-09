@@ -147,7 +147,7 @@ export default async function VendorDashboardPage() {
     <div>
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-text-1">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-text-1">Dashboard</h1>
           <p className="text-sm text-text-4 mt-1">Welcome back, {vendor.business_name}</p>
         </div>
       </div>
@@ -166,11 +166,11 @@ export default async function VendorDashboardPage() {
             <Link
               key={item.text}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 hover:bg-amber-100 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 bg-white dark:bg-cream-2 border border-brand-border border-l-[3px] border-l-brand rounded-lg text-sm text-text-2 hover:bg-cream/50 transition-colors"
             >
-              <AlertCircle className="h-4 w-4 shrink-0" />
+              <AlertCircle className="h-4 w-4 shrink-0 text-text-4" />
               <span className="font-medium">{item.text}</span>
-              <ArrowRight className="h-3.5 w-3.5 ml-auto" />
+              <ArrowRight className="h-3.5 w-3.5 ml-auto text-text-4" />
             </Link>
           ))}
         </div>
@@ -182,12 +182,12 @@ export default async function VendorDashboardPage() {
           const Icon = stat.icon
           const inner = (
             <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Icon className="h-4 w-4 text-text-4" />
-                <span className="text-xs text-text-4 font-medium">{stat.label}</span>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Icon className="h-3.5 w-3.5 text-text-4" />
+                <span className="text-[11px] text-text-4 font-medium uppercase tracking-wide">{stat.label}</span>
               </div>
-              <div className="text-2xl font-black text-text-1">{stat.value}</div>
-              {stat.sub && <div className="text-xs text-text-4 mt-0.5">{stat.sub}</div>}
+              <div className="text-2xl font-bold tracking-tight text-text-1">{stat.value}</div>
+              {stat.sub && <div className="text-[11px] text-text-4 mt-0.5">{stat.sub}</div>}
             </div>
           )
           if ('href' in stat && stat.href) {
@@ -205,7 +205,7 @@ export default async function VendorDashboardPage() {
       <div>
         <h2 className="text-lg font-bold text-text-1 mb-4">Recent Bookings</h2>
         {recentBookings.length === 0 ? (
-          <div className="bg-white dark:bg-cream-2 border-2 border-dashed border-brand-border rounded-xl p-10 text-center">
+          <div className="bg-white dark:bg-cream-2 border border-dashed border-brand-border rounded-xl p-10 text-center">
             <div className="w-12 h-12 rounded-xl bg-cream flex items-center justify-center mx-auto mb-3">
               <CalendarDays className="h-6 w-6 text-text-4/40" />
             </div>
@@ -221,13 +221,13 @@ export default async function VendorDashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {recentBookings.map((booking) => {
               const event = booking.match.event_request.event
               return (
                 <div
                   key={booking.id}
-                  className="bg-white dark:bg-cream-2 border border-brand-border rounded-xl px-5 py-4 flex items-center justify-between"
+                  className="bg-white dark:bg-cream-2 border border-brand-border rounded-lg px-4 py-3 flex items-center justify-between hover:bg-cream/30 transition-colors"
                 >
                   <div>
                     <div className="font-semibold text-text-1 text-sm">{event.event_name}</div>

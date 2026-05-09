@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Caveat } from "next/font/google";
+import { DM_Sans, Inter, Caveat } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
 import ThemeProvider from "@/components/ThemeProvider";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  weight: ["400", "500", "600", "700", "800"],
+});
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700"],
+});
 const caveat = Caveat({
   subsets: ["latin"],
   variable: "--font-dancing-script",
@@ -27,10 +36,10 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${caveat.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${inter.variable} ${caveat.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className={`${inter.className} min-h-full flex flex-col`}>
+      <body className={`${dmSans.className} min-h-full flex flex-col`}>
         <ThemeProvider>
           <SessionProvider session={session}>{children}</SessionProvider>
         </ThemeProvider>

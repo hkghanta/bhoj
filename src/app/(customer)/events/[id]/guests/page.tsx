@@ -482,9 +482,6 @@ export default function GuestsPage() {
         <span className="text-text-2 font-medium">Guests & Invitations</span>
       </div>
 
-      {/* ── RSVP Tracker ────────────────────────────────────────────────── */}
-      {households.length > 0 && <RsvpDashboard eventId={eventId} />}
-
       {/* ── Invitation Banner ────────────────────────────────────────────── */}
       {(() => {
         const theme = getTheme(event?.invite_theme)
@@ -524,7 +521,7 @@ export default function GuestsPage() {
                   </div>
 
                   {/* Event name */}
-                  <h1 className="text-3xl md:text-5xl font-black text-white leading-tight mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                     {event?.event_name ?? <span className="opacity-30 animate-pulse">Loading…</span>}
                   </h1>
 
@@ -565,7 +562,7 @@ export default function GuestsPage() {
                   </div>
 
                   {/* Event name */}
-                  <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-3">
+                  <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight mb-3">
                     {event?.event_name ?? <span className="opacity-30 animate-pulse">Loading…</span>}
                   </h1>
 
@@ -801,6 +798,9 @@ export default function GuestsPage() {
         </div>
       )}
 
+      {/* ── RSVP Tracker ────────────────────────────────────────────────── */}
+      {households.length > 0 && <RsvpDashboard eventId={eventId} />}
+
       {/* ── Invitation settings panel ─────────────────────────────────── */}
       <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl shadow-sm overflow-hidden">
         <button
@@ -910,26 +910,6 @@ export default function GuestsPage() {
       {bulkResult && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 text-sm rounded-2xl px-4 py-3">
           <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" /> {bulkResult}
-        </div>
-      )}
-
-
-      {/* ── RSVP Stats strip ─────────────────────────────────────────── */}
-      {total > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {[
-            { label: 'Total invited', value: total,                    sub: `${total} household${total !== 1 ? 's' : ''}`,                         color: 'text-text-1',     bg: 'bg-cream',     border: 'border-brand-border' },
-            { label: 'Attending',     value: rsvpAttending.length,     sub: `${attendingGuestTotal} guest${attendingGuestTotal !== 1 ? 's' : ''}`,  color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-200' },
-            { label: 'Maybe',         value: rsvpMaybe.length,         sub: 'household' + (rsvpMaybe.length !== 1 ? 's' : ''),                      color: 'text-amber-700',  bg: 'bg-amber-50',  border: 'border-amber-200' },
-            { label: 'Not attending', value: rsvpNotAttending.length,  sub: 'household' + (rsvpNotAttending.length !== 1 ? 's' : ''),               color: 'text-rose-700',   bg: 'bg-rose-50',   border: 'border-rose-200' },
-            { label: 'Pending',       value: rsvpPending.length,       sub: 'no response',                                                          color: 'text-text-3',     bg: 'bg-cream',     border: 'border-brand-border' },
-          ].map(s => (
-            <div key={s.label} className={`${s.bg} border ${s.border} rounded-2xl px-4 py-3.5`}>
-              <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
-              <div className="text-xs font-semibold text-text-3 mt-0.5">{s.label}</div>
-              <div className="text-[10px] text-text-4">{s.sub}</div>
-            </div>
-          ))}
         </div>
       )}
 
@@ -1216,7 +1196,7 @@ export default function GuestsPage() {
 
               return (
                 <div key={h.id}
-                  className={`bg-white dark:bg-cream-2 border border-brand-border border-l-4 ${statusBorder} rounded-2xl px-4 py-4 flex items-center gap-4 transition-all hover:shadow-md hover:border-brand-border ${h.declined ? 'opacity-60' : ''}`}>
+                  className={`bg-white dark:bg-cream-2 border border-brand-border border-l-4 ${statusBorder} rounded-2xl shadow-sm px-4 py-3 flex items-center gap-3 transition-all duration-200 hover:shadow-md ${h.declined ? 'opacity-60' : ''}`}>
 
                   {/* Avatar */}
                   <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ring-2 ring-white shadow-sm ${avatarColor(h.label)}`}>

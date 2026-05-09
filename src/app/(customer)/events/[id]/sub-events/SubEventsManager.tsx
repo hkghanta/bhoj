@@ -200,14 +200,14 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-1">Sub-Events</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-1">Sub-Events</h1>
           <p className="text-sm text-text-4 mt-1">
             Manage all the events within your celebration
           </p>
         </div>
         <button
           onClick={openAddForm}
-          className="inline-flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-brand/90 transition-colors"
+          className="inline-flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-hover transition-colors"
         >
           <Plus className="h-4 w-4" />
           Add Sub-Event
@@ -225,7 +225,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
       {showForm && (
         <div className="bg-white dark:bg-cream-2 border border-brand-border rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-black text-text-1">
+            <h2 className="text-lg font-extrabold tracking-tight text-text-1">
               {editingId ? 'Edit Sub-Event' : 'Add Sub-Event'}
             </h2>
             <button
@@ -240,7 +240,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Name */}
             <div>
-              <label className="block text-xs font-bold text-text-3 mb-1.5">Name *</label>
+              <label className="block text-xs font-semibold text-text-3 mb-1.5">Name *</label>
               <input
                 type="text"
                 value={formName}
@@ -252,7 +252,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
 
             {/* Type */}
             <div>
-              <label className="block text-xs font-bold text-text-3 mb-1.5">Type</label>
+              <label className="block text-xs font-semibold text-text-3 mb-1.5">Type</label>
               <select
                 value={formType}
                 onChange={e => setFormType(e.target.value)}
@@ -266,7 +266,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
 
             {/* Date */}
             <div>
-              <label className="block text-xs font-bold text-text-3 mb-1.5">Date</label>
+              <label className="block text-xs font-semibold text-text-3 mb-1.5">Date</label>
               <input
                 type="date"
                 value={formDate}
@@ -277,7 +277,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
 
             {/* Venue */}
             <div>
-              <label className="block text-xs font-bold text-text-3 mb-1.5">Venue</label>
+              <label className="block text-xs font-semibold text-text-3 mb-1.5">Venue</label>
               <input
                 type="text"
                 value={formVenue}
@@ -289,7 +289,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
 
             {/* Start time */}
             <div>
-              <label className="block text-xs font-bold text-text-3 mb-1.5">Start Time</label>
+              <label className="block text-xs font-semibold text-text-3 mb-1.5">Start Time</label>
               <input
                 type="time"
                 value={formStartTime}
@@ -300,7 +300,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
 
             {/* End time */}
             <div>
-              <label className="block text-xs font-bold text-text-3 mb-1.5">End Time</label>
+              <label className="block text-xs font-semibold text-text-3 mb-1.5">End Time</label>
               <input
                 type="time"
                 value={formEndTime}
@@ -311,7 +311,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
 
             {/* City */}
             <div>
-              <label className="block text-xs font-bold text-text-3 mb-1.5">City</label>
+              <label className="block text-xs font-semibold text-text-3 mb-1.5">City</label>
               <input
                 type="text"
                 value={formCity}
@@ -323,7 +323,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
 
             {/* Description */}
             <div className="sm:col-span-2">
-              <label className="block text-xs font-bold text-text-3 mb-1.5">Description</label>
+              <label className="block text-xs font-semibold text-text-3 mb-1.5">Description</label>
               <textarea
                 value={formDescription}
                 onChange={e => setFormDescription(e.target.value)}
@@ -338,14 +338,14 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
           <div className="flex items-center justify-end gap-3 mt-5">
             <button
               onClick={() => { setShowForm(false); setEditingId(null); resetForm() }}
-              className="px-4 py-2 rounded-xl text-sm font-bold text-text-3 hover:bg-cream transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-text-3 hover:bg-cream transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-brand/90 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-hover transition-colors disabled:opacity-50"
             >
               <Check className="h-4 w-4" />
               {saving ? 'Saving...' : editingId ? 'Save Changes' : 'Add Sub-Event'}
@@ -368,7 +368,7 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
           </div>
           <button
             onClick={openAddForm}
-            className="inline-flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-brand/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-hover transition-colors"
           >
             <Plus className="h-4 w-4" />
             Add your first sub-event
@@ -386,9 +386,9 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
                 <div key={se.id} className="flex gap-4 group">
                   {/* Timeline connector */}
                   <div className="flex flex-col items-center pt-1 flex-shrink-0">
-                    <div className={`w-3.5 h-3.5 rounded-full ${color.dot} ring-4 ring-white dark:ring-cream-2 z-10 flex-shrink-0`} />
+                    <div className={`w-3 h-3 rounded-full ${color.dot} ring-[3px] ring-white dark:ring-cream-2 z-10 flex-shrink-0`} />
                     {!isLast && (
-                      <div className="w-0.5 flex-1 bg-brand-border min-h-[24px]" />
+                      <div className="w-px flex-1 bg-brand-border/60 min-h-[24px]" />
                     )}
                   </div>
 
@@ -397,8 +397,8 @@ export function SubEventsManager({ eventId, eventName, eventCity, eventVenue, in
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2.5 flex-wrap mb-2">
-                          <h3 className="text-base font-black text-text-1 leading-tight">{se.name}</h3>
-                          <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold ${color.bg} ${color.text}`}>
+                          <h3 className="text-base font-extrabold tracking-tight text-text-1 leading-tight">{se.name}</h3>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${color.bg} ${color.text}`}>
                             {se.event_type}
                           </span>
                         </div>

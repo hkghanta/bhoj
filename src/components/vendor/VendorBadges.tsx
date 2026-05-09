@@ -10,32 +10,32 @@ const BADGE_CONFIG: Record<string, BadgeConfig> = {
   TOP_RATED: {
     label: 'Top Rated',
     icon: Star,
-    className: 'bg-amber-50 text-amber-700',
+    className: 'bg-amber-500/[0.07] text-amber-700',
   },
   FAST_RESPONDER: {
     label: 'Fast Responder',
     icon: Zap,
-    className: 'bg-blue-50 text-blue-700',
+    className: 'bg-blue-500/[0.07] text-blue-600',
   },
   POPULAR: {
     label: 'Popular',
     icon: TrendingUp,
-    className: 'bg-green-50 text-green-700',
+    className: 'bg-green-500/[0.07] text-green-700',
   },
   NEW_VENDOR: {
-    label: 'New Vendor',
+    label: 'New',
     icon: Sparkles,
-    className: 'bg-purple-50 text-purple-700',
+    className: 'bg-purple-500/[0.07] text-purple-600',
   },
   VERIFIED: {
     label: 'Verified',
     icon: ShieldCheck,
-    className: 'bg-sky-50 text-sky-700',
+    className: 'bg-sky-500/[0.07] text-sky-600',
   },
   PREMIUM: {
     label: 'Premium',
     icon: Gem,
-    className: 'bg-brand/10 text-brand',
+    className: 'bg-brand/[0.07] text-brand',
   },
 }
 
@@ -56,7 +56,7 @@ export function VendorBadges({ badges, responseHrs }: VendorBadgesProps) {
         return (
           <span
             key={badge.badge_type}
-            className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${config.className}`}
+            className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md ${config.className}`}
           >
             <Icon className="h-3 w-3" />
             {config.label}
@@ -64,7 +64,7 @@ export function VendorBadges({ badges, responseHrs }: VendorBadgesProps) {
         )
       })}
       {responseHrs != null && (
-        <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-50 text-gray-600">
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-gray-500/[0.07] text-gray-600">
           <Clock className="h-3 w-3" />
           Responds in ~{responseHrs < 1 ? `${Math.round(responseHrs * 60)}m` : `${Math.round(responseHrs)}h`}
         </span>
